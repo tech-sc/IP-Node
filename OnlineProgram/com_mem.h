@@ -61,14 +61,14 @@ extern BYTE com_FpgaLED( uint8_t mask, uint8_t val, uint8_t *prev_p );
 #define FPGA_DONE               (1<<10)             /* FPGA-DONE信号     =1:FPGAコンフィグ完了／=0:コンフィグ中 */
 #define FPGA_PROG_INACT         (1<<15)             /* FPGA-Program制御  =1:通常時／=0:再コンフィグ実施(1→0→1) */
 #define MODE_SW_ON              (1<<18)             /* 検査モードSW      =1:通常モード／=0:検査モード */
-#define GPIO_LED_MASK           (1<<21)             /* 検査結果LED制御   =1:消灯／=0:点灯 */
+#define GPIO_LED_OFF            (1<<21)             /* 検査結果LED制御   =1:消灯／=0:点灯 */
 
 /* GPIOレジスタマスク */
 #define SPI_GATE_MASK           SPI_GATE_CLOSE      /* SPI-ROMゲート制御 */
 #define FPGA_DONE_MASK          FPGA_DONE           /* FPGA-DONE信号 */
 #define FPGA_PROG_MASK          FPGA_PROG_INACT     /* FPGA-Program制御 */
 #define MODE_SW_MASK            MODE_SW_ON          /* 検査モードSW入力 */
-#define GPIO_LED_MASK           GPIO_LED_MASK       /* 検査結果LED制御 */
+#define GPIO_LED_MASK           GPIO_LED_OFF        /* 検査結果LED制御 */
 
 /* GPIOレジスタアクセス APIs */
 extern BYTE com_GpioRegRead( off_t phy_addr, uint32_t mask, uint32_t *buff_p );

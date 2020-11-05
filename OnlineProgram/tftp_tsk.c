@@ -14,11 +14,12 @@
 #include <unistd.h>     	/* execlp(), stat() */
 
 /*** ユーザ作成ヘッダの取り込み ***/
+#include "def.h"
 #define TEMP_HEADER
 #ifdef TEMP_HEADER
 #include "temp_header.h"
+#include "temp_tmr_def.h"
 #else
-#include "def.h"
 #include "str.h"
 #include "tmr_def.h"
 #endif
@@ -84,7 +85,7 @@ typedef enum TFTP_STATE_e {
     STATE_IDLE = 0,					/* アイドル状態 */
     STATE_SERVER_DL,				/* ダウンロード監視状態 */
     STATE_CLIENT_DL,				/* ダウンロード中状態 */
-    STATE_NO_MAX
+    MAX_STATE_NO
 }TFTP_STATE_e;
 
 /*** 自ファイル内でのみ使用するstruct/union タグ定義 ***/
@@ -130,12 +131,13 @@ static BYTE dl_SvrStt_WriteResp( INNER_MSG *msg_p );
 static BYTE dl_ClStt_SvrReq( INNER_MSG *msg_p );
 static BYTE dl_ClStt_ClReq( INNER_MSG *msg_p );
 static BYTE dl_ClStt_WriteResp( INNER_MSG *msg_p );
+static bool dl_tmpfile_chk(void);
 
 /** 状態管理テーブル */
 STATE_TABLE_t   STATE_IDLE_Table[] = {
         { I_SERVER_REQ,         dl_IdleStt_SvrReq },
         { I_CLIENT_REQ,         dl_IdleStt_ClReq },
-        { NULL,NULL }
+        { 0, NULL }
 };
 
 STATE_TABLE_t   STATE_SERVER_DL_Table[] = {
@@ -143,17 +145,17 @@ STATE_TABLE_t   STATE_SERVER_DL_Table[] = {
         { TIM_OUT,              dl_SvrStt_Tmo },
         { I_CLIENT_REQ,         dl_SvrStt_ClReq },
         { I_WRITE_RESP,         dl_SvrStt_WriteResp },
-        { NULL,NULL }
+        { 0, NULL }
 };
 
 STATE_TABLE_t   STATE_CLIENT_DL_Table[] = {
         { I_SERVER_REQ,         dl_ClStt_SvrReq },
         { I_CLIENT_REQ,         dl_ClStt_ClReq },
         { I_WRITE_RESP,         dl_ClStt_WriteResp },
-        { NULL,NULL }
+        { 0, NULL }
 };
 
-STATE_TABLE_t   *RootStateTable[MAX_STATE_ID] = {
+STATE_TABLE_t   *RootStateTable[MAX_STATE_NO] = {
         STATE_IDLE_Table,
         STATE_SERVER_DL_Table,
         STATE_CLIENT_DL_Table,
@@ -262,7 +264,7 @@ static void downld_SttMng(INNER_MSG *msg_p)
 	STATE_TABLE_t	*p_tbl   = NULL;
 	BYTE			event_id = 0;
 
-	if (downld_state_no >= STATE_NO_MAX)
+	if (downld_state_no >= MAX_STATE_NO)
 	{
 		return;		/* Bug */
 	}
@@ -299,7 +301,7 @@ static BYTE dl_IdleStt_SvrReq(INNER_MSG *msg_p)
 {
     int     retv = 0;
 
-    retv = execlp("atftpd", "--daemon", "--pidfile", "/tmp/tftpd-pid.txt", "/tmp");
+    retv = execlp("atftpd", "--daemon", "--pidfile", "/tmp/tftpd-pid.txt", "/tmp", NULL);
     if (retv == -1 )
     {
         dbg_print(DWL_ID, LOG_ERR, "TFTP Server Start Error:%s", mkstr_errno(errno));
@@ -327,6 +329,7 @@ static BYTE dl_IdleStt_SvrReq(INNER_MSG *msg_p)
 /******************************************************************************/
 static BYTE dl_IdleStt_ClReq(INNER_MSG *msg_p)
 {
+    return OK;
 }
 
 /******************************************************************************/
@@ -353,7 +356,7 @@ static BYTE dl_SvrStt_SvrReq(INNER_MSG *msg_p)
 /* 注意事項   －                                                              */
 /* その他     －                                                              */
 /******************************************************************************/
-static BYTE dl_SvrStt_SvrReq(INNER_MSG *msg_p)
+static BYTE dl_SvrStt_Tmo(INNER_MSG *msg_p)
 {
     if (dl_tmpfile_chk() != false)
     {

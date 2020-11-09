@@ -14,7 +14,7 @@ TOOLCHAIN = ~/sdk.ac49x/barrier_breaker/staging_dir/toolchain-mipsel_mips32_gcc-
 BUILDDIR = ./build
 OBJDIR = $(BUILDDIR)
 SRCDIR = .
-INCDIRS = -I -I $(TOOLCHAIN)/include \
+INCDIRS = -I $(TOOLCHAIN)/include -I $(TOOLCHAIN) \
 ~/googletest/googletest/include
 LIBDIRS = -L $(TOOLCHAIN)/lib \
 -L ~/googletest/build/googletest

@@ -13,7 +13,7 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>			/* execlp(), stat() */
-#include <openssl/md5.h>	/* MD5_Init() */
+//#include <openssl/md5.h>	/* MD5_Init() */
 #include <arpa/inet.h>	/* inet_ntop() */
 
 /*** ユーザ作成ヘッダの取り込み ***/
@@ -148,13 +148,14 @@ static BYTE dl_ClStt_SvrReq( INNER_MSG *msg_p );
 static BYTE dl_ClStt_ClReq( INNER_MSG *msg_p );
 static BYTE dl_ClStt_WriteResp( INNER_MSG *msg_p );
 static bool dl_tmpfile_chk(void);
+static BYTE str2hex(const char *str, BYTE *hex, size_t siz);
 static int writer_FileInfoFile(void);
 static int writer_OnlineProg(char *fileinfo);
 static int writer_BootProg(char *fileinfo);
-static BYTE *seq_search(BYTE *buff, size_t siz, BYTE *target, size_t len);
-static int writer_FpgaProg(char *fileinfo);
+static BYTE *seq_search(BYTE *buff, size_t siz, char *target, size_t len);
+static int writer_FpgaProg(void);
 static int wt_ProgFileWrite(char *wt_dev, FILE *rd_fp);
-static int writer_FpgaProg(FILE *rd_fp);
+static int wt_FpgaFileWrite(FILE *rd_fp);
 static BYTE tftp(INNER_MSG *msg_p);
 
 /** 状態管理テーブル型 */
@@ -681,10 +682,9 @@ static int writer_FileInfoFile(void)
 	{
 		while (feof(fp) == 0)
 		{
-			retv = fgets(buff, sizeof(buff), fp);
-			if (retv != NULL)
+			if (fgets(buff, sizeof(buff[256]), fp) != NULL)
 			{
-				next_p = strtok(buff, ",")
+				next_p = strtok(buff, ",");
 				/* 書込み対象のプログラムファイルだけを解凍する */
 				retv = execlp("tar", "-xf", TMP_FOLDER TAR_FILE, buff, NULL);
 				if (retv != 0)
@@ -692,7 +692,7 @@ static int writer_FileInfoFile(void)
 					return TFTP_RES_FL_NOTFOUND;
 				}
 
-				if (strncmp(buff, ONL_PROG, MAX_PROGFILE_LEN)) == 0)
+				if (strncmp(buff, ONL_PROG, MAX_PROGFILE_LEN) == 0)
 				{
 					result = writer_OnlineProg(next_p);
 					if (result != OK)
@@ -700,7 +700,7 @@ static int writer_FileInfoFile(void)
 						break;
 					}
 				}
-				else if (strncmp(buff, IPL_PROG, MAX_PROGFILE_LEN)) == 0)
+				else if (strncmp(buff, IPL_PROG, MAX_PROGFILE_LEN) == 0)
 				{
 					result = writer_BootProg(next_p);
 					if (result != OK)
@@ -708,7 +708,7 @@ static int writer_FileInfoFile(void)
 						break;
 					}
 				}
-				else if (strncmp(buff, FPGA_PROG, MAX_PROGFILE_LEN)) == 0)
+				else if (strncmp(buff, FPGA_PROG, MAX_PROGFILE_LEN) == 0)
 				{
 					result = writer_FpgaProg();
 					if (result != OK)
@@ -739,15 +739,15 @@ static int writer_OnlineProg(char *fileinfo)
 	int		retv	= 0;
 	FILE	*fp		= NULL;
 	char	*next_p	= NULL;
-	MD2_CTX	ctx		= {};
-	char	buff[512];
-	char	hash[16];
+	MD5_CTX	ctx		= {};
+	BYTE	buff[512];
+	BYTE	hash[16];
 
 	/* バージョン比較 */
 	next_p = strtok(fileinfo, ",");			/* next_pは日付を指す */
 	if (next_p == NULL)
 	{
-		return = TFTP_RES_MISC;
+		return TFTP_RES_MISC;
 	}
 
 	fp = fopen(TMP_FOLDER ONL_PROG, "rb");
@@ -767,10 +767,10 @@ static int writer_OnlineProg(char *fileinfo)
 		result = TFTP_RES_OK;
 		while (feof(fp) == 0)
 		{
-			retv = fread(buff, sizeof(buff), 1, fp);
+			retv = fread(buff, sizeof(buff[512]), 1, fp);
 			if (retv > 0)
 			{
-				if (MD2_Update(&ctx, buff, retv) == 0)
+				if (MD5_Update(&ctx, buff, retv) == 0)
 				{
 					result = TFTP_RES_CRC;
 					break;
@@ -799,7 +799,7 @@ static int writer_OnlineProg(char *fileinfo)
 			result = TFTP_RES_MISC;
 			break;
 		}
-		str2hex(next_p, hash, sizeof(hash));
+		str2hex(next_p, hash, sizeof(hash[16]));
 		if (memcmp(hash, buff, 16) != 0)
 		{
 			result = TFTP_RES_CRC;
@@ -840,15 +840,15 @@ static int writer_BootProg(char *fileinfo)
 	int		retv	= 0;
 	FILE	*fp		= NULL;
 	char	*next_p	= NULL;
-	MD2_CTX	ctx		= {};
-	char	buff[512];
-	char	hash[16];
+	MD5_CTX	ctx		= {};
+	BYTE	buff[512];
+	BYTE	hash[16];
 
 	/* バージョン比較 */
 	next_p = strtok(fileinfo, ",");			/* next_pは日付を指す */
 	if (next_p == NULL)
 	{
-		return = TFTP_RES_MISC;
+		return TFTP_RES_MISC;
 	}
 
 	fp = fopen(TMP_FOLDER IPL_PROG, "rb");
@@ -868,10 +868,10 @@ static int writer_BootProg(char *fileinfo)
 		result = TFTP_RES_OK;
 		while (feof(fp) == 0)
 		{
-			retv = fread(buff, sizeof(buff), 1, fp);
+			retv = fread(buff, sizeof(buff[512]), 1, fp);
 			if (retv > 0)
 			{
-				if (MD2_Update(&ctx, buff, retv) == 0)
+				if (MD5_Update(&ctx, buff, retv) == 0)
 				{
 					result = TFTP_RES_CRC;
 					break;
@@ -900,7 +900,7 @@ static int writer_BootProg(char *fileinfo)
 			result = TFTP_RES_MISC;
 			break;
 		}
-		str2hex(next_p, hash, sizeof(hash));
+		str2hex(next_p, hash, sizeof(hash[16]));
 		if (memcmp(hash, buff, 16) != 0)
 		{
 			result = TFTP_RES_CRC;
@@ -937,7 +937,7 @@ static int writer_BootProg(char *fileinfo)
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-static BYTE *seq_search(BYTE *buff, size_t siz, BYTE *target, size_t len)
+static BYTE *seq_search(BYTE *buff, size_t siz, char *target, size_t len)
 {
 	size_t		i    = 0;
 	size_t		same = 0;
@@ -945,7 +945,7 @@ static BYTE *seq_search(BYTE *buff, size_t siz, BYTE *target, size_t len)
 
 	while (i < siz)
 	{
-		p = target;
+		p = (BYTE*)target;
 		while ((i < siz)&&(*buff != *p))
 		{
 			i++;
@@ -982,10 +982,9 @@ static BYTE *seq_search(BYTE *buff, size_t siz, BYTE *target, size_t len)
 /*	IPCS_V4_FPGA.BIN														  */
 /*					↑引数は、ココから渡される								  */
 /******************************************************************************/
-static int writer_FpgaProg(char *fileinfo)
+static int writer_FpgaProg(void)
 {
 	int		result	= TFTP_RES_FL_NOTFOUND;
-	int		retv	= 0;
 	int		rd_siz  = 0;
 	FILE	*fp		= NULL;
 	BYTE	*p		= NULL;
@@ -994,15 +993,15 @@ static int writer_FpgaProg(char *fileinfo)
 	BYTE	ver		= 0;
 	WORD	i		= 0;
 	struct stat		fl_stat		= {};
-	char	buff[512];
+	BYTE	buff[512];
 
 	/* FPGAプログラムサイズを基にSPI-FLASHからヘッダ情報辺りをリードして、版数を取得する */
 	if (stat(TMP_FOLDER FPGA_PROG, &fl_stat) != 0)
 	{
 		return TFTP_RES_FL_NOTFOUND;
 	}
-	fl_stat.st_size -= sizeof(buff);
-	if (com_SpiflashRead(fl_stat.st_size, sizeof(buff)/sizeof(WORD), buff) == -1)
+	fl_stat.st_size -= sizeof(buff[512]);
+	if (com_SpiflashRead(fl_stat.st_size, sizeof(buff[512])/sizeof(WORD), buff) == -1)
 	{
 		return TFTP_RES_FL_NOTFOUND;
 	}
@@ -1025,7 +1024,7 @@ static int writer_FpgaProg(char *fileinfo)
 		result = TFTP_RES_OK;
 		while (feof(fp) == 0)
 		{
-			rd_siz = fread(buff, sizeof(buff), 1, fp);
+			rd_siz = fread(buff, sizeof(buff[512]), 1, fp);
 			if (rd_siz > 0)
 			{
 				p = buff;
@@ -1086,7 +1085,7 @@ static int wt_ProgFileWrite(char *wt_dev, FILE *rd_fp)
 		while (feof(rd_fp) == 0)
 		{
 			result = OK;
-			rd_sz = fread(buff, sizeof(buff), 1, rd_fp);
+			rd_sz = fread(buff, sizeof(buff[512]), 1, rd_fp);
 			if (rd_sz < 0)
 			{
 				result = NG;
@@ -1121,7 +1120,6 @@ static int wt_FpgaFileWrite(FILE *rd_fp)
 	int		retv	= 0;
 	int		rd_sz	= 0;
 	FILE	*fp	= NULL;
-	BYTE	fl_footer[FPGA_FOOTER];
 	char	buff[512];
 
 	/* SPI-ROMゲート開放 */
@@ -1142,7 +1140,7 @@ static int wt_FpgaFileWrite(FILE *rd_fp)
 		while (feof(rd_fp) == 0)
 		{
 			result = OK;
-			rd_sz = fread(buff, sizeof(buff), 1, rd_fp);
+			rd_sz = fread(buff, sizeof(buff[512]), 1, rd_fp);
 			if (rd_sz < 0)
 			{
 				result = NG;
@@ -1189,24 +1187,24 @@ static BYTE tftp(INNER_MSG *msg_p)
 	char	*dl_mode		= NULL;
 	BYTE	*ip_addr		= NULL;
 	size_t	len				= 0;
-	BYTE	ipaddr_str[16]	= {};
+	char	ipaddr_str[16]	= {};
 
-	fl_name = msg_p->msg_header.link;
+	fl_name = (char*)msg_p->msg_header.link;
 	len = strnlen(fl_name, 128+1);
-	if((len == 128+1)||(len == 0))
+	if ((len == 128+1)||(len == 0))
 	{
 		return NG;
 	}
 
 	dl_mode = fl_name + len +1;
 	len = strnlen(dl_mode, 6+1);
-	if((len != 6)||(sterncmp(dl_mode, "octed", 6) != 0))
+	if (strcmp(dl_mode, "octed") != 0)
 	{
 		return NG;
 	}
 
-	ip_addr = dl_mode + len +1 +1;		/* IP_TYPEは不要なので無視 */
-	if (inet_ntop(AF_INET, ip_addr, &ipaddr_str, sizeof(ipaddr_str)) == NULL)
+	ip_addr = (BYTE*)dl_mode + len +1 +1;		/* IP_TYPEは不要なので無視 */
+	if (inet_ntop(AF_INET, ip_addr, ipaddr_str, sizeof(ipaddr_str[16])) == NULL)
 	{
 		return NG;
 	}

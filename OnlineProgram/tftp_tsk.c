@@ -13,7 +13,7 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>			/* execlp(), stat() */
-//#include <openssl/md5.h>	/* MD5_Init() */
+#include <openssl/md5.h>	/* MD5_Init() */
 #include <arpa/inet.h>	/* inet_ntop() */
 
 /*** ユーザ作成ヘッダの取り込み ***/

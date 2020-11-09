@@ -9,73 +9,42 @@
 # |-- source header files.
 # `-- source files.
 
-## Directory defines
-TOOLCHAIN = ~/sdk.ac49x/barrier_breaker/staging_dir/toolchain-mipsel_mips32_gcc-4.8-linaro_uClibc-0.9.33.2
-BUILDDIR = ./build
-OBJDIR = $(BUILDDIR)
-SRCDIR = .
-INCDIRS = -I $(TOOLCHAIN)/include -I $(TOOLCHAIN) \
+PROGNAME := linktest
+
+SRCDIR := .
+OBJDIR := build
+TARGET := $(OBJDIR)/$(PROGNAME)
+
+TOOLCHAIN := ~/sdk.ac49x/barrier_breaker/staging_dir/toolchain-mipsel_mips32_gcc-4.8-linaro_uClibc-0.9.33.2
+OPENSSL := ~/sdk.ac49x/barrier_breaker/build_dir/target-mipsel_mips32_uClibc-0.9.33.2/openssl-1.0.2f
+
+INCDIR := -I $(TOOLCHAIN)/include -I $(OPENSSL)/include \
 ~/googletest/googletest/include
-LIBDIRS = -L $(TOOLCHAIN)/lib \
+LIBDIR := -L $(TOOLCHAIN)/lib -L $(OPENSSL) \
 -L ~/googletest/build/googletest
 
-## Target name
-TARGET = $(BUILDDIR)/stat
-STAGING_DIR = ./
+SRCS := $(wildcard $(SRCDIR)/*.c) $(wildcard $(SRCDIR)/*.cpp)
+OBJS := $(addprefix $(OBJDIR)/,$(patsubst %.c,%.o,$(SRCS)))
+LIBS := -lpthread -lcrypto
 
-## Compiler options
-CC = $(TOOLCHAIN)/bin/mipsel-openwrt-linux-gcc
 #CC = gcc
-CFLAGS = -O2 -Wall
+CC = $(TOOLCHAIN)/bin/mipsel-openwrt-linux-gcc
+CFLAGS = -Wall -O2 $(INCDIR)
 CXX = $(TOOLCHAIN)/bin/mipsel-openwrt-linux-g++
-#CXX = g++
-CXXFLAGS = -O2 -Wall
-LDFLAGS =
+CXXFLAGS = -Wall -O2 $(INCDIR)
+LDFLAGS = $(LIBDIRS)
 
-SRCS := $(shell find $(SRCDIR) -name *.cpp -or -name *.c -or -name *.s)
-OBJS := $(SRCS:%=$(OBJDIR)/%.o)
-DEPS := $(OBJS:.o=.d)
-LIBS = -lpthread
-
-#INCLUDE := $(shell find $(INCDIRS) -type d)
-#INCLUDE := $(addprefix -I,$(INCLUDE))
-INCLUDE := $(INCDIRS)
-
-CPPFLAGS := $(INCLUDE) -MMD -MP
-LDFLAGS += $(LIBDIRS) $(LIBS)
-
-# Target
-default:
-	make all
+.PHONY: all clean
 
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
-	$(CXX) -o $@ $^ $(LDFLAGS)
+	$(CXX) -o $@ $^ $(LDFLAGS) $(LIBDIR) $(LIBS)
 
-# assembly
-$(OBJDIR)/%.s.o: %.s
-	$(MKDIR_P) $(dir $@)
-	$(AS) $(ASFLAGS) -c $< -o $@
-
-# c source
-$(OBJDIR)/%.c.o: %.c
-	$(MKDIR_P) $(dir $@)
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
-
-# c++ source
-$(OBJDIR)/%.cpp.o: %.cpp
-	$(MKDIR_P) $(dir $@)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
-	
-.PHONY: all clean rebuild
+$(OBJDIR)/%.o:%.c
+	@if [ ! -e `dirname $@` ]; then mkdir -p `dirname $@`; fi
+	$(CC) $(CFLAGS) -o $@ -c $<
 
 clean:
-	$(RM) -r $(BUILDDIR)
+	rm -rf $(OBJDIR)
 
-rebuild:
-	make clean && make
-
--include $(DEPS)
-
-MKDIR_P = mkdir -p

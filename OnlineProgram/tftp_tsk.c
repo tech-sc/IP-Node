@@ -32,6 +32,13 @@
 #include "tftp_tsk.h"
 #include "wave_sub.h"
 
+#ifdef DEBUG
+#define _ATTR_SYM
+#else  // !DEBUG
+#define _ATTR_SYM		static
+#endif // DEBUG
+
+
 /*** 自ファイル内でのみ使用する#define マクロ ***/
 #ifdef DEBUG
 	#define LOG_LEVEL		LOG_DEBUG			/* テスト時ログレベル */
@@ -92,20 +99,20 @@ typedef enum TFTP_STATE_e {
 /*** 自ファイル内でのみ使用するstruct/union タグ定義 ***/
 /*** ファイル内で共有するstatic 変数宣言 ***/
 /* 状態番号 */
-static TFTP_STATE_e		downld_state_no;
+_ATTR_SYM	TFTP_STATE_e		downld_state_no;
 /* タイマ登録ID(1～254) */
-static BYTE				downld_tim;
+_ATTR_SYM	pBYTE				downld_tim;
 /* ダウンロード完了判断カウンタ */
-uint16_t				downld_same_cnt;
+_ATTR_SYM	uint16_t			downld_same_cnt;
 
 /* TFTP起動前のLED状態 */
-static uint8_t			prev_LED;
+_ATTR_SYM	uint8_t			prev_LED;
 
 /* errno文字列生成バッファ */
-static char		str_buff[16];
+_ATTR_SYM	char		str_buff[16];
 
 /* ダウンロード種別 */
-static uint16_t			downld_type;
+_ATTR_SYM	uint16_t			downld_type;
 
 /* ダウンロードファイルリスト型 */
 typedef struct DL_FILE_t {
@@ -143,6 +150,7 @@ DL_FILE_t	uncomp_files[MAX_UNCOMP_FILELIST] = {
 };
 
 /*** static 関数宣言 ***/
+#ifndef DEBUG
 static void downld_init(void);
 static void downld_SttMng(INNER_MSG *msg_p);
 static BYTE dl_IdleStt_SvrReq( INNER_MSG *msg_p );
@@ -167,6 +175,7 @@ static int writer_FpgaProg(void);
 static int wt_ProgFileWrite(char *wt_dev, FILE *rd_fp);
 static int wt_FpgaFileWrite(FILE *rd_fp);
 static BYTE tftp(INNER_MSG *msg_p, uint16_t cnt);
+#endif // !DEBUG
 
 /** 状態管理テーブル型 */
 typedef struct STATE_TABLE_t {
@@ -215,7 +224,7 @@ STATE_TABLE_t	*RootStateTable[MAX_STATE_NO] = {
 /* その他	  －															  */
 /******************************************************************************/
 #define CASE_STR(a)	case a:	 return #a
-const char *mkstr_errno(int err)
+_ATTR_SYM const char *mkstr_errno(int err)
 {
 	switch(err)
 	{
@@ -239,7 +248,7 @@ const char *mkstr_errno(int err)
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-static BYTE str2hex(const char *str, BYTE *hex, size_t siz)
+_ATTR_SYM BYTE str2hex(const char *str, BYTE *hex, size_t siz)
 {
 	char	ch  = 0;
 	BYTE	val = 0;
@@ -291,7 +300,7 @@ static BYTE str2hex(const char *str, BYTE *hex, size_t siz)
 /* その他	  －															  */
 /*																			  */
 /******************************************************************************/
-static void dl_sndmsg(BYTE ecb, BYTE kind, BYTE result)
+_ATTR_SYM void dl_sndmsg(BYTE ecb, BYTE kind, BYTE result)
 {
 	INNER_MSG	*msg_p = NULL;
 
@@ -344,7 +353,7 @@ void downld_thread(void *arg)
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-static void downld_init(void)
+_ATTR_SYM void downld_init(void)
 {
 	/* 変数初期化 */
 	downld_state_no = STATE_IDLE;
@@ -363,7 +372,7 @@ static void downld_init(void)
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-static void downld_SttMng(INNER_MSG *msg_p)
+_ATTR_SYM void downld_SttMng(INNER_MSG *msg_p)
 {
 	STATE_TABLE_t	*p_tbl	 = NULL;
 	BYTE			event_id = 0;
@@ -401,7 +410,7 @@ static void downld_SttMng(INNER_MSG *msg_p)
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-static BYTE dl_IdleStt_SvrReq(INNER_MSG *msg_p)
+_ATTR_SYM BYTE dl_IdleStt_SvrReq(INNER_MSG *msg_p)
 {
 	int		retv = 0;
 
@@ -431,7 +440,7 @@ static BYTE dl_IdleStt_SvrReq(INNER_MSG *msg_p)
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-static BYTE dl_IdleStt_Cl1Req(INNER_MSG *msg_p)
+_ATTR_SYM BYTE dl_IdleStt_Cl1Req(INNER_MSG *msg_p)
 {
 	downld_type = PROG_DL;
 	if (tftp(msg_p, PROG_DL) != OK)
@@ -450,7 +459,7 @@ static BYTE dl_IdleStt_Cl1Req(INNER_MSG *msg_p)
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-static BYTE dl_IdleStt_Cl2Req(INNER_MSG *msg_p)
+_ATTR_SYM BYTE dl_IdleStt_Cl2Req(INNER_MSG *msg_p)
 {
 	downld_type = WAVE_DL;
 	if (tftp(msg_p, WAVE_DL) != OK)
@@ -469,7 +478,7 @@ static BYTE dl_IdleStt_Cl2Req(INNER_MSG *msg_p)
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-static BYTE dl_SvrStt_SvrReq(INNER_MSG *msg_p)
+_ATTR_SYM BYTE dl_SvrStt_SvrReq(INNER_MSG *msg_p)
 {
 	dl_sndmsg(LUMNG_ECB, I_PGDLCMP, TFTP_RES_STATE);
 	return OK;
@@ -484,7 +493,7 @@ static BYTE dl_SvrStt_SvrReq(INNER_MSG *msg_p)
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-static BYTE dl_SvrStt_Tmo(INNER_MSG *msg_p)
+_ATTR_SYM BYTE dl_SvrStt_Tmo(INNER_MSG *msg_p)
 {
 	if (dl_tmpfile_chk() != false)
 	{
@@ -517,7 +526,7 @@ static BYTE dl_SvrStt_Tmo(INNER_MSG *msg_p)
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-static BYTE dl_SvrStt_Cl1Req(INNER_MSG *msg_p)
+_ATTR_SYM BYTE dl_SvrStt_Cl1Req(INNER_MSG *msg_p)
 {
 	dl_sndmsg(LUMNG_ECB, I_PGDLCMP, TFTP_RES_STATE);
 	return OK;
@@ -532,7 +541,7 @@ static BYTE dl_SvrStt_Cl1Req(INNER_MSG *msg_p)
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-static BYTE dl_SvrStt_Cl2Req(INNER_MSG *msg_p)
+_ATTR_SYM BYTE dl_SvrStt_Cl2Req(INNER_MSG *msg_p)
 {
 	dl_sndmsg(LUMNG_ECB, E_HORYDLEND, TFTP_RES_STATE);
 	return OK;
@@ -547,7 +556,7 @@ static BYTE dl_SvrStt_Cl2Req(INNER_MSG *msg_p)
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-static BYTE dl_SvrStt_WriteResp(INNER_MSG *msg_p)
+_ATTR_SYM BYTE dl_SvrStt_WriteResp(INNER_MSG *msg_p)
 {
 	dl_sndmsg(LUMNG_ECB, I_PGDLCMP, msg_p->msg_header.no);
 	downld_state_no = STATE_IDLE;
@@ -563,7 +572,7 @@ static BYTE dl_SvrStt_WriteResp(INNER_MSG *msg_p)
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-static BYTE dl_ClStt_SvrReq(INNER_MSG *msg_p)
+_ATTR_SYM BYTE dl_ClStt_SvrReq(INNER_MSG *msg_p)
 {
 	dl_sndmsg(LUMNG_ECB, I_PGDLCMP, TFTP_RES_STATE);
 	return OK;
@@ -578,7 +587,7 @@ static BYTE dl_ClStt_SvrReq(INNER_MSG *msg_p)
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-static BYTE dl_ClStt_Cl1Req(INNER_MSG *msg_p)
+_ATTR_SYM BYTE dl_ClStt_Cl1Req(INNER_MSG *msg_p)
 {
 	dl_sndmsg(LUMNG_ECB, I_PGDLCMP, TFTP_RES_STATE);
 	return OK;
@@ -593,7 +602,7 @@ static BYTE dl_ClStt_Cl1Req(INNER_MSG *msg_p)
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-static BYTE dl_ClStt_Cl2Req(INNER_MSG *msg_p)
+_ATTR_SYM BYTE dl_ClStt_Cl2Req(INNER_MSG *msg_p)
 {
 	dl_sndmsg(LUMNG_ECB, E_HORYDLEND, TFTP_RES_STATE);
 	return OK;
@@ -608,7 +617,7 @@ static BYTE dl_ClStt_Cl2Req(INNER_MSG *msg_p)
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-static BYTE dl_ClStt_WriteResp(INNER_MSG *msg_p)
+_ATTR_SYM BYTE dl_ClStt_WriteResp(INNER_MSG *msg_p)
 {
 	if (downld_type == PROG_DL)
 	{
@@ -632,7 +641,7 @@ static BYTE dl_ClStt_WriteResp(INNER_MSG *msg_p)
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-static bool dl_tmpfile_chk(void)
+_ATTR_SYM bool dl_tmpfile_chk(void)
 {
 	bool			same		= true;
 	uint16_t		fl_cnt		= 0;
@@ -711,7 +720,7 @@ void writer_thread(void *arg)
 					execlp("rm", "-f", TMP_FOLDER TAR_FILE, NULL);
 					break;
 				  case CONFIGFILE_NO:
-					;
+					mnt_config_dat(fl_list_p->fl_name, 1);
 					break;
 				  case WAVEFILE_NO:
 					if (wave_file_write(fl_list_p->fl_name) != OK)
@@ -745,7 +754,7 @@ void writer_thread(void *arg)
 /*	IPCS_V4_BOOT.BIN,04.00,2020/07/15 11:38:07,9999999,xxxxxxxxxxxxxxxxx	  */
 /*	IPCS_V4_FPGA.BIN														  */
 /******************************************************************************/
-static int writer_FileInfoFile(void)
+_ATTR_SYM int writer_FileInfoFile(void)
 {
 	int		result	= TFTP_RES_FL_NOTFOUND;
 	int		retv	= 0;
@@ -809,7 +818,7 @@ static int writer_FileInfoFile(void)
 /*	IPCS_V4_PROG.BIN,04.00,2020/07/15 11:38:07,9999999,xxxxxxxxxxxxxxxxx	  */
 /*					↑引数は、ココから渡される								  */
 /******************************************************************************/
-static int writer_OnlineProg(char *fileinfo)
+_ATTR_SYM int writer_OnlineProg(char *fileinfo)
 {
 	int		result	= TFTP_RES_FL_NOTFOUND;
 	int		retv	= 0;
@@ -910,7 +919,7 @@ static int writer_OnlineProg(char *fileinfo)
 /*	IPCS_V4_BOOT.BIN,04.00,2020/07/15 11:38:07,9999999,xxxxxxxxxxxxxxxxx	  */
 /*					↑引数は、ココから渡される								  */
 /******************************************************************************/
-static int writer_BootProg(char *fileinfo)
+_ATTR_SYM int writer_BootProg(char *fileinfo)
 {
 	int		result	= TFTP_RES_FL_NOTFOUND;
 	int		retv	= 0;
@@ -1013,7 +1022,7 @@ static int writer_BootProg(char *fileinfo)
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-static BYTE *seq_search(BYTE *buff, size_t siz, char *target, size_t len)
+_ATTR_SYM BYTE *seq_search(BYTE *buff, size_t siz, char *target, size_t len)
 {
 	size_t		i    = 0;
 	size_t		same = 0;
@@ -1058,7 +1067,7 @@ static BYTE *seq_search(BYTE *buff, size_t siz, char *target, size_t len)
 /*	IPCS_V4_FPGA.BIN														  */
 /*					↑引数は、ココから渡される								  */
 /******************************************************************************/
-static int writer_FpgaProg(void)
+_ATTR_SYM int writer_FpgaProg(void)
 {
 	int		result	= TFTP_RES_FL_NOTFOUND;
 	int		rd_siz  = 0;
@@ -1142,7 +1151,7 @@ static int writer_FpgaProg(void)
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-static int wt_ProgFileWrite(char *wt_dev, FILE *rd_fp)
+_ATTR_SYM int wt_ProgFileWrite(char *wt_dev, FILE *rd_fp)
 {
 	int		result	= NG;
 	int		retv	= 0;
@@ -1190,7 +1199,7 @@ static int wt_ProgFileWrite(char *wt_dev, FILE *rd_fp)
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-static int wt_FpgaFileWrite(FILE *rd_fp)
+_ATTR_SYM int wt_FpgaFileWrite(FILE *rd_fp)
 {
 	int		result	= NG;
 	int		retv	= 0;
@@ -1257,7 +1266,7 @@ static int wt_FpgaFileWrite(FILE *rd_fp)
 /*				IP_TYPE				0=IPv4									  */
 /*				AP_ADDR[4]			IPv4アドレス							  */
 /******************************************************************************/
-static BYTE tftp(INNER_MSG *msg_p, uint16_t cnt)
+_ATTR_SYM BYTE tftp(INNER_MSG *msg_p, uint16_t cnt)
 {
 	char	*fl_name		= NULL;
 	char	*dl_mode		= NULL;

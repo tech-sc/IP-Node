@@ -88,6 +88,7 @@
 
 /*** 自ファイル内でのみ使用するtypedef 定義 ***/
 /*** 自ファイル内でのみ使用するenum タグ定義 ***/
+#ifndef DEBUG
 /* 状態番号 */
 typedef enum TFTP_STATE_e {
 	STATE_IDLE = 0,					/* アイドル状態 */
@@ -95,28 +96,29 @@ typedef enum TFTP_STATE_e {
 	STATE_CLIENT_DL,				/* ダウンロード中状態 */
 	MAX_STATE_NO
 }TFTP_STATE_e;
+#endif // !DEBUG
 
 /*** 自ファイル内でのみ使用するstruct/union タグ定義 ***/
 /*** ファイル内で共有するstatic 変数宣言 ***/
 /* 状態番号 */
 _ATTR_SYM	TFTP_STATE_e		downld_state_no;
 /* タイマ登録ID(1～254) */
-_ATTR_SYM	pBYTE				downld_tim;
+_ATTR_SYM	BYTE				downld_tim;
 /* ダウンロード完了判断カウンタ */
 _ATTR_SYM	uint16_t			downld_same_cnt;
 
 /* TFTP起動前のLED状態 */
-_ATTR_SYM	uint8_t			prev_LED;
+_ATTR_SYM	uint8_t				prev_LED;
 
 /* errno文字列生成バッファ */
-_ATTR_SYM	char		str_buff[16];
+_ATTR_SYM	char				str_buff[16];
 
 /* ダウンロード種別 */
 _ATTR_SYM	uint16_t			downld_type;
 
 /* ダウンロードファイルリスト型 */
 typedef struct DL_FILE_t {
-	const char	*fl_name;			/* パス付ファイル名 */
+	char	*fl_name;			/* パス付ファイル名 */
 	uint32_t	exist;				/* ファイル有無/ファイルNo */
 	off_t		size;				/* ファイルサイズ */
 } DL_FILE_t;

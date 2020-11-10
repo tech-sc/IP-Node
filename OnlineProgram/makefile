@@ -35,7 +35,7 @@ CC = $(TOOLCHAIN)/bin/mipsel-openwrt-linux-gcc
 CFLAGS = -Wall -O2 -DDEBUG -MMD -MP $(INCDIR)
 CXX = $(TOOLCHAIN)/bin/mipsel-openwrt-linux-g++
 CXXFLAGS = -Wall -O2 -DDEBUG -MMD -MP $(INCDIR)
-LDFLAGS = $(LIBDIRS)
+LDFLAGS = $(LIBDIR)
 ARFLAGS = crsv
 
 .PHONY: all clean rebuild

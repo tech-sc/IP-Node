@@ -38,6 +38,8 @@ BYTE tmr_start(BYTE id, WORD cnt) {return OK;}
 BYTE tmr_entry(WORD sndid, BYTE tmid, BYTE exeid) {return OK;}
 BYTE tmr_delete(BYTE timno) {return OK;}
 
+BYTE mnt_config_dat(char *path, BYTE write) {return OK;}
+
 BYTE com_FpgaRegRead( off_t phy_addr, uint16_t len, uint8_t *buff_p ) {return OK;}
 BYTE com_FpgaRegWrite( off_t phy_addr, uint8_t val ) {return OK;}
 BYTE com_FpgaLED( uint8_t mask, uint8_t val, uint8_t *prev_p ) {return OK;}

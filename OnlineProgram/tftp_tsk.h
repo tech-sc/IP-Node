@@ -13,9 +13,15 @@ extern void writer_thread( void *arg );
 
 #ifdef DEBUG
 /* 状態番号 */
+typedef enum TFTP_STATE_e {
+	STATE_IDLE = 0,					/* アイドル状態 */
+	STATE_SERVER_DL,				/* ダウンロード監視状態 */
+	STATE_CLIENT_DL,				/* ダウンロード中状態 */
+	MAX_STATE_NO
+}TFTP_STATE_e;
 extern TFTP_STATE_e		downld_state_no;
 /* タイマ登録ID(1～254) */
-extern pBYTE				downld_tim;
+extern BYTE				downld_tim;
 /* ダウンロード完了判断カウンタ */
 extern uint16_t			downld_same_cnt;
 /* TFTP起動前のLED状態 */

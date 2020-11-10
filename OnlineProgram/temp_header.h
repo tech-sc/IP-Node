@@ -47,5 +47,6 @@ extern void com_threadstart(BYTE id, void *p);
 extern void dbg_print_set(BYTE i,BYTE v,BYTE z);
 extern void dbg_print(BYTE i,BYTE v,char *p,...);
 
+extern BYTE mnt_config_dat(char *path, BYTE write);
 
 

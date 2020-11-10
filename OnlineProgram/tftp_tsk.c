@@ -288,6 +288,7 @@ _ATTR_SYM BYTE str2hex(const char *str, BYTE *hex, size_t siz)
 			return NG;
 		}
 		*hex |= val;
+		hex++;
 		siz--;
 	}
 	return OK;

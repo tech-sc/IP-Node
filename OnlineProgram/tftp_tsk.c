@@ -711,7 +711,7 @@ void writer_thread(void *arg)
 					execlp("rm", "-f", TMP_FOLDER TAR_FILE, NULL);
 					break;
 				  case CONFIGFILE_NO:
-					;
+					mnt_config_dat(fl_list_p->fl_name, 1);
 					break;
 				  case WAVEFILE_NO:
 					if (wave_file_write(fl_list_p->fl_name) != OK)

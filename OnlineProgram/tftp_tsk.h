@@ -54,7 +54,7 @@ extern BYTE *seq_search(BYTE *buff, size_t siz, char *target, size_t len);
 extern int writer_FpgaProg(void);
 extern int wt_ProgFileWrite(char *wt_dev, FILE *rd_fp);
 extern int wt_FpgaFileWrite(FILE *rd_fp);
-extern BYTE tftp(INNER_MSG *msg_p, uint16_t cnt);
+extern BYTE tftp(INNER_MSG *msg_p);
 #endif // !DEBUG
 
 #endif /* _TFTP_TSK_H_ */

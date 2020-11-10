@@ -176,7 +176,7 @@ static BYTE *seq_search(BYTE *buff, size_t siz, char *target, size_t len);
 static int writer_FpgaProg(void);
 static int wt_ProgFileWrite(char *wt_dev, FILE *rd_fp);
 static int wt_FpgaFileWrite(FILE *rd_fp);
-static BYTE tftp(INNER_MSG *msg_p, uint16_t cnt);
+static BYTE tftp(INNER_MSG *msg_p);
 #endif // !DEBUG
 
 /** 状態管理テーブル型 */
@@ -445,7 +445,7 @@ _ATTR_SYM BYTE dl_IdleStt_SvrReq(INNER_MSG *msg_p)
 _ATTR_SYM BYTE dl_IdleStt_Cl1Req(INNER_MSG *msg_p)
 {
 	downld_type = PROG_DL;
-	if (tftp(msg_p, PROG_DL) != OK)
+	if (tftp(msg_p) != OK)
 	{
 		dl_sndmsg(LUMNG_ECB, I_PGDLCMP, TFTP_RES_SERVER);
 	}
@@ -464,7 +464,7 @@ _ATTR_SYM BYTE dl_IdleStt_Cl1Req(INNER_MSG *msg_p)
 _ATTR_SYM BYTE dl_IdleStt_Cl2Req(INNER_MSG *msg_p)
 {
 	downld_type = WAVE_DL;
-	if (tftp(msg_p, WAVE_DL) != OK)
+	if (tftp(msg_p) != OK)
 	{
 		dl_sndmsg(LUMNG_ECB, E_HORYDLEND, TFTP_RES_SERVER);
 	}
@@ -722,7 +722,10 @@ void writer_thread(void *arg)
 					execlp("rm", "-f", TMP_FOLDER TAR_FILE, NULL);
 					break;
 				  case CONFIGFILE_NO:
-					mnt_config_dat(fl_list_p->fl_name, 1);
+					if( mnt_config_dat(fl_list_p->fl_name, 1) != OK)
+					{
+						result = NG;
+					}
 					break;
 				  case WAVEFILE_NO:
 					if (wave_file_write(fl_list_p->fl_name) != OK)
@@ -1258,7 +1261,6 @@ _ATTR_SYM int wt_FpgaFileWrite(FILE *rd_fp)
 /* 機能概要	  プログラムダウンロードMSGにより、TFTPサーバからファイルを		  */
 /*			  ダウンロードする												  */
 /* パラメータ msg_p : (in)	  内部受信メッセージ							  */
-/*			  cnt   : (in)	  ダウンロード回数(=1:プログラム／=2:保留音)	  */
 /* リターン	  OK : 正常終了													  */
 /*			  NG : エラー													  */
 /* 注意事項	  －															  */
@@ -1268,47 +1270,41 @@ _ATTR_SYM int wt_FpgaFileWrite(FILE *rd_fp)
 /*				IP_TYPE				0=IPv4									  */
 /*				AP_ADDR[4]			IPv4アドレス							  */
 /******************************************************************************/
-_ATTR_SYM BYTE tftp(INNER_MSG *msg_p, uint16_t cnt)
+_ATTR_SYM BYTE tftp(INNER_MSG *msg_p)
 {
 	char	*fl_name		= NULL;
 	char	*dl_mode		= NULL;
 	BYTE	*ip_addr		= NULL;
 	size_t	len				= 0;
-	uint16_t	loop		= 0;
 	int		retv			= 0;
 	char	ipaddr_str[16]	= {};
 
 	fl_name = (char*)msg_p->msg_header.link;
-	while (loop < cnt)
+	len = strnlen(fl_name, 128+1);
+	if ((len == 128+1)||(len == 0))
 	{
-		len = strnlen(fl_name, 128+1);
-		if ((len == 128+1)||(len == 0))
-		{
-			return NG;
-		}
-
-		dl_mode = fl_name + len +1;
-		len = strnlen(dl_mode, 6+1);
-		if (strcmp(dl_mode, "octed") != 0)
-		{
-			return NG;
-		}
-
-		ip_addr = (BYTE*)dl_mode + len +1 +1;		/* IP_TYPEは不要なので無視 */
-		if (inet_ntop(AF_INET, ip_addr, ipaddr_str, sizeof(ipaddr_str[16])) == NULL)
-		{
-			return NG;
-		}
-
-		retv = execlp("atftp", "-g -r", fl_name, ipaddr_str, NULL);
-		if (retv != 0)
-		{
-			return NG;
-		}
-
-		fl_name = (char*)ip_addr + 16;						/* IPアドレス領域は16byteある */
-		loop++;
+		return NG;
 	}
+
+	dl_mode = fl_name + len +1;
+	len = strnlen(dl_mode, 6+1);
+	if (strcmp(dl_mode, "octed") != 0)
+	{
+		return NG;
+	}
+
+	ip_addr = (BYTE*)dl_mode + len +1 +1;		/* IP_TYPEは不要なので無視 */
+	if (inet_ntop(AF_INET, ip_addr, ipaddr_str, sizeof(ipaddr_str[16])) == NULL)
+	{
+		return NG;
+	}
+
+	retv = execlp("atftp", "-g -r", fl_name, ipaddr_str, NULL);
+	if (retv != 0)
+	{
+		return NG;
+	}
+
 	dl_sndmsg(WRITER_ECB, I_WRITE_REQ, 0);
 	return OK;
 }

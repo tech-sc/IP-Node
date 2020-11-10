@@ -29,6 +29,7 @@
 
 #include "com_mem.h"
 #include "tftp_tsk.h"
+#include "wave_sub.h"
 
 /*** 自ファイル内でのみ使用する#define マクロ ***/
 #ifdef DEBUG
@@ -64,12 +65,16 @@
 #define FPGA_PROG		"IPCS_V4_FPGA.BIN"
 #define FILEINFO_FILE	"FILEINFO.txt"
 #define CONFIG_FILE		"config.dat"
-#define WAV_FILE		"HOLD.wav"
+#define WAVE_FILE		"HOLD.wav"
 #define CaData_FILE		"ca_data.dat"
 #define LuStart_FILE	"lu_start.dat"
 
-#define	FPGA_FOOTER_SIZE		48					/* FPGAフッダサイズ */
+#define FPGA_FOOTER_SIZE		48					/* FPGAフッダサイズ */
 #define FPGA_FOOTER_STR			"UF7200IPstep2"		/* FPGAフッダの先頭文字列 */
+
+/* ダウンロード種別 */
+#define PROG_DL					1
+#define WAVE_DL					2
 
 /*** 自ファイル内でのみ使用する#define 関数マクロ ***/
 
@@ -98,6 +103,8 @@ static uint8_t			prev_LED;
 /* errno文字列生成バッファ */
 static char		str_buff[16];
 
+/* ダウンロード種別 */
+static uint16_t			downld_type;
 
 /* ダウンロードファイルリスト型 */
 typedef struct DL_FILE_t {
@@ -116,12 +123,11 @@ DL_FILE_t	dl_files[MAX_FILELIST] = {
 	{NULL, false, 0}
 };
 
-
 /* ダウンロードファイルリスト数 */
 #define MAX_UNCOMP_FILELIST		(5+1)
 #define FILEINFO_NO				1
 #define CONFIGFILE_NO			2
-#define WAVFILE_NO				3
+#define WAVEFILE_NO				3
 #define CADATAFILE_NO			4
 #define LUSTARTFILE_NO			5
 
@@ -129,7 +135,7 @@ DL_FILE_t	dl_files[MAX_FILELIST] = {
 DL_FILE_t	uncomp_files[MAX_UNCOMP_FILELIST] = {
 	{TMP_FOLDER FILEINFO_FILE,	FILEINFO_NO,	0},
 	{TMP_FOLDER CONFIG_FILE,	CONFIGFILE_NO,	0},
-	{TMP_FOLDER WAV_FILE,		WAVFILE_NO,		0},
+	{TMP_FOLDER WAVE_FILE,		WAVEFILE_NO,	0},
 	{TMP_FOLDER CaData_FILE,	CADATAFILE_NO,	0},
 	{TMP_FOLDER LuStart_FILE,	LUSTARTFILE_NO, 0},
 	{NULL, false, 0}
@@ -139,7 +145,8 @@ DL_FILE_t	uncomp_files[MAX_UNCOMP_FILELIST] = {
 static void downld_init(void);
 static void downld_SttMng(INNER_MSG *msg_p);
 static BYTE dl_IdleStt_SvrReq( INNER_MSG *msg_p );
-static BYTE dl_IdleStt_ClReq( INNER_MSG *msg_p );
+static BYTE dl_IdleStt_Cl1Req( INNER_MSG *msg_p );
+static BYTE dl_IdleStt_Cl2Req( INNER_MSG *msg_p );
 static BYTE dl_SvrStt_SvrReq( INNER_MSG *msg_p );
 static BYTE dl_SvrStt_Tmo( INNER_MSG *msg_p );
 static BYTE dl_SvrStt_ClReq( INNER_MSG *msg_p );
@@ -156,10 +163,10 @@ static BYTE *seq_search(BYTE *buff, size_t siz, char *target, size_t len);
 static int writer_FpgaProg(void);
 static int wt_ProgFileWrite(char *wt_dev, FILE *rd_fp);
 static int wt_FpgaFileWrite(FILE *rd_fp);
-static BYTE tftp(INNER_MSG *msg_p);
+static BYTE tftp(INNER_MSG *msg_p, uint16_t cnt);
 
 /** 状態管理テーブル型 */
-typedef struct {
+typedef struct STATE_TABLE_t {
 		BYTE		event_id;
 		BYTE		(*event_proc)(INNER_MSG *msg_p);
 } STATE_TABLE_t;
@@ -167,21 +174,24 @@ typedef struct {
 /** 状態管理テーブル */
 STATE_TABLE_t	STATE_IDLE_Table[] = {
 		{ I_SERVER_REQ,			dl_IdleStt_SvrReq },
-		{ I_CLIENT_REQ,			dl_IdleStt_ClReq },
+		{ O_PGDOWNLOAD,			dl_IdleStt_Cl1Req },
+		{ O_HORYDOWN,			dl_IdleStt_Cl2Req },
 		{ 0, NULL }
 };
 
 STATE_TABLE_t	STATE_SERVER_DL_Table[] = {
 		{ I_SERVER_REQ,			dl_SvrStt_SvrReq },
 		{ TIM_OUT,				dl_SvrStt_Tmo },
-		{ I_CLIENT_REQ,			dl_SvrStt_ClReq },
+		{ O_PGDOWNLOAD,			dl_SvrStt_Cl1Req },
+		{ O_HORYDOWN,			dl_SvrStt_Cl2Req },
 		{ I_WRITE_RESP,			dl_SvrStt_WriteResp },
 		{ 0, NULL }
 };
 
 STATE_TABLE_t	STATE_CLIENT_DL_Table[] = {
 		{ I_SERVER_REQ,			dl_ClStt_SvrReq },
-		{ I_CLIENT_REQ,			dl_ClStt_ClReq },
+		{ O_PGDOWNLOAD,			dl_ClStt_Cl1Req },
+		{ O_HORYDOWN,			dl_ClStt_Cl2Req },
 		{ I_WRITE_RESP,			dl_ClStt_WriteResp },
 		{ 0, NULL }
 };
@@ -410,7 +420,7 @@ static BYTE dl_IdleStt_SvrReq(INNER_MSG *msg_p)
 }
 
 /******************************************************************************/
-/* 関数名	  IDLE状態でのダウンロード要求処理								  */
+/* 関数名	  IDLE状態でのプログラムダウンロード要求処理					  */
 /* 機能概要	  TFTPクライアントによるダウンロード処理を行う					  */
 /* パラメータ msg_p : (in)	  内部受信メッセージ							  */
 /* リターン	  OK : 正常終了													  */
@@ -418,9 +428,32 @@ static BYTE dl_IdleStt_SvrReq(INNER_MSG *msg_p)
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-static BYTE dl_IdleStt_ClReq(INNER_MSG *msg_p)
+static BYTE dl_IdleStt_Cl1Req(INNER_MSG *msg_p)
 {
-	tftp(msg_p);
+	downld_type = PROG_DL;
+	if (tftp(msg_p, PROG_DL) != OK)
+	{
+		dl_sndmsg(LUMNG_ECB, I_PGDLCMP, TFTP_RES_SERVER);
+	}
+	return OK;
+}
+
+/******************************************************************************/
+/* 関数名	  IDLE状態での保留音ダウンロード要求処理						  */
+/* 機能概要	  TFTPクライアントによるダウンロード処理を行う					  */
+/* パラメータ msg_p : (in)	  内部受信メッセージ							  */
+/* リターン	  OK : 正常終了													  */
+/*			  NG : エラー													  */
+/* 注意事項	  －															  */
+/* その他	  －															  */
+/******************************************************************************/
+static BYTE dl_IdleStt_Cl2Req(INNER_MSG *msg_p)
+{
+	downld_type = WAVE_DL;
+	if (tftp(msg_p, WAVE_DL) != OK)
+	{
+		dl_sndmsg(LUMNG_ECB, E_HORYDLEND, TFTP_RES_SERVER);
+	}
 	return OK;
 }
 
@@ -481,9 +514,24 @@ static BYTE dl_SvrStt_Tmo(INNER_MSG *msg_p)
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-static BYTE dl_SvrStt_ClReq(INNER_MSG *msg_p)
+static BYTE dl_SvrStt_Cl1Req(INNER_MSG *msg_p)
 {
 	dl_sndmsg(LUMNG_ECB, I_PGDLCMP, TFTP_RES_STATE);
+	return OK;
+}
+
+/******************************************************************************/
+/* 関数名	  Server動作中状態での保留音ダウンロード要求処理				  */
+/* 機能概要	  保留音ダウンロード完了通知[エラー]を返送する				  */
+/* パラメータ msg_p : (in)	  内部受信メッセージ							  */
+/* リターン	  OK : 正常終了													  */
+/*			  NG : エラー													  */
+/* 注意事項	  －															  */
+/* その他	  －															  */
+/******************************************************************************/
+static BYTE dl_SvrStt_Cl2Req(INNER_MSG *msg_p)
+{
+	dl_sndmsg(LUMNG_ECB, E_HORYDLEND, TFTP_RES_STATE);
 	return OK;
 }
 
@@ -514,12 +562,12 @@ static BYTE dl_SvrStt_WriteResp(INNER_MSG *msg_p)
 /******************************************************************************/
 static BYTE dl_ClStt_SvrReq(INNER_MSG *msg_p)
 {
-	dl_sndmsg(LUMNG_ECB, I_SERVER_RESP, TFTP_RES_STATE);
+	dl_sndmsg(LUMNG_ECB, I_PGDLCMP, TFTP_RES_STATE);
 	return OK;
 }
 
 /******************************************************************************/
-/* 関数名	  Client動作中状態でのダウンロード要求処理						  */
+/* 関数名	  Client動作中状態でのプログラムダウンロード要求処理			  */
 /* 機能概要	  プログラムダウンロード完了通知[エラー]を返送する				  */
 /* パラメータ msg_p : (in)	  内部受信メッセージ							  */
 /* リターン	  OK : 正常終了													  */
@@ -527,9 +575,24 @@ static BYTE dl_ClStt_SvrReq(INNER_MSG *msg_p)
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-static BYTE dl_ClStt_ClReq(INNER_MSG *msg_p)
+static BYTE dl_ClStt_Cl1Req(INNER_MSG *msg_p)
 {
 	dl_sndmsg(LUMNG_ECB, I_PGDLCMP, TFTP_RES_STATE);
+	return OK;
+}
+
+/******************************************************************************/
+/* 関数名	  Client動作中状態での保留音ダウンロード要求処理				  */
+/* 機能概要	  保留音ダウンロード完了通知[エラー]を返送する					  */
+/* パラメータ msg_p : (in)	  内部受信メッセージ							  */
+/* リターン	  OK : 正常終了													  */
+/*			  NG : エラー													  */
+/* 注意事項	  －															  */
+/* その他	  －															  */
+/******************************************************************************/
+static BYTE dl_ClStt_Cl2Req(INNER_MSG *msg_p)
+{
+	dl_sndmsg(LUMNG_ECB, E_HORYDLEND, TFTP_RES_STATE);
 	return OK;
 }
 
@@ -544,7 +607,14 @@ static BYTE dl_ClStt_ClReq(INNER_MSG *msg_p)
 /******************************************************************************/
 static BYTE dl_ClStt_WriteResp(INNER_MSG *msg_p)
 {
-	dl_sndmsg(LUMNG_ECB, I_SERVER_RESP, msg_p->msg_header.no);
+	if (downld_type == PROG_DL)
+	{
+		dl_sndmsg(LUMNG_ECB, I_PGDLCMP, msg_p->msg_header.no);
+	}
+	else
+	{
+		dl_sndmsg(LUMNG_ECB, E_HORYDLEND, msg_p->msg_header.no);
+	}
 	downld_state_no = STATE_IDLE;
 	return OK;
 }
@@ -640,8 +710,11 @@ void writer_thread(void *arg)
 				  case CONFIGFILE_NO:
 					;
 					break;
-				  case WAVFILE_NO:
-					;
+				  case WAVEFILE_NO:
+					if (wave_file_write(fl_list_p->fl_name) != OK)
+					{
+						result = NG;
+					}
 					break;
 				default:
 					if (execlp("mv", fl_list_p->fl_name, SAVE_FOLDER, NULL) != 0)
@@ -930,7 +1003,7 @@ static int writer_BootProg(char *fileinfo)
 /* 機能概要	  buff内からtargetに合致する部分検索を行う						  */
 /* パラメータ buff   : (in)	検索領域のバッファ								  */
 /*			  siz    : (in)	検索領域のバイト数								  */
-/*			  target : (in)	検索するデータ領域のポインタ					  */
+/*			  target : (in)	検索するデータのポインタ						  */
 /*			  len    : (in)	検索するデータのバイト長						  */
 /* リターン	  targetに一致した検索領域内のポインタ							  */
 /*			  NULLの場合、一致箇所なし										  */
@@ -1171,6 +1244,7 @@ static int wt_FpgaFileWrite(FILE *rd_fp)
 /* 機能概要	  プログラムダウンロードMSGにより、TFTPサーバからファイルを		  */
 /*			  ダウンロードする												  */
 /* パラメータ msg_p : (in)	  内部受信メッセージ							  */
+/*			  cnt   : (in)	  ダウンロード回数(=1:プログラム／=2:保留音)	  */
 /* リターン	  OK : 正常終了													  */
 /*			  NG : エラー													  */
 /* 注意事項	  －															  */
@@ -1180,41 +1254,46 @@ static int wt_FpgaFileWrite(FILE *rd_fp)
 /*				IP_TYPE				0=IPv4									  */
 /*				AP_ADDR[4]			IPv4アドレス							  */
 /******************************************************************************/
-static BYTE tftp(INNER_MSG *msg_p)
+static BYTE tftp(INNER_MSG *msg_p, uint16_t cnt)
 {
-	int		retv			= 0;
 	char	*fl_name		= NULL;
 	char	*dl_mode		= NULL;
 	BYTE	*ip_addr		= NULL;
 	size_t	len				= 0;
+	uint16_t	loop		= 0;
 	char	ipaddr_str[16]	= {};
 
 	fl_name = (char*)msg_p->msg_header.link;
-	len = strnlen(fl_name, 128+1);
-	if ((len == 128+1)||(len == 0))
+	while (loop < cnt)
 	{
-		return NG;
-	}
+		len = strnlen(fl_name, 128+1);
+		if ((len == 128+1)||(len == 0))
+		{
+			return NG;
+		}
 
-	dl_mode = fl_name + len +1;
-	len = strnlen(dl_mode, 6+1);
-	if (strcmp(dl_mode, "octed") != 0)
-	{
-		return NG;
-	}
+		dl_mode = fl_name + len +1;
+		len = strnlen(dl_mode, 6+1);
+		if (strcmp(dl_mode, "octed") != 0)
+		{
+			return NG;
+		}
 
-	ip_addr = (BYTE*)dl_mode + len +1 +1;		/* IP_TYPEは不要なので無視 */
-	if (inet_ntop(AF_INET, ip_addr, ipaddr_str, sizeof(ipaddr_str[16])) == NULL)
-	{
-		return NG;
-	}
+		ip_addr = (BYTE*)dl_mode + len +1 +1;		/* IP_TYPEは不要なので無視 */
+		if (inet_ntop(AF_INET, ip_addr, ipaddr_str, sizeof(ipaddr_str[16])) == NULL)
+		{
+			return NG;
+		}
 
-	retv = execlp("atftp", "-g -r", fl_name, ipaddr_str, NULL);
-	if (retv != 0)
-	{
-		return NG;
-	}
+		retv = execlp("atftp", "-g -r", fl_name, ipaddr_str, NULL);
+		if (retv != 0)
+		{
+			return NG;
+		}
 
+		fl_name = ip_addr + 16;						/* IPアドレス領域は16byteある */
+		loop++;
+	}
 	dl_sndmsg(WRITER_ECB, I_WRITE_REQ, 0);
 	return OK;
 }

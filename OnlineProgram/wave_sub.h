@@ -1,22 +1,21 @@
 /* This is free software, licensed under the GNU General Public License v2. */
 /* See /LICENSE for more information. */
 /******************************************************************************/
-/* 概要       TFTPタスク機能のヘッダファイル                                  */
+/* 概要		  WAVE・保留音サブルーチンのヘッダファイル						  */
 /*                              Copyright 2020 Oki Electric Industry Co.,Ltd. */
 /******************************************************************************/
-#ifndef _TFTP_TSK_H_
-#define _TFTP_TSK_H_
+#ifndef _WAVE_SUB_H_
+#define _WAVE_SUB_H_
 
 /* TFTPタスクのスレッド */
-extern void downld_thread( void *arg );
-extern void writer_thread( void *arg );
+extern BYTE wave_file_write( char *fl_name );
 
 
-#endif /* _TFTP_TSK_H_ */
+#endif /* _WAVE_SUB_H_ */
 
 /* This is free software, licensed under the GNU General Public License v2. */
 /* See /LICENSE for more information. */
 /******************************************************************************/
-/* 概要       TFTPタスク機能のヘッダファイル                                  */
+/* 概要		  WAVE・保留音サブルーチンのヘッダファイル						  */
 /*                              Copyright 2020 Oki Electric Industry Co.,Ltd. */
 /******************************************************************************/

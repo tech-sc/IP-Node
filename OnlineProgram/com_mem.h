@@ -1,3 +1,9 @@
+/* This is free software, licensed under the GNU General Public License v2. */
+/* See /LICENSE for more information. */
+/******************************************************************************/
+/* 概要       共通関数のヘッダファイル                                        */
+/*                              Copyright 2020 Oki Electric Industry Co.,Ltd. */
+/******************************************************************************/
 #ifndef _COM_MEM_H_
 #define _COM_MEM_H_
 #include <stdint.h>
@@ -77,4 +83,13 @@ extern BYTE com_GpioRegUpdate( off_t phy_addr, uint32_t mask, uint32_t bit );
 /* IPLパージョン取得 API */
 extern BYTE com_IPLVerGet( char *ver );
 
+extern int com_SpiflashRead(WORD addr, WORD size, WORD *data_p);
+
 #endif /* _COM_MEM_H_ */
+
+/* This is free software, licensed under the GNU General Public License v2. */
+/* See /LICENSE for more information. */
+/******************************************************************************/
+/* 概要       共通関数のヘッダファイル                                        */
+/*                              Copyright 2020 Oki Electric Industry Co.,Ltd. */
+/******************************************************************************/

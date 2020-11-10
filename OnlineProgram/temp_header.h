@@ -25,14 +25,23 @@ typedef struct  T_INNER_MSG{        /*# 内部メッセージフォーマット 
 #define DWL_ID	0x10
 #define WRT_ID	0x11
 
-#define LOGDST_SYSLOG	0x21
-#define LOG_ERR		0x23
+#define	LOG_EMERG	0		/* system is unusable */
+#define	LOG_ALERT	1		/* action must be taken immediately */
+#define	LOG_CRIT		2		/* critical conditions */
+#define	LOG_ERR		3		/* error conditions */
+#define	LOG_WARNING	4		/* warning conditions */
+#define	LOG_NOTICE	5		/* normal but significant condition */
+#define	LOG_INFO		6		/* informational */
+#define	LOG_DEBUG	7		/* debug-level messages */
+
+#define LOGDST_CNS    1 /* Output to console */
+#define LOGDST_SYSLOG 2 /* Output to syslog */
 
 #define WRITER_ECB	0x30
 
 extern BYTE *com_poolget(BYTE id);
 extern void com_poolput(BYTE id, BYTE *p);
-extern BYTE *com_sndmsg(BYTE ecb, BYTE *g);
+extern void com_sndmsg(BYTE ecb, BYTE *g);
 extern BYTE *com_rcvmsg(BYTE ecb, WORD tim);
 extern void com_threadstart(BYTE id, void *p);
 extern void dbg_print_set(BYTE i,BYTE v,BYTE z);

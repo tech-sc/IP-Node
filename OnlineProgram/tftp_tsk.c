@@ -1077,7 +1077,7 @@ static int writer_FpgaProg(void)
 		return TFTP_RES_FL_NOTFOUND;
 	}
 	fl_stat.st_size -= sizeof(buff[512]);
-	if (com_SpiflashRead(fl_stat.st_size, sizeof(buff[512])/sizeof(WORD), buff) == -1)
+	if (com_SpiflashRead(fl_stat.st_size, sizeof(buff[512])/sizeof(WORD), (WORD*)&buff[0]) == -1)
 	{
 		return TFTP_RES_FL_NOTFOUND;
 	}

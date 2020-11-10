@@ -1,6 +1,3 @@
-# make実行前にSTAGING_DIRを定義するとよい
-# $ export STAGING_DIR=./
-#
 # ビルドファイル構成
 # |-- Makefile (This file)
 # |-- build
@@ -9,8 +6,13 @@
 # |-- source header files.
 # `-- source files.
 
-PROGNAME := linktest
+## make program name
+PROGNAME := apptest
+## $(PROGLIB)は、googletest用のテストモジュールにリンクするためのlibファイル
+PROGLIB := lib$(PROGNAME).a
+export STAGING_DIR=
 
+## Directory defines
 SRCDIR := .
 OBJDIR := build
 TARGET := $(OBJDIR)/$(PROGNAME)
@@ -23,28 +25,47 @@ INCDIR := -I $(TOOLCHAIN)/include -I $(OPENSSL)/include \
 LIBDIR := -L $(TOOLCHAIN)/lib -L $(OPENSSL) \
 -L ~/googletest/build/googletest
 
-SRCS := $(wildcard $(SRCDIR)/*.c) $(wildcard $(SRCDIR)/*.cpp)
-OBJS := $(addprefix $(OBJDIR)/,$(patsubst %.c,%.o,$(SRCS)))
+SRCS := $(wildcard $(SRCDIR)/*.cpp) $(wildcard $(SRCDIR)/*.c) $(wildcard $(SRCDIR)/*.s)
+OBJS := $(SRCS:%=$(OBJDIR)/%.o)
+DEPS := $(OBJS:.o=.d)
 LIBS := -lpthread -lcrypto
 
 #CC = gcc
 CC = $(TOOLCHAIN)/bin/mipsel-openwrt-linux-gcc
-CFLAGS = -Wall -O2 $(INCDIR)
+CFLAGS = -Wall -O2 -DDEBUG -MMD -MP $(INCDIR)
 CXX = $(TOOLCHAIN)/bin/mipsel-openwrt-linux-g++
-CXXFLAGS = -Wall -O2 $(INCDIR)
+CXXFLAGS = -Wall -O2 -DDEBUG -MMD -MP $(INCDIR)
 LDFLAGS = $(LIBDIRS)
+ARFLAGS = crsv
 
-.PHONY: all clean
+.PHONY: all clean rebuild
 
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
-	$(CXX) -o $@ $^ $(LDFLAGS) $(LIBDIR) $(LIBS)
+	$(AR) $(ARFLAGS) $(PROGLIB) $^
+	$(CXX) -o $@ $^ $(LDFLAGS) $(LIBS)
 
-$(OBJDIR)/%.o:%.c
+# ssembly
+$(OBJDIR)/%.s.o:%.s
+	@if [ ! -e `dirname $@` ]; then mkdir -p `dirname $@`; fi
+	$(AS) $(ASFLAGS) -o $@ -c $<
+
+# c source
+$(OBJDIR)/%.c.o:%.c
 	@if [ ! -e `dirname $@` ]; then mkdir -p `dirname $@`; fi
 	$(CC) $(CFLAGS) -o $@ -c $<
+
+# c++ source
+$(OBJDIR)/%.cpp.o:%.cpp
+	@if [ ! -e `dirname $@` ]; then mkdir -p `dirname $@`; fi
+	$(CXX) $(CXXFLAGS) -o $@ -c $<
+
 
 clean:
 	rm -rf $(OBJDIR)
 
+rebuild:
+	make clean && make
+
+-include $(DEPS)

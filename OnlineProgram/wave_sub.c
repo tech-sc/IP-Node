@@ -10,11 +10,16 @@
 #include <sys/stat.h>		/* stat() */
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <string.h>
 
 /*** ユーザ作成ヘッダの取り込み ***/
 #include "def.h"
+#include "str_comdt.h"
 #include "wave_sub.h"
+
+#define SAVE_FOLDER		"/flsdata/"
+extern	COM_DATA		com_data;
 
 /*** 自ファイル内でのみ使用するtypedef 定義 ***/
 /* RIFFチャンクの定義 */
@@ -60,7 +65,7 @@ typedef struct WAVE_HDR_t {
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-BYTE wave_file_write( char *fl_name )
+BYTE wave_file_write( const char *fl_name )
 {
 	FILE		*fp					= NULL;
 	FILE		*w_fp				= NULL;
@@ -70,8 +75,8 @@ BYTE wave_file_write( char *fl_name )
     uint32_t	data_size			= 0;
 	bool		loop				= true;
 	BYTE		result				= NG;
-	WAVE_HDR_t	wave_header			= {};
-	char		savefl[MAX_PATH]	= {};
+	WAVE_HDR_t	wave_header		= {};
+	char		savefl[128]			= {};
 	char		buff[512];
 
 	fp = fopen(fl_name, "rb");
@@ -91,7 +96,7 @@ BYTE wave_file_write( char *fl_name )
 		return NG;
 	}
 
-	p = strrch(fl_name, '/');
+	p = strrchr(fl_name, '/');
 	strcpy(savefl, SAVE_FOLDER);
 	strcat(savefl, p +1);
 	w_fp = fopen(savefl, "wb");

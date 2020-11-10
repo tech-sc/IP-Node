@@ -8,7 +8,7 @@
 #define _WAVE_SUB_H_
 
 /* TFTPタスクのスレッド */
-extern BYTE wave_file_write( char *fl_name );
+extern BYTE wave_file_write( const char *fl_name );
 
 
 #endif /* _WAVE_SUB_H_ */

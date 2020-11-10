@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+//#include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>			/* execlp(), stat() */
 #include <openssl/md5.h>	/* MD5_Init() */
@@ -149,10 +150,12 @@ static BYTE dl_IdleStt_Cl1Req( INNER_MSG *msg_p );
 static BYTE dl_IdleStt_Cl2Req( INNER_MSG *msg_p );
 static BYTE dl_SvrStt_SvrReq( INNER_MSG *msg_p );
 static BYTE dl_SvrStt_Tmo( INNER_MSG *msg_p );
-static BYTE dl_SvrStt_ClReq( INNER_MSG *msg_p );
+static BYTE dl_SvrStt_Cl1Req( INNER_MSG *msg_p );
+static BYTE dl_SvrStt_Cl2Req( INNER_MSG *msg_p );
 static BYTE dl_SvrStt_WriteResp( INNER_MSG *msg_p );
 static BYTE dl_ClStt_SvrReq( INNER_MSG *msg_p );
-static BYTE dl_ClStt_ClReq( INNER_MSG *msg_p );
+static BYTE dl_ClStt_Cl1Req( INNER_MSG *msg_p );
+static BYTE dl_ClStt_Cl2Req( INNER_MSG *msg_p );
 static BYTE dl_ClStt_WriteResp( INNER_MSG *msg_p );
 static bool dl_tmpfile_chk(void);
 static BYTE str2hex(const char *str, BYTE *hex, size_t siz);
@@ -1261,6 +1264,7 @@ static BYTE tftp(INNER_MSG *msg_p, uint16_t cnt)
 	BYTE	*ip_addr		= NULL;
 	size_t	len				= 0;
 	uint16_t	loop		= 0;
+	int		retv			= 0;
 	char	ipaddr_str[16]	= {};
 
 	fl_name = (char*)msg_p->msg_header.link;
@@ -1291,7 +1295,7 @@ static BYTE tftp(INNER_MSG *msg_p, uint16_t cnt)
 			return NG;
 		}
 
-		fl_name = ip_addr + 16;						/* IPアドレス領域は16byteある */
+		fl_name = (char*)ip_addr + 16;						/* IPアドレス領域は16byteある */
 		loop++;
 	}
 	dl_sndmsg(WRITER_ECB, I_WRITE_REQ, 0);

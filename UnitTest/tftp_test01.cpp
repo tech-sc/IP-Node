@@ -4,9 +4,6 @@
 /* 概要		  TFTPタスク機能のソースファイル								  */
 /*								Copyright 2020 Oki Electric Industry Co.,Ltd. */
 /******************************************************************************/
-#include "gtest/gtest.h"
-
-extern "C" {
 //#include <sys/types.h>	/* stat() */
 //#include <sys/stat.h>		/* stat() */
 //#include <stdio.h>
@@ -14,6 +11,9 @@ extern "C" {
 #include <stdbool.h>
 #include <string.h>
 
+#include "gtest/gtest.h"
+
+extern "C" {
 #include "def.h"
 #define TEMP_HEADER
 #ifdef TEMP_HEADER
@@ -25,6 +25,7 @@ extern "C" {
 #endif
 //#include "com_mem.h"
 #include "tftp_tsk.h"
+#include "stub.h"
 }
 
 /********************************************************************************/
@@ -37,7 +38,7 @@ extern "C" {
 /********************************************************************************/
 
 /******************************************************************************/
-/* テストクラス																  *
+/* テストクラス																  */
 /******************************************************************************/
 class TftpTaskLv01 : public ::testing::Test {
 protected:
@@ -54,8 +55,68 @@ protected:
 	}
 };
 
+class TftpTaskLv02 : public ::testing::Test {
+protected:
+	TftpTaskLv02(){
+	}
+	~TftpTaskLv02(){
+	}
+
+	// TestCase名ごとの初期化処理。テストケース実行前に実行される。
+	virtual void SetUp(){
+	}
+	// TestCase名ごとの後処理。テストケース実行後に実行される。
+	virtual void TearDown(){
+	}
+};
+
+class TftpTaskLv03 : public ::testing::Test {
+protected:
+	TftpTaskLv03(){
+	}
+	~TftpTaskLv03(){
+	}
+
+	// TestCase名ごとの初期化処理。テストケース実行前に実行される。
+	virtual void SetUp(){
+	}
+	// TestCase名ごとの後処理。テストケース実行後に実行される。
+	virtual void TearDown(){
+	}
+};
+
+class TftpTaskLv04 : public ::testing::Test {
+protected:
+	TftpTaskLv04(){
+	}
+	~TftpTaskLv04(){
+	}
+
+	// TestCase名ごとの初期化処理。テストケース実行前に実行される。
+	virtual void SetUp(){
+	}
+	// TestCase名ごとの後処理。テストケース実行後に実行される。
+	virtual void TearDown(){
+	}
+};
+
+class TftpTaskLv05 : public ::testing::Test {
+protected:
+	TftpTaskLv05(){
+	}
+	~TftpTaskLv05(){
+	}
+
+	// TestCase名ごとの初期化処理。テストケース実行前に実行される。
+	virtual void SetUp(){
+	}
+	// TestCase名ごとの後処理。テストケース実行後に実行される。
+	virtual void TearDown(){
+	}
+};
+
 /******************************************************************************/
-/* テストケース																  *
+/* テストケース																  */
 /******************************************************************************/
 TEST_F(TftpTaskLv01, str2hex)
 {
@@ -104,8 +165,6 @@ TEST_F(TftpTaskLv01, downld_init)
 
 TEST_F(TftpTaskLv02, downld_SttMng)
 {
-	INNER_MSG	*msg_p = NULL;
-
 	// 各状態アクション関数のテスト完了後にテストする
 	printf("skip. TBD:No Confirmation Method.\n");
 }
@@ -297,7 +356,7 @@ TEST_F(TftpTaskLv01, dl_ClStt_WriteResp)
 	EXPECT_EQ(DWL_ID, msg_p->msg_header.id);
 	EXPECT_EQ(IN_MSG, msg_p->msg_header.div);
 	EXPECT_EQ(E_HORYDLEND, msg_p->msg_header.kind);
-	EXPECT_EQ(TFTP_RES_STATE, msg_p->msg_header.no);
+	EXPECT_EQ(0x00, msg_p->msg_header.no);
 	EXPECT_EQ(NULL, msg_p->msg_header.link);
 
 	EXPECT_EQ(STATE_IDLE, downld_state_no);
@@ -319,7 +378,7 @@ TEST_F(TftpTaskLv01, dl_tmpfile_chk)
 	// test2:IPCS_V4.tarだけの場合、false
 	// test3:FILEINFO.txtだけの場合、false
 	// test4:IPCS_V4.tarとFILEINFO.txtが有れば、true
-	EXPECT_EQ(false, dl_tmpfile_chk());
+	EXPECT_EQ(0, dl_tmpfile_chk());
 
 	printf("TBD:ファイルコピー\n");
 }
@@ -347,12 +406,12 @@ TEST_F(TftpTaskLv04, writer_BootProg)
 
 TEST_F(TftpTaskLv01, seq_search)
 {
-	char	buff[512];
-	char	*p = buff;
+	BYTE	buff[512];
+	BYTE	*p = buff;
 	int16_t	i = 0;
 
 	// バッファを汚した後、検索対象文字をセットする
-	for(i=0; i < 512; i++)	*p++ = (char)i;
+	for(i=0; i < 512; i++)	*p++ = (BYTE)i;
 	memcpy(&buff[100], "UF7200IPstep2", 13);
 
 	EXPECT_EQ(&buff[100], seq_search(buff, 512, "UF7200IPstep2", 13));
@@ -377,7 +436,7 @@ TEST_F(TftpTaskLv03, tftp)
 }
 
 /******************************************************************************/
-/* メイン関数																  *
+/* メイン関数																  */
 /******************************************************************************/
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

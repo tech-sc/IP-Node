@@ -12,6 +12,20 @@ extern void downld_thread( void *arg );
 extern void writer_thread( void *arg );
 
 #ifdef DEBUG
+#ifndef TFTP_RES_OK
+/* ダウンロード結果 */
+#define TFTP_RES_OK				0				/* 正常終了 */
+#define TFTP_RES_PARAM			1				/* パラメータ異常（TFTP未実施） */
+#define TFTP_RES_FL_NOTFOUND	2				/* ファイルなし受信（TFTP未完了） */
+#define TFTP_RES_SERVER			3				/* サーバ未応答（TFTP未完了） */
+#define TFTP_RES_CRC			4				/* ファイルエラー：CRCエラー（TFTP未完了） */
+#define TFTP_RES_STATE			5				/* 未実施（TFTP未完了）*/
+#define TFTP_RES_MISC			6				/* その他エラー */
+/* ダウンロード種別 */
+#define PROG_DL					1
+#define WAVE_DL					2
+#endif //TFTP_RES_OK
+
 /* 状態番号 */
 typedef enum TFTP_STATE_e {
 	STATE_IDLE = 0,					/* アイドル状態 */
@@ -32,6 +46,7 @@ extern char		str_buff[16];
 extern uint16_t			downld_type;
 /* 内部関数 */
 extern void downld_init(void);
+extern void dl_sndmsg(BYTE ecb, BYTE kind, BYTE result);
 extern void downld_SttMng(INNER_MSG *msg_p);
 extern BYTE dl_IdleStt_SvrReq( INNER_MSG *msg_p );
 extern BYTE dl_IdleStt_Cl1Req( INNER_MSG *msg_p );
@@ -50,7 +65,7 @@ extern BYTE str2hex(const char *str, BYTE *hex, size_t siz);
 extern int writer_FileInfoFile(void);
 extern int writer_OnlineProg(char *fileinfo);
 extern int writer_BootProg(char *fileinfo);
-extern BYTE *seq_search(BYTE *buff, size_t siz, char *target, size_t len);
+extern BYTE *seq_search(BYTE *buff, size_t siz, const char *target, size_t len);
 extern int writer_FpgaProg(void);
 extern int wt_ProgFileWrite(char *wt_dev, FILE *rd_fp);
 extern int wt_FpgaFileWrite(FILE *rd_fp);

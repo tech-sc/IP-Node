@@ -172,7 +172,7 @@ static BYTE str2hex(const char *str, BYTE *hex, size_t siz);
 static int writer_FileInfoFile(void);
 static int writer_OnlineProg(char *fileinfo);
 static int writer_BootProg(char *fileinfo);
-static BYTE *seq_search(BYTE *buff, size_t siz, char *target, size_t len);
+static BYTE *seq_search(BYTE *buff, size_t siz, const char *target, size_t len);
 static int writer_FpgaProg(void);
 static int wt_ProgFileWrite(char *wt_dev, FILE *rd_fp);
 static int wt_FpgaFileWrite(FILE *rd_fp);
@@ -1028,15 +1028,15 @@ _ATTR_SYM int writer_BootProg(char *fileinfo)
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-_ATTR_SYM BYTE *seq_search(BYTE *buff, size_t siz, char *target, size_t len)
+_ATTR_SYM BYTE *seq_search(BYTE *buff, size_t siz, const char *target, size_t len)
 {
 	size_t		i    = 0;
 	size_t		same = 0;
-	BYTE		*p   = NULL;
+	const BYTE		*p   = NULL;
 
 	while (i < siz)
 	{
-		p = (BYTE*)target;
+		p = (const BYTE*)target;
 		while ((i < siz)&&(*buff != *p))
 		{
 			i++;
@@ -1046,9 +1046,12 @@ _ATTR_SYM BYTE *seq_search(BYTE *buff, size_t siz, char *target, size_t len)
 		{
 			return NULL;
 		}
-		same = 1;
+		/* 1文字目一致 */
+		i++;
+		buff++;
 		p++;
-		while ((i < siz)&&(*buff == *p)&&(same != len))
+		same = 1;
+		while ((i < siz)&&(*buff == *p)&&(same < len))
 		{
 			i++;
 			buff++;

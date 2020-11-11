@@ -258,7 +258,7 @@ typedef struct {    //2001.01.16 V2.2’Ç‰Á
     DWORD       clkd_mlt;               /*# ‚b‚k‚j‚cƒ}ƒ‹ƒ`ƒLƒƒƒXƒg #*/
     DWORD       clkd_uni;               /*# ‚b‚k‚j‚cƒ†ƒjƒLƒƒƒXƒg #*/
     DWORD       clkd_phs;               /*# ‚b‚k‚j‚c ‚o‚g‚r #*/
-    DWORD       ;                   /*# ‚c‚n‚d‚o #*/
+    DWORD       doep;                   /*# ‚c‚n‚d‚o #*/
     DWORD       crint_mlt;              /*# ‚b‚q‚h‚m‚sƒ}ƒ‹ƒ`ƒLƒƒƒXƒg #*/
     DWORD       crint_uni;              /*# ‚b‚q‚h‚m‚sƒ†ƒjƒLƒƒƒXƒg #*/
     DWORD       lulog;                  /*# ‚k‚tƒƒO #*/

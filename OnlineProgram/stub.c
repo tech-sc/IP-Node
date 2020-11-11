@@ -26,7 +26,7 @@ uint8_t			msg_area[2][256];
 /* パラメータ確認用変数 */
 uint8_t			poolget_id;
 uint8_t			poolput_id;
-uint8_t			poolput_ptr;
+BYTE			*poolput_ptr;
 uint8_t			sndmsg_ecb;
 BYTE			*sndmsg_ptr;
 uint8_t			rcvmsg_ecb;

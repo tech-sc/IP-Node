@@ -41,6 +41,10 @@ TEST_F(TftpTaskLv01, Test0101)
 	BYTE	hex[32];
 	EXPECT_EQ(OK, str2hex("FF00", hex, 2));
 	EXPECT_EQ(0, memcmp("\xff\x00", hex, 2));
+	EXPECT_EQ(OK, str2hex("ff0011", hex, 3));
+	EXPECT_EQ(0, memcmp("\xff\x00\x11", hex, 3));
+	EXPECT_EQ(NG, str2hex("FG00", hex, 2));
+	EXPECT_EQ(NG, str2hex("fg00", hex, 2));
 }
 
 int main(int argc, char **argv) {

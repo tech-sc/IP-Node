@@ -8,8 +8,10 @@
 
 ## make program name
 PROGNAME := UnitTest
-## $(PROGDIR)は、libapptest.aがあるディレクトリを指定する
-PROGDIR := ../OnlineProgram
+## $(APPDIR)は、libapptest.aがあるディレクトリを指定する
+APPDIR := ../OnlineProgram
+APPLIBFL := libapptest.a
+APPLIB := apptest
 export STAGING_DIR=
 export LD_LIBRARY_PATH=/usr/local/src/openssl-1.0.2f
 
@@ -21,15 +23,15 @@ TARGET := $(OBJDIR)/$(PROGNAME)
 TOOLCHAIN := /usr
 OPENSSL := /usr/local/src/openssl-1.0.2f
 
-INCDIR := -I $(TOOLCHAIN)/include -I $(OPENSSL)/include -I $(PROGDIR) \
+INCDIR := -I $(TOOLCHAIN)/include -I $(OPENSSL)/include -I $(APPDIR) \
 -I /usr/local/src/googletest/googletest/include
-LIBDIR := -L $(TOOLCHAIN)/lib -L $(OPENSSL) -L $(PROGDIR) \
+LIBDIR := -L $(TOOLCHAIN)/lib -L $(OPENSSL) -L $(APPDIR) \
 -L /usr/local/src/googletest/build/googletest
 
 SRCS := $(wildcard $(SRCDIR)/*.cpp) $(wildcard $(SRCDIR)/*.c) $(wildcard $(SRCDIR)/*.s)
 OBJS := $(SRCS:%=$(OBJDIR)/%.o)
 DEPS := $(OBJS:.o=.d)
-LIBS := -lpthread -lcrypto -lgtest -lgtest_main -lapptest
+LIBS := -lpthread -lcrypto -lgtest -lgtest_main -l$(APPLIB)
 
 #CC = gcc
 CC = $(TOOLCHAIN)/bin/gcc
@@ -43,7 +45,7 @@ ARFLAGS = crsv
 
 all: $(TARGET)
 
-$(TARGET): $(OBJS)
+$(TARGET): $(OBJS) $(APPDIR)/$(APPLIBFL)
 	$(CXX) -o $@ $^ $(LDFLAGS) $(LIBS)
 
 # ssembly

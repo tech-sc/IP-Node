@@ -139,7 +139,7 @@
 
 /* FPGA firmware register */	/* TBD:BASEアドレスのMSB3bitが変わるかも（メーカ問合せ中） */
 /*	bootで使用するレジスタのみ定義する */
-#define FPGA_MEM_BASE		0x1C000000
+#define FPGA_BASE			0x1C000000
 #define FPGA_LED			(*(volatile unsigned char *)(FPGA_BASE+0x35))
 #define FPGA_BUS_CHK		(*(volatile unsigned char *)(FPGA_BASE+0x39))
 /*	reg = reg & MASK | VALUE; でセットする */

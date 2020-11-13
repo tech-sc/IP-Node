@@ -6,6 +6,8 @@
 /******************************************************************************/
 
 /*** システムヘッダの取り込み ***/
+#include <stdio.h>
+#include <stdint.h>
 
 /*** ユーザ作成ヘッダの取り込み ***/
 #include "UF7200s2.h"
@@ -22,9 +24,7 @@
 /* その他	  －															  */
 /******************************************************************************/
 #define RegWrite(adr,val)														\
-{																				\
-	adr = val;																	\
-}
+	adr = val
 
 /******************************************************************************/
 /* マクロ名	  レジスタリード												  */
@@ -35,9 +35,7 @@
 /* その他	  －															  */
 /******************************************************************************/
 #define RegRead(adr)															\
-{																				\
-	return adr;																	\
-}
+	adr
 
 /******************************************************************************/
 /* マクロ名	  DDRメモリライト												  */
@@ -49,9 +47,7 @@
 /* その他	  －															  */
 /******************************************************************************/
 #define DDRWrite(adr,val)														\
-{																				\
-	*(volatile unsigned short *)adr = (unsigned short)val;						\
-}
+	*((volatile unsigned short *)adr) = (unsigned short)val
 
 /******************************************************************************/
 /* マクロ名	  DDRメモリリード												  */
@@ -62,9 +58,7 @@
 /* その他	  －															  */
 /******************************************************************************/
 #define DDRRead(adr)															\
-{																				\
-	return *(volatile unsigned short *)adr;										\
-}
+	*(volatile unsigned short *)adr
 
 /******************************************************************************/
 /* マクロ名	  検査結果LED点滅												  */
@@ -74,14 +68,14 @@
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-#define GPIO_LedBlink()															\
-{																				\
-	RegWrite(GPIO_LED, RegRead(GPIO_LED) & ~GPIO_LED_OFF);						\
-	while(1)																	\
-	{																			\
-		msleep(200);															\
-		RegWrite(GPIO_LED, RegRead(GPIO_LED) ^ GPIO_LED_OFF);					\
-	}																			\
+__inline void GPIO_LedBlink()
+{
+	RegWrite(GPIO_LED, RegRead(GPIO_LED) & ~GPIO_LED_OFF);	
+	while(1)
+	{
+		msleep(200);
+		RegWrite(GPIO_LED, RegRead(GPIO_LED) ^ GPIO_LED_OFF);
+	}
 }
 
 /*** 自ファイル内でのみ使用するtypedef 定義 ***/
@@ -90,6 +84,19 @@
 /*** ファイル内で共有するstatic 変数宣言 ***/
 /*** static 関数宣言 ***/
 
+/******************************************************************************/
+/* 関数名	  ナノ秒ウェイト												  */
+/* 機能概要	  ナノ秒単位のウェイト処理										  */
+/* パラメータ tim : (in)	ウェイトする時間								  */
+/* リターン	  なし															  */
+/* 注意事項	  －															  */
+/* その他	  －															  */
+/******************************************************************************/
+__inline void FPGA_BlueLedBlink(void)
+{
+	RegWrite(FPGA_LED, LED_BLINK | LED_CTRL_LU | LED_BLUE);
+	while(1);
+}
 /******************************************************************************/
 /* 関数名	  ナノ秒ウェイト												  */
 /* 機能概要	  ナノ秒単位のウェイト処理										  */
@@ -108,7 +115,7 @@ void nsleep(int tim)
 		i = 0;
 		while (i < NANO_CNT) {
 			__asm("nop");
-			i++
+			i++;
 		}
 		tim--;
 	}
@@ -131,7 +138,7 @@ void msleep(int tim)
 		i = 0;
 		while (i < NANO_CNT * 1000) {
 			__asm("nop");
-			i++
+			i++;
 		}
 		tim--;
 	}
@@ -212,11 +219,11 @@ void SoC_GPIOSetting(void)
 
 	/* FPGAをリセットする */
 	RegWrite(SPI_GATE, RegRead(SPI_GATE) & ~SPI_GATE_CLOSE);		/* ゲート開放 */
-	RegWrite(FPGA_PROG, RegRead(FPGA_PROG) & ~FPGA_PROG_INACT | FPGA_PROG_INACT);	/* HI */
+	RegWrite(FPGA_PROG, (RegRead(FPGA_PROG) & ~FPGA_PROG_INACT) | FPGA_PROG_INACT);	/* HI */
 	RegWrite(FPGA_PROG, RegRead(FPGA_PROG) & ~FPGA_PROG_INACT);		/* Lo=ACT */
 	nsleep(55);		/* wait 55ns以上 */
-	RegWrite(FPGA_PROG, RegRead(FPGA_PROG) & ~FPGA_PROG_INACT | FPGA_PROG_INACT);	/* Hi */
-	RegWrite(SPI_GATE, RegRead(SPI_GATE) & ~SPI_GATE_CLOSE | SPI_GATE_CLOSE);		/* ゲート閉塞 */
+	RegWrite(FPGA_PROG, (RegRead(FPGA_PROG) & ~FPGA_PROG_INACT) | FPGA_PROG_INACT);	/* Hi */
+	RegWrite(SPI_GATE, (RegRead(SPI_GATE) & ~SPI_GATE_CLOSE) | SPI_GATE_CLOSE);		/* ゲート閉塞 */
 }
 
 /******************************************************************************/
@@ -231,8 +238,8 @@ void FPGAConfigChk(void)
 {
 	int		cnt = 0;
 
-	/* コンフィグ完了チェック */.
-	while (FPGACONFIG_DONE != RegRead(GPIO_FPGA_CONFIG) & FPGACONFIG_DONE)
+	/* コンフィグ完了チェック */
+	while (FPGACONFIG_DONE != (RegRead(GPIO_FPGA_CONFIG) & FPGACONFIG_DONE))
 	{
 		cnt++;
 		if (cnt > 2)	/* 30ms×2回NGなら、LED点滅 */
@@ -383,7 +390,7 @@ void DDR_DetailMemChk(void)
 {
 	volatile unsigned short *p = NULL;
 
-	p = DDR_TOP_ADDR;
+	p = (unsigned short *)DDR_TOP_ADDR;
 	while (p <= (unsigned short *)DDR_TAIL_ADDR)
 	{
 		DDRWrite(p, 0x5555);
@@ -393,7 +400,7 @@ void DDR_DetailMemChk(void)
 		p++;
 	}
 
-	p = DDR_TOP_ADDR;
+	p = (unsigned short *)DDR_TOP_ADDR;
 	while (p <= (unsigned short *)DDR_TAIL_ADDR)
 	{
 		DDRWrite(p, 0xaaaa);
@@ -414,7 +421,7 @@ void DDR_DetailMemChk(void)
 /******************************************************************************/
 void DDR_MemChk(void)
 {
-	if (RegRead(GPIO_DDRCHK_MODE) & DDRCHK_NORMAL == DDRCHK_NORMAL)
+	if ((RegRead(GPIO_DDRCHK_MODE) & DDRCHK_NORMAL) == DDRCHK_NORMAL)
 	{	/* 通常モード */
 		DDR_SimpleMemChk();
 	}

@@ -117,7 +117,7 @@
 /*	bootでは未使用なので定義しない */
 /* UART controller */
 /*	psbl/kernel/sio.cのSioInit()でch0使用しているので、既存のまま流用する */
-/*	但し、BASEアドレスがハード仕様とことなるので、ハード仕様に合わせて再定義する */
+/*	但し、BASEアドレスがハード仕様と異なるので、ハード仕様に合わせて再定義する */
 #undef	SIO0_BASE
 #undef	SIO0_RSTMASK
 #define SIO0_BASE		 	0xa8610e00
@@ -163,8 +163,8 @@
 #define DDR_TAIL_ADDR		(DDR_BASE+0x04000000-2)
 
 
-extern void nsleep(int tim);
-extern void msleep(int tim);
+extern void nsleep(int32_t tim);
+extern void msleep(int32_t tim);
 extern void SoC_CPUSetting(void);
 extern void SoC_EMIFSetting(void);
 extern void SoC_GPIOSetting(void);
@@ -173,7 +173,6 @@ extern void FPGA_BusChk(void);
 extern void DDR_SimpleMemChk(void);
 extern void DDR_DetailMemChk(void);
 extern void DDR_MemChk(void);
-
 
 #endif /* _UF7200s2_H_ */
 /* This is free software, licensed under the GNU General Public License v2. */

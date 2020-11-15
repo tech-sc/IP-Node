@@ -65,7 +65,6 @@ extern BYTE str2hex(const char *str, BYTE *hex, size_t siz);
 extern int writer_FileInfoFile(void);
 extern int writer_OnlineProg(char *fileinfo);
 extern int writer_BootProg(char *fileinfo);
-extern BYTE *seq_search(BYTE *buff, size_t siz, const char *target, size_t len);
 extern int writer_FpgaProg(void);
 extern int wt_ProgFileWrite(char *wt_dev, FILE *rd_fp);
 extern int wt_FpgaFileWrite(FILE *rd_fp);

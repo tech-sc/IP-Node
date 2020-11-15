@@ -1017,56 +1017,6 @@ _ATTR_SYM int writer_BootProg(char *fileinfo)
 }
 
 /******************************************************************************/
-/* 関数名	  シーケンシャル検索アルゴリズム								  */
-/* 機能概要	  buff内からtargetに合致する部分検索を行う						  */
-/* パラメータ buff   : (in)	検索領域のバッファ								  */
-/*			  siz    : (in)	検索領域のバイト数								  */
-/*			  target : (in)	検索するデータのポインタ						  */
-/*			  len    : (in)	検索するデータのバイト長						  */
-/* リターン	  targetに一致した検索領域内のポインタ							  */
-/*			  NULLの場合、一致箇所なし										  */
-/* 注意事項	  －															  */
-/* その他	  －															  */
-/******************************************************************************/
-_ATTR_SYM BYTE *seq_search(BYTE *buff, size_t siz, const char *target, size_t len)
-{
-	size_t		i    = 0;
-	size_t		same = 0;
-	const BYTE		*p   = NULL;
-
-	while (i < siz)
-	{
-		p = (const BYTE*)target;
-		while ((i < siz)&&(*buff != *p))
-		{
-			i++;
-			buff++;
-		}
-		if (i >= siz)
-		{
-			return NULL;
-		}
-		/* 1文字目一致 */
-		i++;
-		buff++;
-		p++;
-		same = 1;
-		while ((i < siz)&&(*buff == *p)&&(same < len))
-		{
-			i++;
-			buff++;
-			p++;
-			same++;
-		}
-		if (same == len)
-		{
-			return buff - len;
-		}
-	}
-	return NULL;
-}
-
-/******************************************************************************/
 /* 関数名	  FPGAプログラムの書き込み										  */
 /* 機能概要	  FPGAプログラムの正常性確認後FLASHに書き込む					  */
 /* パラメータ fileinfo : (in)	FILEINFOファイルの対象行					  */

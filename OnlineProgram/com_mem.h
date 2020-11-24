@@ -85,10 +85,7 @@ extern BYTE com_IPLVerGet( char *ver, BYTE ver_sz );
 
 extern int com_SpiflashRead(WORD addr, WORD size, WORD *data_p);
 
-
-#ifdef DEBUG
 extern BYTE *seq_search(BYTE *buff, size_t siz, const char *target, size_t len);
-#endif // !DEBUG
 
 #endif /* _COM_MEM_H_ */
 

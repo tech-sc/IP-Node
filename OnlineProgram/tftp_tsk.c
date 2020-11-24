@@ -85,7 +85,6 @@
 #define WAVE_DL					2
 
 /*** 自ファイル内でのみ使用する#define 関数マクロ ***/
-
 /*** 自ファイル内でのみ使用するtypedef 定義 ***/
 /*** 自ファイル内でのみ使用するenum タグ定義 ***/
 #ifndef DEBUG
@@ -1260,6 +1259,35 @@ _ATTR_SYM BYTE tftp(INNER_MSG *msg_p)
 	}
 
 	dl_sndmsg(WRITER_ECB, I_WRITE_REQ, 0);
+	return OK;
+}
+
+/******************************************************************************/
+/* 関数名	  TFTPクライアントによるファイルダウンロード					  */
+/* 機能概要	  TFTPサーバからファイルをダウンロードする						  */
+/* パラメータ fl_name : (in)	  TFTPサーバからGETするファイル名			  */
+/*            ip_addr : (in)	  TFTPサーバのIPアドレス(例:192.168.1.1)	  */
+/*                                [0]=192,[1]=168,[2]=1,[3]=1				  */
+/* リターン	  OK : 正常終了													  */
+/*			  NG : エラー													  */
+/* 注意事項	  －															  */
+/* その他	  －															  */
+/******************************************************************************/
+BYTE tftp_get(char *fl_name, BYTE *ip_addr)
+{
+	int		retv			= 0;
+	char	ipaddr_str[16]	= {};
+
+	if (inet_ntop(AF_INET, ip_addr, ipaddr_str, sizeof(ipaddr_str[16])) == NULL)
+	{
+		return NG;
+	}
+
+	retv = execlp("atftp", "-g -r", fl_name, ipaddr_str, NULL);
+	if (retv != 0)
+	{
+		return NG;
+	}
 	return OK;
 }
 

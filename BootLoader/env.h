@@ -158,6 +158,7 @@ typedef enum ENV_VARS {
      * NOTE: New environment variables should always be placed at the end, ie
      *       just before env_vars_end.
      */
+	IPL_VERSION,									/* IPCS_V4 PG ADD */
 
     env_vars_end
 } ENV_VARS;

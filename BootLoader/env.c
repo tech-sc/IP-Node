@@ -47,6 +47,7 @@
 #include "shell.h"
 #endif
 
+#include "UF7200s2.h"								/* IPCS_V4 PG ADD */
 
 #define MAX_ENV_ENTRY           (block_size/FLASH_ENV_ENTRY_SIZE)
 #ifndef AVALANCHE_DCL_BOOTCR
@@ -138,6 +139,8 @@ ENVDESC env_ns[] = {
     /*
      * Add new entries below this.
      */
+    _ENV_ENTRY(IPL_VERSION),						/* IPCS_V4 PG ADD */
+
     /* Adam2 environment name alias. Temporary. */
     _ENV_ENTRY_NAME(IPA,     my_ipaddress),
     _ENV_ENTRY_NAME(MIPSFREQ, cpufrequency),
@@ -700,7 +703,7 @@ int IsReadOnlyVar( const char* env_nm )
 {
   if( (strcmp("CPUFREQ", env_nm) == 0) ||
       ( strcmp("SYSFREQ", env_nm) == 0 ) || (strcmp("BUILD_OPS", env_nm) == 0)
-      || (strcmp("MIPSFREQ", env_nm) == 0) )
+      || (strcmp("MIPSFREQ", env_nm) == 0) || (strcmp(IPL_VER, env_nm) == 0))	/* IPCS_V4 PG ADD */
     return 1;
 
   return 0;

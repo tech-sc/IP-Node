@@ -145,6 +145,11 @@
 #include "autoconfig.h"
 #include "../net/cpmac.h"
 
+/* IPCS_V4 PG ADD-STA:UF7200step2コード追加 */
+#include "UF7200s2.h"
+#define IPL_VER_STR		"1.00"
+/* IPCS_V4 PG ADD-STA:UF7200step2コード追加 */
+
 #if 0
 #define  CPGMAC_MODE
 #endif
@@ -243,6 +248,52 @@ void SioCheckSerialLock( void );
 /* Check if serial port is locked */
 int SioIsSerialLocked( void );
 #endif
+
+/* IPCS_V4 PG ADD-STA:UF7200step2コード追加 */
+/******************************************************************************/
+/******************************************************************************/
+void initMtdBlocks(void)
+{
+	if (sys_getenv("mtd4") == NULL) {
+		sys_printf("\nRe-allocate mtd1-mtd7 blocks !!\n");
+		sys_setenv("mtd2", "0x90000000,0x900C0000");
+		sys_setenv("mtd4", "0x900C0000,0x900E0000");
+		sys_setenv("mtd3", "0x900E0000,0x90100000");
+		sys_setenv("mtd1", "0x90100000,0x91000000");
+		sys_setenv("mtd6", "0x91000000,0x91200000");
+		sys_setenv("mtd7", "0x91200000,0x92000000");
+		sys_printf("\nPlease, re-boot...\n");
+	}
+}
+/******************************************************************************/
+/******************************************************************************/
+char	UF7200_MAC[6];
+char	UF7200_MAC_STR[18];
+char *getMacAddr(void)
+{
+	char		*retv	= NULL;
+	FFS_FILE	*p_file = NULL;
+
+	p_file = fopen("mtd4", "rb");
+	if (NULL != p_file)
+	{
+		len = fread(&UF7200_MAC[0], 1, 6, p_file);
+		if (len != 0)
+		{
+			if( UF7200_MAC[0] != 0xFF ) {
+			    sys_sprintf(UF7200_MAC_STR, "%02X:%02X:%02X:%02X:%02X:%02X",
+			    	UF7200_MAC[0],UF7200_MAC[1],UF7200_MAC[2],UF7200_MAC[3],UF7200_MAC[4],UF7200_MAC[5]);
+				retv = UF7200_MAC_STR;
+			} else {
+				sys_printf("\nMAC address not found at mtd4.\n");
+			}
+		}
+		fclose(p_file);
+	}
+	return retv;
+}
+/******************************************************************************/
+/* IPCS_V4 PG ADD-STA:UF7200step2コード追加 */
 
 #ifdef TNETV1061_BOARD
 
@@ -470,6 +521,11 @@ void c_entry(int memsize)
 #ifdef PERMANENT_VARIABLES
     int bootsize;
 #endif
+	/* IPCS_V4 PG ADD-STA:UF7200step2コード追加 */
+	char	*p1 = NULL;
+	char	*p2 = NULL;
+	/* IPCS_V4 PG ADD-END:UF7200step2コード追加 */
+
 /*LED indicator for debug purpose*/
 #if defined(TNETV1051_BOARD)
 aries_sdb_led_on(4);
@@ -742,7 +798,43 @@ aries_sdb_led_on(10);
 aries_sdb_led_on(11);
 #endif
 
-    initMacPorts();
+	/* IPCS_V4 PG ADD-STA:UF7200step2コード追加 */
+	initMtdBlocks();
+
+	*p1 = getMacAddr();
+	*p2 = sys_getenv(HWA_0);
+	if ((NULL != p1) && (NULL != p2)) {
+		if (strncmp(p1, p2, 17) != 0) {
+			sys_printf("\nset MAC address\n");
+			sys_setenv(HWA_0, p1);
+		}
+	}else if (NULL == p1) {
+	    sys_printf("\nMAC address not found at mtd4.\n");
+	}else if (NULL == p2) {
+	    sys_printf("\nHWA_0 config not found.\n");
+	}
+
+	*p1 = sys_getenv(IPL_VERSION);
+	if (NULL == p1) {
+		sys_printf("\nset IPL version\n");
+		sys_setenv(IPL_VERSION, IPL_VER_STR);
+	}else{
+		if (0 != strncmp(p1, IPL_VER_STR, 4)) {
+			sys_printf("\nrenew IPL version\n");
+			sys_setenv(IPL_VERSION, IPL_VER_STR);
+		}
+	}
+
+	sys_printf("\nSoC_CPUSetting\n");
+	SoC_CPUSetting();
+	sys_printf("\SoC_GPIOSetting\n");
+	SoC_GPIOSetting();
+	sys_printf("\SoC_EMIFSetting\n");
+	SoC_EMIFSetting();
+	sys_printf("\finish UF7200s2 setting\n");
+	/* IPCS_V4 PG ADD-END:UF7200step2コード追加 */
+
+	initMacPorts();
     startMDIO();
 
 #if !defined(TNETV1051_BOARD)
@@ -828,6 +920,12 @@ aries_sdb_led_on(12);
     sys_sprintf(disp_prompt, "%s " "%d.%d-%d", "psbl", MonitorMajorRev,
                     MonitorMinorRev, IncRev);
 #endif
+
+	/* IPCS_V4 PG ADD-STA:UF7200step2コード追加 */
+	FPGAConfigChk();
+	FPGA_BusChk();
+	DDR_MemChk();
+	/* IPCS_V4 PG ADD-END:UF7200step2コード追加 */
 
     DISP_STR("Wait");
 

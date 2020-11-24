@@ -8,6 +8,8 @@
 #define _UF7200s2_H_
 #include "hw.h"			/* SDK提供ヘッダファイル */
 
+#define IPL_VER			"IPL_VERSION"
+
 /* GPIO controller */		/* TBD:BASEアドレスのMSB3bitが変わるかも（メーカ問合せ中） */
 #if 0 /* 以下内容で inc/psbl/hw.h に定義済み */
 #define GPIO_BASE			0xa8610900
@@ -163,8 +165,6 @@
 #define DDR_TAIL_ADDR		(DDR_BASE+0x04000000-2)
 
 
-extern void nsleep(int32_t tim);
-extern void msleep(int32_t tim);
 extern void SoC_CPUSetting(void);
 extern void SoC_EMIFSetting(void);
 extern void SoC_GPIOSetting(void);

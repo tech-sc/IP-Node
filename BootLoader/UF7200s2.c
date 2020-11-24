@@ -10,11 +10,13 @@
 #include <stdint.h>
 
 /*** ユーザ作成ヘッダの取り込み ***/
+#include "sysconf.h"								/* SDK提供 */
 #include "UF7200s2.h"
 
-/*** 自ファイル内でのみ使用する#define マクロ ***/
-#define	NANO_CNT		100		/* 1nsecのnopカウント値 */
+extern void t_clear(void);							/* SDK提供:実体はmips.S */
+extern int  t_get(void);							/* SDK提供:実体はmips.S */
 
+/*** 自ファイル内でのみ使用する#define マクロ ***/
 /*** 自ファイル内でのみ使用する#define 関数マクロ ***/
 /******************************************************************************/
 /* マクロ名	  レジスタライト												  */
@@ -69,6 +71,40 @@
 /*** static 関数宣言 ***/
 
 /******************************************************************************/
+/* 関数名	  マイクロ秒ウェイト											  */
+/* 機能概要	  10-6秒単位のウェイト処理										  */
+/* パラメータ tim : (in)	ウェイトする時間								  */
+/* リターン	  なし															  */
+/* 注意事項	  －															  */
+/* その他	  －															  */
+/******************************************************************************/
+void Delay_uSec(unsigned int tim)
+{
+    unsigned int i;
+    for (i = 0; i < tim; i++) {
+        t_clear();
+        while ( (unsigned int)t_get() < (MHZ(300) / (2 * 1000000)));
+    }
+}
+
+/******************************************************************************/
+/* 関数名	  ミリ秒ウェイト												  */
+/* 機能概要	  10-3秒単位のウェイト処理										  */
+/* パラメータ tim : (in)	ウェイトする時間								  */
+/* リターン	  なし															  */
+/* 注意事項	  －															  */
+/* その他	  －															  */
+/******************************************************************************/
+void Delay_mSec(unsigned int tim)
+{
+    unsigned int i;
+    for (i = 0; i < tim; i++) {
+        t_clear();
+        while ( (unsigned int)t_get() < (MHZ(300) / (2 * 1000)));
+    }
+}
+
+/******************************************************************************/
 /* 関数名	  検査結果LED点滅												  */
 /* 機能概要	  リターンすることなくGPIO-LEDを点滅する						  */
 /* パラメータ なし															  */
@@ -81,7 +117,7 @@ __inline void GPIO_LedBlink()
 	RegWrite(GPIO_LED, RegRead(GPIO_LED) & ~GPIO_LED_OFF);	
 	while(1)
 	{
-		msleep(200);
+		Delay_mSec(200);
 		RegWrite(GPIO_LED, RegRead(GPIO_LED) ^ GPIO_LED_OFF);
 	}
 }
@@ -98,52 +134,6 @@ __inline void FPGA_BlueLedBlink(void)
 {
 	RegWrite(FPGA_LED, LED_BLINK | LED_CTRL_LU | LED_BLUE);
 	while(1);
-}
-
-/******************************************************************************/
-/* 関数名	  ナノ秒ウェイト												  */
-/* 機能概要	  ナノ秒単位のウェイト処理										  */
-/* パラメータ tim : (in)	ウェイトする時間								  */
-/* リターン	  なし															  */
-/* 注意事項	  －															  */
-/* その他	  －															  */
-/******************************************************************************/
-void nsleep(int32_t tim)
-{
-	int32_t		i = 0;
-
-	while(tim > 0)
-	{
-		i = 0;
-		while (i < NANO_CNT) {
-			__asm("nop");
-			i++;
-		}
-		tim--;
-	}
-}
-
-/******************************************************************************/
-/* 関数名	  ミリ秒ウェイト												  */
-/* 機能概要	  ミリ秒単位のウェイト処理										  */
-/* パラメータ tim : (in)	ウェイトする時間								  */
-/* リターン	  なし															  */
-/* 注意事項	  －															  */
-/* その他	  －															  */
-/******************************************************************************/
-void msleep(int32_t tim)
-{
-	int32_t		i = 0;
-
-	while(tim > 0)
-	{
-		i = 0;
-		while (i < NANO_CNT * 1000) {
-			__asm("nop");
-			i++;
-		}
-		tim--;
-	}
 }
 
 /******************************************************************************/
@@ -223,7 +213,7 @@ void SoC_GPIOSetting(void)
 	RegWrite(SPI_GATE, RegRead(SPI_GATE) & ~SPI_GATE_CLOSE);		/* ゲート開放 */
 	RegWrite(FPGA_PROG, (RegRead(FPGA_PROG) & ~FPGA_PROG_INACT) | FPGA_PROG_INACT);	/* HI */
 	RegWrite(FPGA_PROG, RegRead(FPGA_PROG) & ~FPGA_PROG_INACT);		/* Lo=ACT */
-	nsleep(55);		/* wait 55ns以上 */
+	Delay_uSec(1);													/* 1micro sec（55ns以上wait） */
 	RegWrite(FPGA_PROG, (RegRead(FPGA_PROG) & ~FPGA_PROG_INACT) | FPGA_PROG_INACT);	/* Hi */
 	RegWrite(SPI_GATE, (RegRead(SPI_GATE) & ~SPI_GATE_CLOSE) | SPI_GATE_CLOSE);		/* ゲート閉塞 */
 }
@@ -249,7 +239,7 @@ void FPGAConfigChk(void)
 			/* 検査結果LED点滅してリターンしない */
 			GPIO_LedBlink();
 		}
-		msleep(30);
+		Delay_mSec(30);
 	}
 
 	/* 青LED点灯 */

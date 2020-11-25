@@ -1,156 +1,74 @@
+/* This is free software, licensed under the GNU General Public License v2. */
+/* See /LICENSE for more information. */
 /*###########################################################################*/
 /*#                                                                         #*/
-/*# ƒ‚ƒWƒ…[ƒ‹–¼ : LU                                                       #*/
+/*# ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«å : LU                                                       #*/
 /*#                                                                         #*/
-/*#     “ú–{Œê–¼ : LU‹¤’Êƒfƒtƒ@ƒCƒ“’è‹`ƒtƒ@ƒCƒ‹REL                          #*/
-/*#     ŽQÆ”Ô† : -                                                        #*/
-/*#     ’PˆÊ‹æ•ª : -                                                        #*/
-/*#     ŠT    —v :                                                          #*/
-/*#     ì    ¬ : 99/01/28 - –Ñ’Ë  Æ–¾                                    #*/
-/*#     X    V : 08/12/05 - T.Kitazawa                                    #*/
+/*#     æ—¥æœ¬èªžå : LUå…±é€šãƒ‡ãƒ•ã‚¡ã‚¤ãƒ³å®šç¾©ãƒ•ã‚¡ã‚¤ãƒ«REL                          #*/
+/*#     å‚ç…§ç•ªå· : -                                                        #*/
+/*#     å˜ä½åŒºåˆ† : -                                                        #*/
+/*#     æ¦‚    è¦ :                                                          #*/
+/*#     ä½œ    æˆ : 99/01/28 - æ¯›å¡š  ç…§æ˜Ž                                    #*/
+/*#     æ›´    æ–° : 20/11/27 - å°æ¾¤  ç¾Žæ´¥æ™´                                  #*/
 /*#                                                                         #*/
 /*###########################################################################*/
-//#include "../../mik/mik_armc.h"
 
 /*---------------------------------------------------------------------------*/
-/*       ì¬ƒtƒ@ƒCƒ‹Ží•Ê—p                                                  */
+/*       ä½œæˆãƒ•ã‚¡ã‚¤ãƒ«ç¨®åˆ¥ç”¨                                                  */
 /*---------------------------------------------------------------------------*/
 
-/*--- ƒfƒoƒbƒN^³Ž®‚ÅØ‘Ö•K—v‚È’è‹` ---*/
+/*--- ãƒ‡ãƒãƒƒã‚¯ï¼æ­£å¼ã§åˆ‡æ›¿å¿…è¦ãªå®šç¾© ---*/
 
-#ifndef V1_DEBUG                                                                                //makefile‚Ö
-//#define   V1_DEBUG                                                                                //makefile‚Ö
+#ifndef V4_DEBUG                                                                                //makefileã¸
+//#define   V4_DEBUG                                                                                //makefileã¸
 #endif
-//#define   V2_1_DBG                    /*# ƒfƒoƒbƒNdefineŒ³ƒXƒCƒbƒ` #*/    //V2.1LUƒtƒ@[ƒ€’Ç‰Á    //makefile‚Ö
 
-#ifdef      V1_DEBUG            /* ƒfƒoƒbƒNŽž’è‹`i³Ž®”Å‚Í–¢’è‹`j */
-
-//#define       NO_BOOTP_USE        /*# IP=10.11.1.(2+(BYTE)MAC)‚É‚·‚é #*///makefile‚É‚Ä‘€ì
-
-//#define           LED_INT_TEST        // HêŽŽŒ±—p‚k‚d‚c—LŒø     99.12.3
-//#define           CLKD_SYNC_CHK       // ‚b‚k‚j‚c“¯Šú‡‚í‚¹ó‘Ô‚ðƒAƒ‰[ƒ€ƒ‰ƒ“ƒv‚Å•\Ž¦iLED_INT_TEST‚à’è‹`‚·‚éj   99.12.3
-//#define           SYNC_PHS_CHK        // ƒtƒF[ƒY•ÏX’Ê’mƒpƒPƒbƒg‘—oiƒn[ƒhƒfƒoƒbƒO—pj 2000.06.26
-//#define           SYNC_CMP_DBG        /*# “¯Šú‡‚í‚¹Š®—¹ƒfƒoƒbƒNi³Ž®Žž–¢’è‹`‚É‚·‚éj #*/
-
-#define         NON_HELCHK_TO       /*# ’è‹`Žž‚b‚b‚t‚©‚ç‚Ìƒwƒ‹ƒXƒ`ƒFƒbƒN‚sD‚nŠÄŽ‹–³ŒøiŽŽŒ±Žž‚Íí‚É‚sD‚nD–³Œøj #*///2004.04 IP-CS debug
-
-//#define       LU_TFTP_RETRY       //  ƒ\ƒtƒgƒfƒoƒbƒOŽž‚ÉTFTP‚ð–³ŒÀƒŠƒgƒ‰ƒC‚·‚é‚Æ‚«‚É’è‹`‚·‚é
-//#define       NON_MAC_ROM_CHECK   /*# ‚h‚o‚kƒvƒƒOƒ‰ƒ€ƒ`ƒFƒbƒN—LŒøŽžA‚l‚`‚bƒGƒŠƒA‚ð‘ÎÛ‚Æ‚µ‚È‚¢Žž’è‹`io‰×Žž‚É–¢’è‹`j #*/
-//#define       FAULT_LED_INTER     /*# áŠQŽž‚k‚d‚cƒCƒ“ƒ^[—LŒøi³Ž®”Å‚Í‚É–¢’è‹`‚É‚·‚éj #*/
-//#define       WDT_ON              // ƒEƒHƒbƒ`ƒhƒbƒO—LŒøi’Êí‚ÍƒƒCƒN‚Å’è‹`‚·‚é‚ªƒfƒoƒbƒOŽž‚à—LŒø‚É‚·‚éê‡’è‹`‚·‚éj
-//#define       WDT_STOP            // ƒEƒHƒbƒ`ƒhƒbƒO’âŽ~i‚v‚c‚s—LŒø‚Å‚àƒEƒHƒbƒ`ƒhƒbƒO‚‰^‚ƒAƒNƒZƒX‚µ‚È‚¢Bo‰×Žž–¢’è‹`‚Æ‚·‚éj //2000.2.1—LŒø‚É‚µ‚½
-//#define       DBG_CACHE_ON        /*# ƒfƒoƒbƒOŽž‚Å‚Ì–½—ßƒLƒƒƒbƒVƒ…—LŒø #*/
-//#define       LU_DBG              /*# LUƒfƒoƒbƒNƒtƒ‰ƒO #*/
-//#define       LU_DBG2             /*# DBG_SWŒŸoƒK[ƒh #*/
-//#define       LU_DBG3             /*# DBG_SW•s‹ï‡‰ðÍ #*/
-//#define       LU_DBG4             /*# DBG_SW–³Œø #*/
-
-//#define           EXEC_TIME_LED       // ˆ—ŽžŠÔ‘ª’è—pi³Ž®Žž–¢’è‹`j
-//#define           KM_RCV_TIME_LED     // ˆ—ŽžŠÔ‘ª’è—pi³Ž®Žž–¢’è‹`j
-//#define           MAC_RST_TIME_LED        // ˆ—ŽžŠÔ‘ª’è—pi³Ž®Žž–¢’è‹`j
-//#define           MAC_ISR_TIME_LED    // ˆ—ŽžŠÔ‘ª’è—pi³Ž®Žž–¢’è‹`j
-//#define       LED_CHK_NO0         /*# ŽžŠÔ‘ª’èLED•\Ž¦i‚T‚‚“Š„žj—LŒø #*/
-//#define       LED_CHK_NO1         /*# ŽžŠÔ‘ª’èLED•\Ž¦—LŒø #*/
-//#define       LED_CHK_NO2         /*# ŽžŠÔ‘ª’èLED•\Ž¦—LŒø #*/
-//#define       LED_CHK_NO3         /*# ŽžŠÔ‘ª’èLED•\Ž¦—LŒø #*/
-//#define       LED_CHK_NO4         /*# ŽžŠÔ‘ª’èLED•\Ž¦—LŒø #*/
-//#define       LED_CHK_NO5         /*# ŽžŠÔ‘ª’èLED•\Ž¦—LŒø #*/
-//#define       LED_CHK_NO6         /*# ŽžŠÔ‘ª’èLED•\Ž¦—LŒø #*/
-//#define       LED_CHK_NO7         /*# ŽžŠÔ‘ª’èLED•\Ž¦—LŒø #*/
-//#define       LED_CHK_NO8         /*# ŽžŠÔ‘ª’èLED•\Ž¦—LŒø #*/
-//#define       LED_CHK_NO9         /*# ŽžŠÔ‘ª’èLED•\Ž¦—LŒø #*/
-//#define       LED_CHK_NO10        /*# ŽžŠÔ‘ª’èLED•\Ž¦—LŒø #*/
-//#define       LED_CHK_NO11        /*# ŽžŠÔ‘ª’èLED•\Ž¦—LŒø #*/
-//#define       LED_CHK_NO12        /*# ŽžŠÔ‘ª’èLED•\Ž¦—LŒø #*/
-//#define       LED_CHK_NO98        /*# ŽžŠÔ‘ª’èLED•\Ž¦iƒAƒCƒhƒ‹ƒCƒ“ƒ^[ƒoƒ‹j—LŒø #*/
-//#define       LED_CHK_NO99        /*# ŽžŠÔ‘ª’èLED•\Ž¦iƒx[ƒXj—LŒø #*/
-
-//#define       CLKD_DBG            // CLKD DBG
-//#define       CLKD_LOG            // CLKD LOGŽûWƒ‚[ƒhÚ×”ÅiCLKD_LOG2‚Æ“¯Žž‚ÉÝ’è‚µ‚È‚¢‚±‚Æj
-//#define       CLKD_LOG2           // CLKD LOGŽûWƒ‚[ƒhŠÈ—ª”ÅiCLKD_LOG‚Æ“¯Žž‚ÉÝ’è‚µ‚È‚¢‚±‚Æj
-//#define       DPRAM_WT_TRC        /*# ‚c‚o‚q‚`‚l‘žƒƒO—LŒø #*/
-//#define       DPRAM_RW_LOG            /*# ‚c‚o‚q‚`‚l“Ç‘ƒƒO—LŒø #*/
-
-//#define       OAK_EVT_DEBUG       // ‚n‚`‚jƒCƒxƒ“ƒg“Ç‚ÝŽæ‚èƒƒO
-//#define       OAK_ORD_DEBUG       // ‚n‚`‚jÝ’èƒI[ƒ_ƒƒO
-//#define           TIME_LOG_DEBUG      //ƒfƒoƒbƒOƒƒO—p‚T‚‚“ŽžŠÔî•ñXV
-//#define       VOICE_SET_DEBUG     // ‰¹ºÝ’èƒ|ƒCƒ“ƒ^ƒƒO
-//#define       PB_NG_DEBUG         // ‚o‚aŽóM‚m‚fƒfƒoƒbƒOƒƒOiƒn[ƒhƒfƒoƒbƒO—pj
-//#define       OAK_PB_DEBUG        // ‚n‚`‚j‚o‚a‰¹ºƒƒOiƒn[ƒhƒfƒoƒbƒO—pj
-//#define       PB_ON_TIME_DBG      // ‚o‚aƒIƒ“ŠÄŽ‹ŽžŠÔ•ÏXiƒn[ƒhƒfƒoƒbƒO—pj
-//#define       PB_EC_ON_DBG        // ‚o‚aŠÄŽ‹’†‚àƒGƒRƒLƒƒƒ“ƒIƒ“‚Æ‚·‚éiƒn[ƒhƒfƒoƒbƒO—pj
-
-//#define       ECHO_CAN_STOP       // ƒGƒR[ƒLƒƒƒ“ƒZƒ‰íŽž’âŽ~iƒn[ƒhƒfƒoƒbƒO—pj’Êí–¢’è‹`‚Æ‚·‚é
-//#define LU_NUMSCN_DBG             // 2001.1.17 ‚k‚t”Ô†’Ê’mƒXƒLƒƒƒ“’²¸ƒfƒoƒbƒO—pi³Ž®”Å‚Í–¢’è‹`j
-//#define       RATE_CPU_EXE        // ‚b‚o‚tŽg—p—¦‘ª’è‚·‚éê‡‚É’è‹`‚·‚éj 99.11.17
-#define FPGA_CHK_DBG    //ƒIƒ“ƒ‰ƒCƒ“DBG—p fpgaƒRƒ“ƒtƒBƒOƒ‹[ƒg—LŒø IP-CS‘Î‰ž 2004.04
-
-#else       //V1_DEBUG          /* ƒfƒoƒbƒNŽž–¢’è‹`i³Ž®”Å‚Í’è‹`j */
-
-//#define       RATE_CPU_EXE        // ‚b‚o‚tŽg—p—¦‘ª’è‚·‚éê‡‚É’è‹`‚·‚éj 99.11.17
-#define         PROG_CHECK_EXE      /*# ƒvƒƒOƒ‰ƒ€ƒ`ƒFƒbƒN‚ð—LŒø‚É‚·‚éiƒfƒoƒbƒOŽž‚Í–¢’è‹`j #*/
-#define         RAM_CHECK_EXE
-#define         LU_PRG_CHECK        //  ƒ_ƒEƒ“ƒ[ƒhƒtƒ@ƒCƒ‹ƒ`ƒFƒbƒN‚ðs‚¤ê‡‚É’è‹`‚·‚éi³Ž®”Å‚ÌŽž‚Í’è‹`‚·‚é‚±‚Æj
-//#define       LSW_START_WAIT      /*# ‚h‚o‚k‚ÅƒRƒAƒXƒCƒbƒ`‚k‚r‚v‚Ì“®ì‘Ò‚¿ƒ^ƒCƒ~ƒ“ƒO—LŒøi³Ž®”Å‚Í’è‹`‚·‚éj #*/
-#define         CCU_HELCHK_START    // 2000.03.28 ‰Šúó‘Ô‚©‚çƒwƒ‹ƒXŠÄŽ‹ŽÀŽ{iƒ\ƒtƒgù‰ª‚³‚ñŠm”F—pj
+#ifdef      V1_DEBUG            /* ãƒ‡ãƒãƒƒã‚¯æ™‚å®šç¾©ï¼ˆæ­£å¼ç‰ˆã¯æœªå®šç¾©ï¼‰ */
+#define         NON_HELCHK_TO       /*# å®šç¾©æ™‚ï¼£ï¼£ï¼µã‹ã‚‰ã®ãƒ˜ãƒ«ã‚¹ãƒã‚§ãƒƒã‚¯ï¼´ï¼Žï¼¯ç›£è¦–ç„¡åŠ¹ï¼ˆè©¦é¨“æ™‚ã¯å¸¸ã«ï¼´ï¼Žï¼¯ï¼Žç„¡åŠ¹ï¼‰ #*///2004.04 IP-CS debug
+#define FPGA_CHK_DBG    //ã‚ªãƒ³ãƒ©ã‚¤ãƒ³DBGç”¨ fpgaã‚³ãƒ³ãƒ•ã‚£ã‚°ãƒ«ãƒ¼ãƒˆæœ‰åŠ¹ IP-CSå¯¾å¿œ 2004.04
+#else       //V4_DEBUG          /* ãƒ‡ãƒãƒƒã‚¯æ™‚æœªå®šç¾©ï¼ˆæ­£å¼ç‰ˆã¯å®šç¾©ï¼‰ */
+#define         CCU_HELCHK_START    // 2000.03.28 åˆæœŸçŠ¶æ…‹ã‹ã‚‰ãƒ˜ãƒ«ã‚¹ç›£è¦–å®Ÿæ–½ï¼ˆã‚½ãƒ•ãƒˆç¬¹å²¡ã•ã‚“ç¢ºèªç”¨ï¼‰
 
 #ifdef  MENTE
-#define             NON_HELCHK_TO   /*# ’è‹`Žž‚b‚b‚t‚©‚ç‚Ìƒwƒ‹ƒXƒ`ƒFƒbƒN‚sD‚nŠÄŽ‹–³ŒøiŽŽŒ±Žž‚Íí‚É‚sD‚nD–³Œøj #*/
+#define             NON_HELCHK_TO   /*# å®šç¾©æ™‚ï¼£ï¼£ï¼µã‹ã‚‰ã®ãƒ˜ãƒ«ã‚¹ãƒã‚§ãƒƒã‚¯ï¼´ï¼Žï¼¯ç›£è¦–ç„¡åŠ¹ï¼ˆè©¦é¨“æ™‚ã¯å¸¸ã«ï¼´ï¼Žï¼¯ï¼Žç„¡åŠ¹ï¼‰ #*/
 #endif  //#ifdef    MENTE
 
-#endif      //V1_DEBUG
-
-#define     FAULT_LED_INTER     /*# áŠQŽž‚k‚d‚cƒCƒ“ƒ^[—LŒøi³Ž®”Å‚Í‚É–¢’è‹`‚É‚·‚éj #*/
-
-//#define           MAC_RESET_DBG       // ‚l‚`‚bƒŠƒZƒbƒg“®ìƒfƒoƒbƒO—pi³Ž®Žž–¢’è‹`j
-//#define           RTP_SND_DBG         // ‚q‚s‚oƒpƒPƒbƒg”²‚¯‰¹º•]‰¿ƒfƒoƒbƒO—pi³Ž®Žž–¢’è‹`j
-//#define           RTP_SEQ_NG_DISP     // ‚q‚s‚oƒpƒPƒbƒg”²‚¯‚k‚d‚c•\Ž¦ƒfƒoƒbƒO—pi³Ž®Žž–¢’è‹`j
+#endif      //V4_DEBUG
 
 
-/*--- ƒVƒXƒeƒ€XV—pŒÅ’è’è‹` ---*/
-
-#ifdef      MAKE_IPL
-//#ifdef            MAKE_IPL_ROM
-#define             LU_TAG_BOOT         /*# LSWƒŠƒŒ[ƒG[ƒWƒFƒ“ƒg‚ÅBOOTPreply‚ª’†Œp‚³‚ê‚È‚¢‚±‚Æ‚Ì‘Îôi³Ž®”Å‚Í’è‹`‚·‚éj #*/
-//#endif    //ifdef     MAKE_IPL_ROM
-#endif  //ifdef     MAKE_IPL
-
-//#define   TEST_TEST_TEST      // HêŽŽŒ±ƒI[ƒ_—LŒøiHêŽŽŒ±—p‚Ìê‡’è‹`‚·‚éj   99.10.26
+/*--- ã‚·ã‚¹ãƒ†ãƒ æ›´æ–°ç”¨å›ºå®šå®šç¾© ---*/
+//#define   TEST_TEST_TEST      // å·¥å ´è©¦é¨“ã‚ªãƒ¼ãƒ€æœ‰åŠ¹ï¼ˆå·¥å ´è©¦é¨“ç”¨ã®å ´åˆå®šç¾©ã™ã‚‹ï¼‰   99.10.26
 #ifdef      TEST_TEST_TEST
 #ifndef         NON_HELCHK_TO
-#define             NON_HELCHK_TO           /*# ’è‹`Žž‚b‚b‚t‚©‚ç‚Ìƒwƒ‹ƒXƒ`ƒFƒbƒN‚sD‚nŠÄŽ‹–³Œøi³Ž®Žž‚Íƒfƒtƒ@ƒCƒ“‚µ‚È‚¢j #*/
+#define             NON_HELCHK_TO           /*# å®šç¾©æ™‚ï¼£ï¼£ï¼µã‹ã‚‰ã®ãƒ˜ãƒ«ã‚¹ãƒã‚§ãƒƒã‚¯ï¼´ï¼Žï¼¯ç›£è¦–ç„¡åŠ¹ï¼ˆæ­£å¼æ™‚ã¯ãƒ‡ãƒ•ã‚¡ã‚¤ãƒ³ã—ãªã„ï¼‰ #*/
 #endif          //NON_HELCHK_TO
 #endif      //TEST_TEST_TEST
 
-#define         V1_2_HARD           /*# ‚u‚PD‚Qƒn[ƒh“®ì—p #*/    // 2000.05.11 ’Ç‰Á
-#define         REMAKE_PKG          /*# Äìƒn[ƒhŠÂ‹«ŽÀs—p #*/    // 99.10.15
-#define         EMA_PORT_CHG        /*# ’¼’ÊØ‘Ö(EMA)ƒ|[ƒg‚R‚É•ÏXƒn[ƒhŽÀs—p #*/ // 99.12.17
-#define         CCU_HELCHK_START    // 2000.03.28 ‰Šúó‘Ô‚©‚çƒwƒ‹ƒXŠÄŽ‹ŽÀŽ{iƒ\ƒtƒgù‰ª‚³‚ñŠm”F—pj
-//#define       OLD_IPL_ROM         /*# ‹Œ”Å‚h‚o‚k‚Å‚l‚`‚bƒAƒhƒŒƒX‚ª0x1ff00‚ÌŽž’è‹`‚·‚é #*/ // 99.10.25
+#define         V1_2_HARD           /*# ï¼¶ï¼‘ï¼Žï¼’ãƒãƒ¼ãƒ‰å‹•ä½œç”¨ #*/    // 2000.05.11 è¿½åŠ 
+#define         REMAKE_PKG          /*# å†ä½œãƒãƒ¼ãƒ‰ç’°å¢ƒå®Ÿè¡Œç”¨ #*/    // 99.10.15
+#define         EMA_PORT_CHG        /*# ç›´é€šåˆ‡æ›¿(EMA)ãƒãƒ¼ãƒˆï¼“ã«å¤‰æ›´ãƒãƒ¼ãƒ‰å®Ÿè¡Œç”¨ #*/ // 99.12.17
+#define         CCU_HELCHK_START    // 2000.03.28 åˆæœŸçŠ¶æ…‹ã‹ã‚‰ãƒ˜ãƒ«ã‚¹ç›£è¦–å®Ÿæ–½ï¼ˆã‚½ãƒ•ãƒˆç¬¹å²¡ã•ã‚“ç¢ºèªç”¨ï¼‰
 
-#define         LU_MACRO            /*# ƒ}ƒNƒ—LŒøƒtƒ‰ƒO #*/    // í‚É’è‹`iPOOLŽæ“¾‚m‚f‚Æ‚È‚é‚Ì‚Åj
-#define         LU_RTP_SEQ          /*# RTP¼°¹Ý½Áª¯¸—LŒøƒtƒ‰ƒO #*/
+#define         LU_RTP_SEQ          /*# RTPï½¼ï½°ï½¹ï¾ï½½ï¾ï½ªï½¯ï½¸æœ‰åŠ¹ãƒ•ãƒ©ã‚° #*/
 
-#define         ALM_LMP     0x80    /*# ŽžŠÔ‘ª’èLED‚`‚k‚lƒ‰ƒ“ƒv #*/
-#define         OP_LMP      0x40    /*# ŽžŠÔ‘ª’èLED‚n‚oƒ‰ƒ“ƒv #*/
+#define         ALM_LMP     0x80    /*# æ™‚é–“æ¸¬å®šLEDï¼¡ï¼¬ï¼­ãƒ©ãƒ³ãƒ— #*/
+#define         OP_LMP      0x40    /*# æ™‚é–“æ¸¬å®šLEDï¼¯ï¼°ãƒ©ãƒ³ãƒ— #*/
 
-//‰ŠúÝ’èê—p‚o‚n‚q‚s‚Oƒf[ƒ^iƒ}ƒXƒ^^ƒXƒŒ[ƒu‹¤’Êj
-//#define           ALM_LMP_ON  0x0042
-//#define           ALM_LMP_OFF 0x00c2
-#define         ALM_LMP_ON  0x004f  /*# ƒAƒ‰[ƒ€ƒ‰ƒ“ƒv‚n‚mA‚o‚oƒŠƒZƒbƒgA‚d‚b‹@”\‚n‚e‚e #*/    //‚h‚o‚k‚É‚Í‚d‚bŠÖŒW‚È‚¢‚ª•´‚ç‚í‚µ‚­‚È‚¢‚æ‚¤‚É
-#define         ALM_LMP_OFF 0x00cf  /*# ƒAƒ‰[ƒ€ƒ‰ƒ“ƒv‚n‚e‚eA‚o‚oƒŠƒZƒbƒgA‚d‚b‹@”\‚n‚e‚e #*/  //‚h‚o‚k‚É‚Í‚d‚bŠÖŒW‚È‚¢‚ª•´‚ç‚í‚µ‚­‚È‚¢‚æ‚¤‚É
+//åˆæœŸè¨­å®šå°‚ç”¨ï¼°ï¼¯ï¼²ï¼´ï¼ãƒ‡ãƒ¼ã‚¿ï¼ˆãƒžã‚¹ã‚¿ï¼ã‚¹ãƒ¬ãƒ¼ãƒ–å…±é€šï¼‰
+#define         ALM_LMP_ON  0x004f  /*# ã‚¢ãƒ©ãƒ¼ãƒ ãƒ©ãƒ³ãƒ—ï¼¯ï¼®ã€ï¼°ï¼°ãƒªã‚»ãƒƒãƒˆã€ï¼¥ï¼£æ©Ÿèƒ½ï¼¯ï¼¦ï¼¦ #*/    //ï¼©ï¼°ï¼¬ã«ã¯ï¼¥ï¼£é–¢ä¿‚ãªã„ãŒç´›ã‚‰ã‚ã—ããªã„ã‚ˆã†ã«
+#define         ALM_LMP_OFF 0x00cf  /*# ã‚¢ãƒ©ãƒ¼ãƒ ãƒ©ãƒ³ãƒ—ï¼¯ï¼¦ï¼¦ã€ï¼°ï¼°ãƒªã‚»ãƒƒãƒˆã€ï¼¥ï¼£æ©Ÿèƒ½ï¼¯ï¼¦ï¼¦ #*/  //ï¼©ï¼°ï¼¬ã«ã¯ï¼¥ï¼£é–¢ä¿‚ãªã„ãŒç´›ã‚‰ã‚ã—ããªã„ã‚ˆã†ã«
 
 
-#define         VO_FLOW             /*# ‰¹ºƒtƒ[§Œä—LŒø #*/
-//#define       VO_FLOW_CNT     5   /*# ‰¹ºƒtƒ[§Œä—LŒøŽž‚Ìè‡’l #*/
-#define         VO_FLOW_STOP    5   /*# ‰¹º’âŽ~Žž‚Ìè‡’l #*/
-#define         VO_FLOW_START   2   /*# ‰¹ºŠJŽnŽž‚Ìè‡’l #*/
-//#define           VO_SEQ_NG       16  /*# ƒV[ƒPƒ“ƒX‚m‚f‚Ì”ÍˆÍ’l #*/
-#define         VO_SEQ_NG       10  /*# ƒV[ƒPƒ“ƒX‚m‚f‚Ì”ÍˆÍ’l #*/
+#define         VO_FLOW             /*# éŸ³å£°ãƒ•ãƒ­ãƒ¼åˆ¶å¾¡æœ‰åŠ¹ #*/
+//#define       VO_FLOW_CNT     5   /*# éŸ³å£°ãƒ•ãƒ­ãƒ¼åˆ¶å¾¡æœ‰åŠ¹æ™‚ã®é–¾å€¤ #*/
+#define         VO_FLOW_STOP    5   /*# éŸ³å£°åœæ­¢æ™‚ã®é–¾å€¤ #*/
+#define         VO_FLOW_START   2   /*# éŸ³å£°é–‹å§‹æ™‚ã®é–¾å€¤ #*/
+//#define           VO_SEQ_NG       16  /*# ã‚·ãƒ¼ã‚±ãƒ³ã‚¹ï¼®ï¼§ã®ç¯„å›²å€¤ #*/
+#define         VO_SEQ_NG       10  /*# ã‚·ãƒ¼ã‚±ãƒ³ã‚¹ï¼®ï¼§ã®ç¯„å›²å€¤ #*/
 
-/*# NON_DOEP_SEQCHK‚ÆNON_DOEP_SEQCHK_RETRY‚Í‚Ç‚¿‚ç‚©‚P‚Â‚ð—LŒø‚É‚·‚é‚±‚Æ #*/
-////#define     NON_DOEP_SEQCHK     /*# ’è‹`Žž‚b‚b‚tƒV[ƒPƒ“ƒXƒ`ƒFƒbƒN–³Œø #*/
-#define     NON_DOEP_SEQCHK_RETRY   /*# ’è‹`Žž‚b‚b‚tƒCƒxƒ“ƒg–³ŒÀÄ‘— #*/ // ³Ž®Žž‚àƒfƒtƒ@ƒCƒ“
+/*# NON_DOEP_SEQCHKã¨NON_DOEP_SEQCHK_RETRYã¯ã©ã¡ã‚‰ã‹ï¼‘ã¤ã‚’æœ‰åŠ¹ã«ã™ã‚‹ã“ã¨ #*/
+////#define     NON_DOEP_SEQCHK     /*# å®šç¾©æ™‚ï¼£ï¼£ï¼µã‚·ãƒ¼ã‚±ãƒ³ã‚¹ãƒã‚§ãƒƒã‚¯ç„¡åŠ¹ #*/
+#define     NON_DOEP_SEQCHK_RETRY   /*# å®šç¾©æ™‚ï¼£ï¼£ï¼µã‚¤ãƒ™ãƒ³ãƒˆç„¡é™å†é€ #*/ // æ­£å¼æ™‚ã‚‚ãƒ‡ãƒ•ã‚¡ã‚¤ãƒ³
 
 //#define       DSP_SEARCH_ORD
 
@@ -160,9 +78,9 @@
 
 #define     CLR                 0x00
 /*
-********  ’Ç‰ÁFV3-IPCS-001 2008.12.04  --- Minimam Delay Time “ü‘Ö‚¦ðŒ•ÏX‚É”º‚¢  *********
+********  è¿½åŠ ï¼šV3-IPCS-001 2008.12.04  --- Minimam Delay Time å…¥æ›¿ãˆæ¡ä»¶å¤‰æ›´ã«ä¼´ã„  *********
 */
-#define		DELAY_TIME_FULL		0xFFFFFFFF      /* V03.03 ’x‰„ŽžŠÔÅ‘å’l               */
+#define		DELAY_TIME_FULL		0xFFFFFFFF      /* V03.03 é…å»¶æ™‚é–“æœ€å¤§å€¤               */
 
 #define     NG                  0xFF
 //#define     NULL                0x00
@@ -172,16 +90,16 @@
 #define     CONT                0x02
 #define     SYS_NG              0xFFFFFFFF
 
-//ˆ³kLU‘Î‰žB2003.09.16
+//åœ§ç¸®LUå¯¾å¿œã€‚2003.09.16
 #define XC_ON   0x01
 #define XC_OFF  0x00
 
 #define XC_OK   0x00
 #define XC_NG   0x01
 
-/* ‚m‚t‚k‚k’è‹` */
-#define         XC_NULLP        0          /* ‚m‚t‚k‚kƒ|ƒCƒ“ƒ^ */
-#define         XC_NULL         0          /* ‚m‚t‚k‚k */
+/* ï¼®ï¼µï¼¬ï¼¬å®šç¾© */
+#define         XC_NULLP        0          /* ï¼®ï¼µï¼¬ï¼¬ãƒã‚¤ãƒ³ã‚¿ */
+#define         XC_NULL         0          /* ï¼®ï¼µï¼¬ï¼¬ */
 
 #define     NON                 0xFF
 
@@ -189,142 +107,142 @@ typedef     unsigned char       BYTE;   /*# BYTE  = 8bit #*/
 typedef     unsigned short      WORD;   /*# WORD  = 16bit #*/
 typedef     unsigned long       DWORD;  /*# DWORD = 32bit #*/
 
-/* ˆ³kLU */
+/* åœ§ç¸®LU */
 #ifndef LONG
-#define LONG       long            /* 32ƒrƒbƒg•„†—L‚è®”
-                                                     -2147483648`2147483647 */
+#define LONG       long            /* 32ãƒ“ãƒƒãƒˆç¬¦å·æœ‰ã‚Šæ•´æ•°
+                                                     -2147483648ï½ž2147483647 */
 #endif
 
 #ifndef  ULONG
-#define  ULONG     unsigned long   /* 32ƒrƒbƒg•„†–³‚µ®” 0`4294967295 */
+#define  ULONG     unsigned long   /* 32ãƒ“ãƒƒãƒˆç¬¦å·ç„¡ã—æ•´æ•° 0ï½ž4294967295 */
 #endif
 #ifndef  USHORT
-#define  USHORT    unsigned short  /* 16ƒrƒbƒg•„†–³‚µ®” 0`65535 */
+#define  USHORT    unsigned short  /* 16ãƒ“ãƒƒãƒˆç¬¦å·ç„¡ã—æ•´æ•° 0ï½ž65535 */
 #endif
 #ifndef  UCHAR
-#define  UCHAR     unsigned char   /* 8ƒrƒbƒg•„†–³‚µ®” 0`255 */
+#define  UCHAR     unsigned char   /* 8ãƒ“ãƒƒãƒˆç¬¦å·ç„¡ã—æ•´æ•° 0ï½ž255 */
 #endif
 #ifndef  CHAR
-#define  CHAR      char            /* 8ƒrƒbƒg•„†—L‚è®” -128`127 */
+#define  CHAR      char            /* 8ãƒ“ãƒƒãƒˆç¬¦å·æœ‰ã‚Šæ•´æ•° -128ï½ž127 */
 #endif
 
 #ifndef  SHORT
-#define  SHORT    short  /* 16ƒrƒbƒg•„†–³‚µ®” 0`65535 */
+#define  SHORT    short  /* 16ãƒ“ãƒƒãƒˆç¬¦å·ç„¡ã—æ•´æ•° 0ï½ž65535 */
 #endif
 
 #ifndef  INT
-#define  INT       int             /* 32ƒrƒbƒg•„†—L‚è®”
-                                                     -2147483648`2147483647 */
+#define  INT       int             /* 32ãƒ“ãƒƒãƒˆç¬¦å·æœ‰ã‚Šæ•´æ•°
+                                                     -2147483648ï½ž2147483647 */
 #endif
 #ifndef  UINT
-#define  UINT      unsigned int    /* 32ƒrƒbƒg•„†–³‚µ®” 0`4294967295 */
+#define  UINT      unsigned int    /* 32ãƒ“ãƒƒãƒˆç¬¦å·ç„¡ã—æ•´æ•° 0ï½ž4294967295 */
 #endif
 #ifndef  BOOL
-#define  BOOL      int             /* 32ƒrƒbƒg•„†–³‚µ®” 0`4294967295 */
+#define  BOOL      int             /* 32ãƒ“ãƒƒãƒˆç¬¦å·ç„¡ã—æ•´æ•° 0ï½ž4294967295 */
 #endif
-/* ˆ³kLU */
+/* åœ§ç¸®LU */
 
 
-// ‚r‚k‚bƒoƒO‘Îô‚Ì‚½‚ß‚r‚k‚bƒpƒbƒP[ƒW”FŽ¯—p 2000.01.18 ’Ç‰Á
+// ï¼³ï¼¬ï¼£ãƒã‚°å¯¾ç­–ã®ãŸã‚ï¼³ï¼¬ï¼£ãƒ‘ãƒƒã‚±ãƒ¼ã‚¸èªè­˜ç”¨ 2000.01.18 è¿½åŠ 
 #define     SLC_PKG_ID      0x12
 
-/*---  V2.1LUƒtƒ@[ƒ€’Ç‰ÁiSTARTj  ---*/
+/*---  V2.1LUãƒ•ã‚¡ãƒ¼ãƒ è¿½åŠ ï¼ˆSTARTï¼‰  ---*/
 
-//#define       V2_EC_FORCE_CUT                 /*# ƒGƒR[ƒLƒƒƒ“ƒZƒ‹Ý’è‹­§‚n‚e‚e #*/                              //2001.02.12 V2.2’Ç‰Á
+//#define       V2_EC_FORCE_CUT                 /*# ã‚¨ã‚³ãƒ¼ã‚­ãƒ£ãƒ³ã‚»ãƒ«è¨­å®šå¼·åˆ¶ï¼¯ï¼¦ï¼¦ #*/                              //2001.02.12 V2.2è¿½åŠ 
 
 #ifdef      MAKE_IPL
-#define     V2_1_IPL_EXCLUSIVE              /*# IPLˆ—V2.1ê—p‰» #*/                                           //2000.09 V2.1’Ç‰Á
-#define     IPL_FLASH_NOWRITE               /*# IPL(FROM)ˆ—‚Å‚ÌFLASH‘‚«ž‚Ý(ƒRƒ}ƒ“ƒhŠÜ‚Þ)—}Ž~ #*/            //2000.12.05 V2.1’Ç‰Á
+#define     V2_1_IPL_EXCLUSIVE              /*# IPLå‡¦ç†V2.1å°‚ç”¨åŒ– #*/                                           //2000.09 V2.1è¿½åŠ 
+#define     IPL_FLASH_NOWRITE               /*# IPL(FROM)å‡¦ç†ã§ã®FLASHæ›¸ãè¾¼ã¿(ã‚³ãƒžãƒ³ãƒ‰å«ã‚€)æŠ‘æ­¢ #*/            //2000.12.05 V2.1è¿½åŠ 
 #endif
 
-#define     V2_1_IPL_SLVNODELAY             /*# IPLˆ—ƒXƒŒ[ƒuƒÈˆêÄ‚a‚n‚n‚s #*/                                           //2000.09 V2.1’Ç‰Á
+#define     V2_1_IPL_SLVNODELAY             /*# IPLå‡¦ç†ã‚¹ãƒ¬ãƒ¼ãƒ–Îºä¸€æ–‰ï¼¢ï¼¯ï¼¯ï¼´ #*/                                           //2000.09 V2.1è¿½åŠ 
 
-#define     V2_1_PHY_LINKUPSCAN             /*# PHY‚ÌŠ„‚èž‚Ý”­¶•s—Ç‘Î‰žiƒŠƒ“ƒNƒAƒbƒvƒXƒLƒƒƒ“•ûŽ®·‚èž‚Ýj #*/
+#define     V2_1_PHY_LINKUPSCAN             /*# PHYã®å‰²ã‚Šè¾¼ã¿ç™ºç”Ÿä¸è‰¯å¯¾å¿œï¼ˆãƒªãƒ³ã‚¯ã‚¢ãƒƒãƒ—ã‚¹ã‚­ãƒ£ãƒ³æ–¹å¼ç››ã‚Šè¾¼ã¿ï¼‰ #*/
 
-//#define       BOOT_SAVE_ONLINE            /*# ƒIƒ“ƒ‰ƒCƒ“ƒtƒ@ƒCƒ‹‘¤‚Å‚a‚n‚n‚sî•ñ‚ðƒZ[ƒu‚·‚é #*/              //2000.07 V2.1’Ç‰Á
-#define         BOOT_MAKE_ONLINE            /*# ƒIƒ“ƒ‰ƒCƒ“ƒtƒ@ƒCƒ‹‘¤‚Å‚a‚n‚n‚sî•ñ‚ðì¬‚·‚é #*/                //2000.11.28 V2.1DEBUG
-//#define       V2_1_IPL_BEFORE             /*# ‚u‚QD‚PˆÈ‘O‚Ì‚h‚o‚kŽg—pi‚u‚QD‚P‚h‚o‚kŠJ”­ˆÈ~‚Ííœj #*/    //2000.07 V2.1’Ç‰Á
-//#define       V2_1_DSP2CH_INI4CH          /*# ‚Q‚b‚g‚c‚r‚o‚Å‚S‚b‚g•ª‰Šú‰» #*/
+//#define       BOOT_SAVE_ONLINE            /*# ã‚ªãƒ³ãƒ©ã‚¤ãƒ³ãƒ•ã‚¡ã‚¤ãƒ«å´ã§ï¼¢ï¼¯ï¼¯ï¼´æƒ…å ±ã‚’ã‚»ãƒ¼ãƒ–ã™ã‚‹ #*/              //2000.07 V2.1è¿½åŠ 
+#define         BOOT_MAKE_ONLINE            /*# ã‚ªãƒ³ãƒ©ã‚¤ãƒ³ãƒ•ã‚¡ã‚¤ãƒ«å´ã§ï¼¢ï¼¯ï¼¯ï¼´æƒ…å ±ã‚’ä½œæˆã™ã‚‹ #*/                //2000.11.28 V2.1DEBUG
+//#define       V2_1_IPL_BEFORE             /*# ï¼¶ï¼’ï¼Žï¼‘ä»¥å‰ã®ï¼©ï¼°ï¼¬ä½¿ç”¨ï¼ˆï¼¶ï¼’ï¼Žï¼‘ï¼©ï¼°ï¼¬é–‹ç™ºä»¥é™ã¯å‰Šé™¤ï¼‰ #*/    //2000.07 V2.1è¿½åŠ 
+//#define       V2_1_DSP2CH_INI4CH          /*# ï¼’ï¼£ï¼¨ï¼¤ï¼³ï¼°ã§ï¼”ï¼£ï¼¨åˆ†åˆæœŸåŒ– #*/
 
-//#define       V2_1_DBG_2CHDSPSTART            /*# •]‰¿ŽŽŒ±ROM—pF‚Q‚ƒ‚ˆ‚c‚r‚oƒXƒ^[ƒg #*/
-//#define       V2_1_DBG_4CHDSPFIX              /*# •]‰¿ŽŽŒ±ROM—pF‚S‚ƒ‚ˆ‚c‚r‚oŒÅ’è #*/
+//#define       V2_1_DBG_2CHDSPSTART            /*# è©•ä¾¡è©¦é¨“ROMç”¨ï¼šï¼’ï½ƒï½ˆï¼¤ï¼³ï¼°ã‚¹ã‚¿ãƒ¼ãƒˆ #*/
+//#define       V2_1_DBG_4CHDSPFIX              /*# è©•ä¾¡è©¦é¨“ROMç”¨ï¼šï¼”ï½ƒï½ˆï¼¤ï¼³ï¼°å›ºå®š #*/
 
 //#define           RFCD_TRACE
 
-//‰¹ºŽóMƒGƒ‰[Šm”F—p  2001.03.12
+//éŸ³å£°å—ä¿¡ã‚¨ãƒ©ãƒ¼ç¢ºèªç”¨  2001.03.12
 #define RTP_SEQ_ERR_LOG
 #define RTP_BUF_ERR_LOG
 
-//#define   RTP_SEQ_ERR_TIME                    // ƒfƒoƒbƒO—p   2001.04.26
+//#define   RTP_SEQ_ERR_TIME                    // ãƒ‡ãƒãƒƒã‚°ç”¨   2001.04.26
 
-//#define   SYSERR_PKT_SND                      /*# ƒVƒXƒGƒ‰[ŽžAƒ}ƒ‹ƒ`ƒLƒƒƒXƒgƒpƒPƒbƒg‚Åî•ñ‘—MiƒfƒoƒbƒO—pj #*/    // 2001.03.23 ’Ç‰Á
-//#define   MAC_RESET_LOG                       /*# ‚l‚`‚bƒnƒ“ƒOƒŠƒZƒbƒgƒƒOi’Êí–¢’è‹`j #*/                          // 2001.04.16 ’Ç‰Á
-//#define   MAC_FIFO_LOG                        /*# ‚l‚`‚b‚e‚h‚e‚nƒƒOi’Êí–¢’è‹`j #*/                                // 2001.04.16 ’Ç‰Á
-//#define   KMAC_DBG_LOG                        /*# ‚l‚`‚bƒfƒoƒbƒOƒƒOi’Êí–¢’è‹`j #*/                                // 2001.06.13 ’Ç‰Á
+//#define   SYSERR_PKT_SND                      /*# ã‚·ã‚¹ã‚¨ãƒ©ãƒ¼æ™‚ã€ãƒžãƒ«ãƒã‚­ãƒ£ã‚¹ãƒˆãƒ‘ã‚±ãƒƒãƒˆã§æƒ…å ±é€ä¿¡ï¼ˆãƒ‡ãƒãƒƒã‚°ç”¨ï¼‰ #*/    // 2001.03.23 è¿½åŠ 
+//#define   MAC_RESET_LOG                       /*# ï¼­ï¼¡ï¼£ãƒãƒ³ã‚°ãƒªã‚»ãƒƒãƒˆãƒ­ã‚°ï¼ˆé€šå¸¸æœªå®šç¾©ï¼‰ #*/                          // 2001.04.16 è¿½åŠ 
+//#define   MAC_FIFO_LOG                        /*# ï¼­ï¼¡ï¼£ï¼¦ï¼©ï¼¦ï¼¯ãƒ­ã‚°ï¼ˆé€šå¸¸æœªå®šç¾©ï¼‰ #*/                                // 2001.04.16 è¿½åŠ 
+//#define   KMAC_DBG_LOG                        /*# ï¼­ï¼¡ï¼£ãƒ‡ãƒãƒƒã‚°ãƒ­ã‚°ï¼ˆé€šå¸¸æœªå®šç¾©ï¼‰ #*/                                // 2001.06.13 è¿½åŠ 
 
 
 #ifdef      V2_1_DBG
-#define     V2_DBG_POOL0_DET                /*# POOL0‰ðÍ—p\‘¢‘Ì’è‹`ƒ‚[ƒh #*/
+#define     V2_DBG_POOL0_DET                /*# POOL0è§£æžç”¨æ§‹é€ ä½“å®šç¾©ãƒ¢ãƒ¼ãƒ‰ #*/
 //#define       V2_1_DBG_TFTPOVER
-//#define       V2_1_DBG_IPADDR             /*# ƒfƒoƒbƒN—pFƒ}ƒVƒ“‚h‚oƒAƒhƒŒƒX #*/
-#define     V2_1_DBG_FANALM             /*# ƒfƒoƒbƒN—pFƒtƒ@ƒ“ƒAƒ‰[ƒ€§Œä #*/
-#define     V2_1_DBG_MACADDR            /*# ƒfƒoƒbƒN—pF‚l‚`‚bƒAƒhƒŒƒX #*/
-//#define       V2_1_DBG_BUFFERCNT          /*# ƒfƒoƒbƒN—pFƒoƒbƒtƒ@–ÊŽw’èŽžŠÔ” #*/
-//#define       V2_1_DBG_PGEINNFO           /*# ƒfƒoƒbƒN—pFƒv[ƒ‹Žæ“¾ƒGƒ‰[Ú×î•ñŽûW #*/
-//#define       V2_1_DBG_TIMEEXE            /*# ƒfƒoƒbƒN—pFƒ^ƒCƒ}ŽÀsŽžŠÔ‘ª’è #*/
-//#define       V2_1_DBG_TFTPSENDEXE            /*# ƒfƒoƒbƒN—pFTFTPƒpƒPƒbƒg‘—MŽÀsŽžŠÔ‘ª’è #*/
-//#define       V2_1_DBG_DOEPEXE            /*# ƒfƒoƒbƒN—pFŽÀsŽžŠÔ‘ª’è #*/
-//#define       V2_1_DBG_CRINTEXE           /*# ƒfƒoƒbƒN—pFŽÀsŽžŠÔ‘ª’è #*/
-//#define       V2_1_DBG_FUSIONHEAPWAIT     /*# ƒfƒoƒbƒN—pFFUSIONƒq[ƒvŽæ“¾‘Ò‚¿(LED‚àON‚·‚é‚±‚Æ) #*/
-//#define       V2_1_DBG_CRINTCNT           /*# ƒfƒoƒbƒN—pFCRINTŽÀs‰ñ” #*/
-//#define       V2_1_DBG_CLKDCNT            /*# ƒfƒoƒbƒN—pFCRINTŽÀs‰ñ” #*/
+//#define       V2_1_DBG_IPADDR             /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šãƒžã‚·ãƒ³ï¼©ï¼°ã‚¢ãƒ‰ãƒ¬ã‚¹ #*/
+#define     V2_1_DBG_FANALM             /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šãƒ•ã‚¡ãƒ³ã‚¢ãƒ©ãƒ¼ãƒ åˆ¶å¾¡ #*/
+#define     V2_1_DBG_MACADDR            /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šï¼­ï¼¡ï¼£ã‚¢ãƒ‰ãƒ¬ã‚¹ #*/
+//#define       V2_1_DBG_BUFFERCNT          /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šãƒãƒƒãƒ•ã‚¡é¢æŒ‡å®šæ™‚é–“æ•° #*/
+//#define       V2_1_DBG_PGEINNFO           /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šãƒ—ãƒ¼ãƒ«å–å¾—ã‚¨ãƒ©ãƒ¼è©³ç´°æƒ…å ±åŽé›† #*/
+//#define       V2_1_DBG_TIMEEXE            /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šã‚¿ã‚¤ãƒžå®Ÿè¡Œæ™‚é–“æ¸¬å®š #*/
+//#define       V2_1_DBG_TFTPSENDEXE            /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šTFTPãƒ‘ã‚±ãƒƒãƒˆé€ä¿¡å®Ÿè¡Œæ™‚é–“æ¸¬å®š #*/
+//#define       V2_1_DBG_DOEPEXE            /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šå®Ÿè¡Œæ™‚é–“æ¸¬å®š #*/
+//#define       V2_1_DBG_CRINTEXE           /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šå®Ÿè¡Œæ™‚é–“æ¸¬å®š #*/
+//#define       V2_1_DBG_FUSIONHEAPWAIT     /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šFUSIONãƒ’ãƒ¼ãƒ—å–å¾—å¾…ã¡(LEDã‚‚ONã™ã‚‹ã“ã¨) #*/
+//#define       V2_1_DBG_CRINTCNT           /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šCRINTå®Ÿè¡Œå›žæ•° #*/
+//#define       V2_1_DBG_CLKDCNT            /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šCRINTå®Ÿè¡Œå›žæ•° #*/
 
-//#define       V2_1_DBG_INTPHY             /*# ƒfƒoƒbƒN—pF‚o‚g‚xŠ„‚èž‚Ý‹­§ƒR[ƒ‹ #*/
-//#define       V2_1_DBG_INTMAC             /*# ƒfƒoƒbƒN—pF‚l‚`‚bŠ„‚èž‚Ý‹­§ƒR[ƒ‹ #*/
+//#define       V2_1_DBG_INTPHY             /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šï¼°ï¼¨ï¼¹å‰²ã‚Šè¾¼ã¿å¼·åˆ¶ã‚³ãƒ¼ãƒ« #*/
+//#define       V2_1_DBG_INTMAC             /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šï¼­ï¼¡ï¼£å‰²ã‚Šè¾¼ã¿å¼·åˆ¶ã‚³ãƒ¼ãƒ« #*/
 #ifdef  MAKE_IPL
-//#define       V2_1_DBG_INTDSP             /*# ƒfƒoƒbƒN—pF‚c‚r‚oŠ„‚èž‚Ý‹­§ƒR[ƒ‹ #*/
+//#define       V2_1_DBG_INTDSP             /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šï¼¤ï¼³ï¼°å‰²ã‚Šè¾¼ã¿å¼·åˆ¶ã‚³ãƒ¼ãƒ« #*/
 #else
-//#define           V2_1_DBG_INTDSP             /*# ƒfƒoƒbƒN—pF‚c‚r‚oŠ„‚èž‚Ý‹­§ƒR[ƒ‹ #*/
-//#define       LSI_DOWN_CHECK                  /*#  #*/    //2001.02.26 V2.2’Ç‰Á
+//#define           V2_1_DBG_INTDSP             /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šï¼¤ï¼³ï¼°å‰²ã‚Šè¾¼ã¿å¼·åˆ¶ã‚³ãƒ¼ãƒ« #*/
+//#define       LSI_DOWN_CHECK                  /*#  #*/    //2001.02.26 V2.2è¿½åŠ 
 #endif
-//#define           V2_1_DBG_SIOINTCHK          /*# ƒfƒoƒbƒN—pF‚r‚h‚nŠ„‚èž‚Ýƒ`ƒFƒbƒN #*/
-//#define       V2_1_DBG_LUNUM              /*# ƒfƒoƒbƒN—pF‚k‚t”Ô†‹­§Ý’è #*/
+//#define           V2_1_DBG_SIOINTCHK          /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šï¼³ï¼©ï¼¯å‰²ã‚Šè¾¼ã¿ãƒã‚§ãƒƒã‚¯ #*/
+//#define       V2_1_DBG_LUNUM              /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šï¼¬ï¼µç•ªå·å¼·åˆ¶è¨­å®š #*/
 
-//#define       V2_1_DBG_ECHOEX             /*# ƒfƒoƒbƒN—pF‚d‚b‚g‚nƒLƒƒƒ“ƒZƒ‹ƒ{[ƒhŽÀ‘• #*/
-//#define       V2_1_DBG_DBGLED             /*# ƒfƒoƒbƒN—pF‚c‚a‚f|‚k‚d‚c #*/
-//#define       V2_1_DBG_IPL                /*# ƒfƒoƒbƒN—pF‚h‚o‚k #*/
-//#define       V2_1_DBG_SIONG              /*# ƒfƒoƒbƒN—pF‚r‚h‚n’ÊM‚m‚f #*/
-//#define       V2_1_DBG_UNISELFOK          /*# UNI CAST Ž©•ª‚Ö‚Ì‘—M—}Ž~’âŽ~ #*/
-//#define       V2_1_DBG_LUMNGSYNCSND       /*# ƒfƒoƒbƒN—pFLUMNG SYNC SEND§Œä #*/
-//#define       V2_1_DBG_UNIINTFULL         /*# ƒfƒoƒbƒN—pFLUMNG SYNC SEND§Œä #*/
-//#define       V2_1_DBG_UNISELFSTOP        /*# ƒfƒoƒbƒN—pFUNI CAST Ž©•ª‚Ö‚Ì‘—M—}Ž~ #*/
-//#define       V2_1_DBG_CRINTBZOFF         /*# ƒfƒoƒbƒN—pF‚b‚q‚h‚m‚sƒXƒ^[ƒgŽž‚ÌƒuƒU[‚n‚e‚e #*/
-//#define       V2_1_DBG_UNIFULL            /*# ƒfƒoƒbƒN—pFƒ†ƒjƒLƒƒƒXƒg‘ŠŽè‚e‚t‚k‚k #*/
-//#define       V2_1_DBG_TFTPSRVRTY         /*# ƒfƒoƒbƒN—pFTFTPSRV‘—MƒŠƒgƒ‰ƒC #*/
-//#define       V2_1_DBG_TFTPSRV1PKTJ           /*# ƒfƒoƒbƒN—pFTFTPSRV‚PƒpƒPƒbƒg512bytejust‘—M #*/
-//#define       V2_1_DBG_TFTPSRV1PKTU           /*# ƒfƒoƒbƒN—pFTFTPSRV‚PƒpƒPƒbƒg512byteunder‘—M #*/
-//#define       V2_1_DBG_CRINTADDR          /*# ƒfƒoƒbƒN—pF‚b‚q‚h‚m‚s‚Æ‚b‚k‚j‚cƒAƒhƒŒƒX‚ÌØ‚è•ª‚¯î•ñ #*/
-//#define       V2_1_DBG_TFTPEX             /*# ƒfƒoƒbƒN—pF‚s‚e‚s‚oƒpƒPƒbƒgŠOo #*/
+//#define       V2_1_DBG_ECHOEX             /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šï¼¥ï¼£ï¼¨ï¼¯ã‚­ãƒ£ãƒ³ã‚»ãƒ«ãƒœãƒ¼ãƒ‰å®Ÿè£… #*/
+//#define       V2_1_DBG_DBGLED             /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šï¼¤ï¼¢ï¼§ï¼ï¼¬ï¼¥ï¼¤ #*/
+//#define       V2_1_DBG_IPL                /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šï¼©ï¼°ï¼¬ #*/
+//#define       V2_1_DBG_SIONG              /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šï¼³ï¼©ï¼¯é€šä¿¡ï¼®ï¼§ #*/
+//#define       V2_1_DBG_UNISELFOK          /*# UNI CAST è‡ªåˆ†ã¸ã®é€ä¿¡æŠ‘æ­¢åœæ­¢ #*/
+//#define       V2_1_DBG_LUMNGSYNCSND       /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šLUMNG SYNC SENDåˆ¶å¾¡ #*/
+//#define       V2_1_DBG_UNIINTFULL         /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šLUMNG SYNC SENDåˆ¶å¾¡ #*/
+//#define       V2_1_DBG_UNISELFSTOP        /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šUNI CAST è‡ªåˆ†ã¸ã®é€ä¿¡æŠ‘æ­¢ #*/
+//#define       V2_1_DBG_CRINTBZOFF         /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šï¼£ï¼²ï¼©ï¼®ï¼´ã‚¹ã‚¿ãƒ¼ãƒˆæ™‚ã®ãƒ–ã‚¶ãƒ¼ï¼¯ï¼¦ï¼¦ #*/
+//#define       V2_1_DBG_UNIFULL            /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šãƒ¦ãƒ‹ã‚­ãƒ£ã‚¹ãƒˆç›¸æ‰‹ï¼¦ï¼µï¼¬ï¼¬ #*/
+//#define       V2_1_DBG_TFTPSRVRTY         /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šTFTPSRVé€ä¿¡ãƒªãƒˆãƒ©ã‚¤ #*/
+//#define       V2_1_DBG_TFTPSRV1PKTJ           /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šTFTPSRVï¼‘ãƒ‘ã‚±ãƒƒãƒˆ512bytejusté€ä¿¡ #*/
+//#define       V2_1_DBG_TFTPSRV1PKTU           /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šTFTPSRVï¼‘ãƒ‘ã‚±ãƒƒãƒˆ512byteunderé€ä¿¡ #*/
+//#define       V2_1_DBG_CRINTADDR          /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šï¼£ï¼²ï¼©ï¼®ï¼´ã¨ï¼£ï¼¬ï¼«ï¼¤ã‚¢ãƒ‰ãƒ¬ã‚¹ã®åˆ‡ã‚Šåˆ†ã‘æƒ…å ± #*/
+//#define       V2_1_DBG_TFTPEX             /*# ãƒ‡ãƒãƒƒã‚¯ç”¨ï¼šï¼´ï¼¦ï¼´ï¼°ãƒ‘ã‚±ãƒƒãƒˆå¤–å‡º #*/
 #endif
 
-/*---  V2.1LUƒtƒ@[ƒ€’Ç‰ÁiENDj  ---*/
+/*---  V2.1LUãƒ•ã‚¡ãƒ¼ãƒ è¿½åŠ ï¼ˆENDï¼‰  ---*/
 
 
 
 /*###########################################################################*/
 /*#                                                                         #*/
-/*#                               ƒVƒXƒeƒ€’è”                              #*/
+/*#                               ã‚·ã‚¹ãƒ†ãƒ å®šæ•°                              #*/
 /*#                                                                         #*/
 /*###########################################################################*/
-#define     VO_1FRM_BYTE    40              /*# ‰¹º‚PƒtƒŒ[ƒ€ƒTƒCƒY(Byte) #*/
-#define     VO_1FRM_WORD    20              /*# ‰¹º‚PƒtƒŒ[ƒ€ƒTƒCƒY(WORD) #*/
-#define     VO_1FRM_DWORD   10              /*# ‰¹º‚PƒtƒŒ[ƒ€ƒTƒCƒY(DWORD) #*/
-#define     VO_RTP_FRM_MAX  38              /*# ‚q‚s‚o‰¹ºƒtƒŒ[ƒ€”MAX(5ms’PˆÊ) #*/
-//#define       VO_BUF_FRM_MAX  150             /*# ŽóMƒoƒbƒtƒ@‰¹ºƒtƒŒ[ƒ€”MAX(5ms’PˆÊ) #*/
-//#define       VO_BUF_FRM_MAX  200             /*# ŽóMƒoƒbƒtƒ@‰¹ºƒtƒŒ[ƒ€”MAX(5ms’PˆÊ) 10ms100–Ê #*/    // 2000.01.16 •ÏX
-#define     VO_BUF_FRM_MAX  400             /*# ŽóMƒoƒbƒtƒ@‰¹ºƒtƒŒ[ƒ€”MAX(5ms’PˆÊ) 10ms200–Ê #*/    // 2000.01.16 •ÏX      // 2000.09 V2.1•ÏX
+#define     VO_1FRM_BYTE    40              /*# éŸ³å£°ï¼‘ãƒ•ãƒ¬ãƒ¼ãƒ ã‚µã‚¤ã‚º(Byte) #*/
+#define     VO_1FRM_WORD    20              /*# éŸ³å£°ï¼‘ãƒ•ãƒ¬ãƒ¼ãƒ ã‚µã‚¤ã‚º(WORD) #*/
+#define     VO_1FRM_DWORD   10              /*# éŸ³å£°ï¼‘ãƒ•ãƒ¬ãƒ¼ãƒ ã‚µã‚¤ã‚º(DWORD) #*/
+#define     VO_RTP_FRM_MAX  38              /*# ï¼²ï¼´ï¼°éŸ³å£°ãƒ•ãƒ¬ãƒ¼ãƒ æ•°MAX(5mså˜ä½) #*/
+//#define       VO_BUF_FRM_MAX  150             /*# å—ä¿¡ãƒãƒƒãƒ•ã‚¡éŸ³å£°ãƒ•ãƒ¬ãƒ¼ãƒ æ•°MAX(5mså˜ä½) #*/
+//#define       VO_BUF_FRM_MAX  200             /*# å—ä¿¡ãƒãƒƒãƒ•ã‚¡éŸ³å£°ãƒ•ãƒ¬ãƒ¼ãƒ æ•°MAX(5mså˜ä½) 10ms100é¢ #*/    // 2000.01.16 å¤‰æ›´
+#define     VO_BUF_FRM_MAX  400             /*# å—ä¿¡ãƒãƒƒãƒ•ã‚¡éŸ³å£°ãƒ•ãƒ¬ãƒ¼ãƒ æ•°MAX(5mså˜ä½) 10ms200é¢ #*/    // 2000.01.16 å¤‰æ›´      // 2000.09 V2.1å¤‰æ›´
 
-//ˆ³kLU‘Î‰žB‰¹º1ƒtƒŒ[ƒ€ƒoƒCƒg”’Ç‰ÁB2003.09.07
+//åœ§ç¸®LUå¯¾å¿œã€‚éŸ³å£°1ãƒ•ãƒ¬ãƒ¼ãƒ ãƒã‚¤ãƒˆæ•°è¿½åŠ ã€‚2003.09.07
 #define G723L_1FRM_BYTE     20
 #define G723H_1FRM_BYTE     24
 #define G729_1FRM_BYTE      10
@@ -333,602 +251,399 @@ typedef     unsigned long       DWORD;  /*# DWORD = 32bit #*/
 
 
 
-#define     VO_SLT_U        0xffffffff      /*# –³‰¹ƒpƒ^[ƒ“ƒf[ƒ^F‚•|‚Œ‚‚— #*/
-#define     VO_SLT_A        0x55555555      /*# –³‰¹ƒpƒ^[ƒ“ƒf[ƒ^F‚`|‚Œ‚‚— #*/
-#define     VO_SLTPTN_U     0               /*# –³‰¹ƒpƒ^[ƒ“Žw’èF‚•|‚Œ‚‚— #*/
-#define     VO_SLTPTN_A     1               /*# –³‰¹ƒpƒ^[ƒ“Žw’èF‚`|‚Œ‚‚— #*/
+#define     VO_SLT_U        0xffffffff      /*# ç„¡éŸ³ãƒ‘ã‚¿ãƒ¼ãƒ³ãƒ‡ãƒ¼ã‚¿ï¼šï½•ï¼ï½Œï½ï½— #*/
+#define     VO_SLT_A        0x55555555      /*# ç„¡éŸ³ãƒ‘ã‚¿ãƒ¼ãƒ³ãƒ‡ãƒ¼ã‚¿ï¼šï¼¡ï¼ï½Œï½ï½— #*/
+#define     VO_SLTPTN_U     0               /*# ç„¡éŸ³ãƒ‘ã‚¿ãƒ¼ãƒ³æŒ‡å®šï¼šï½•ï¼ï½Œï½ï½— #*/
+#define     VO_SLTPTN_A     1               /*# ç„¡éŸ³ãƒ‘ã‚¿ãƒ¼ãƒ³æŒ‡å®šï¼šï¼¡ï¼ï½Œï½ï½— #*/
 
-#define     CODEC_U         0               /*# ‚b‚n‚c‚d‚bFƒÊ|‚Œ‚‚—Žw’è #*/
-#define     CODEC_A         1               /*# ‚b‚n‚c‚d‚bF‚`|‚Œ‚‚—Žw’è #*/
+#define     CODEC_U         0               /*# ï¼£ï¼¯ï¼¤ï¼¥ï¼£ï¼šÎ¼ï¼ï½Œï½ï½—æŒ‡å®š #*/
+#define     CODEC_A         1               /*# ï¼£ï¼¯ï¼¤ï¼¥ï¼£ï¼šï¼¡ï¼ï½Œï½ï½—æŒ‡å®š #*/
 
-//#define       CNMAX           8               /*# Å‘åCN” i‚u‚P‚ÍA‚S‚g‚v‚ƒ‚ˆj#*/
-#define     CNMAX           4               /*# Å‘åCN” #*///2004.04 IP-CS•ÏX
-#define     CNMAX_IPCS          3               /*# IPCSŽÀÅ‘åCN” #*///2004.10 SS9100 
-
-
-#define     COM_NOMAL       0           /*# –³•ÏŠ·“]‘—iWORD“]‘—Žž‚ÉŽg—pj#*/
-#define     COM_CHANGE      1           /*# •ÏŠ·“]‘—iWORD“]‘—Žž‚ÉŽg—pj#*/
-
-    /*# ƒ^ƒXƒN‚l‚`‚w #*/
-//#define       TCB_MAX         14          /*# ƒ^ƒXƒN(TCB)” #*/
-//#define       TCB_MAX         17          /*# ƒ^ƒXƒN(TCB)” #*/   //2000.07 V2.1•ÏX
-//#define       TCB_MAX         18          /*# ƒ^ƒXƒN” 0--17 #*/      // 2001.08 V2.3•ÏX
-//#define       TCB_MAX         38          /*# ƒ^ƒXƒN” 0--37 #*/ /* ˆ³kLU */
-//#define       TCB_MAX         39          /*# ƒ^ƒXƒN” 0--38 #*/ /* ˆ³kLU */
-//ˆ³kLU‘Î‰žBDSPƒRƒ}ƒ“ƒhƒ^ƒXƒN2‚Â‚É‚µ‚½‚Ì‚Å•ÏXB2003.09.08
-//#define       TCB_MAX         40              /*# ƒ^ƒXƒN” 0--39 #*/ /* ˆ³kLU */
-#define     TCB_MAX         14              /*# ƒ^ƒXƒN” 0--14 #*/ /* IP-CS *///2004.04
-
-    /*# ƒvƒ‰ƒCƒIƒŠƒeƒB ‚l‚`‚w #*/
-//#define       PRI_MAX         1           /*# —Dæ“x” #*/
-//#define       PRI_MAX         2           /*# —Dæ“x” #*/    // 99.11.10
-#define     PRI_MAX         1           /*# —Dæ“x” #*/    // 99.11.29
-    /*# ‚d‚b‚a ‚l‚`‚w #*/
-//#define       ECB_MAX         44          /*# ‚d‚b‚a” #*/
-//#define       ECB_MAX         47          /*# ‚d‚b‚a” #*/        //2000.07 V2.1•ÏX
-//#define       ECB_MAX         49              /*# ‚d‚b‚a” #*/        //2001.02.08 V2.2•ÏXforMENTE
-//#define       ECB_MAX         50              /*# ‚d‚b‚a”  0--49 #*/     //2001.08.08 V2.3•ÏX forLULOG
-//#define       ECB_MAX         70              /*# ‚d‚b‚a”  0--69 #*/ /* ˆ³kLU */
-//#define       ECB_MAX         72              /*# ‚d‚b‚a”  0--71 #*/ /* ˆ³kLU */
-
-//ˆ³kLU‘Î‰žBDSPƒRƒ}ƒ“ƒhƒ^ƒXƒN2‚Â‚É‚µ‚½‚Ì‚Å•ÏXB2003.09.08
-//#define       ECB_MAX         73              /*# ‚d‚b‚a”  0--72 #*/ /* ˆ³kLU */
-#define     ECB_MAX         97              /*# ‚d‚b‚a”  0--96 #*/ /* ˆ³kLU *///2003.10 V3.1
+#define     CNMAX           4               /*# æœ€å¤§CNæ•° #*///2004.04 IP-CSå¤‰æ›´
+#define     CNMAX_IPCS          3               /*# IPCSå®Ÿæœ€å¤§CNæ•° #*///2004.10 SS9100 
 
 
-    /*# ‚k‚n‚f ‚l‚`‚w #*/
-#define     MIK_LOG_MAX     256         /*# ‚l‚h‚jƒƒO–Ê” #*/
-    /*# ƒv[ƒ‹‚l‚`‚w #*/
-//#define       POOL_MAX        16          /*# ƒv[ƒ‹‚h‚c”(V1) #*/
-//#define       POOL_MAX        25          /*# ƒv[ƒ‹‚h‚c”(V1) #*///2000.07 V2.1•ÏX
-//#define       POOL_MAX        28          /*# ƒv[ƒ‹‚h‚c” #*/ /* ˆ³kLU */
-
-//ˆ³kLU‘Î‰žBDSPƒŠƒAƒ‹ƒ^ƒCƒ€ƒRƒ}ƒ“ƒh—p’Ç‰Á‚µ‚½‚Ì‚Å•ÏXB2003.09.08
-#define     POOL_MAX        32          /*# ƒv[ƒ‹‚h‚c” 0--31 #*/ /* ˆ³kLU */
-
-    /*# ƒ^ƒXƒN—pƒXƒ^ƒbƒNƒTƒCƒY’è‹` #*/
-#define     sup_Stack_size          2048        /*# supƒXƒ^ƒbƒNƒTƒCƒY #*/
-#define     dpisr_main_Stack_size   2048
-#define     lumng_Stack_size        2048
-#define     doep_Stack_size         2048
-#define     h323_Stack_size         2048
-#define     clkd_Stack_size         2048
-#define     crintctl_Stack_size     2048
-#define     tftp_Stack_size         2048
-#define     tmr_Stack_size          2048
-//#define       door_main_Stack_size    2048//IP-CS‘Î‰žíœ 2004.04
-#define     dspmng_Stack_size       2048
-#define     fusion_rcv_Stack_size   2048        /*# fusion_rcvƒXƒ^ƒbƒNƒTƒCƒY #*/
-#define     fusion_tmr_Stack_size   2048        /*# fusion_tmrƒXƒ^ƒbƒNƒTƒCƒY #*/
-//#define       almmng_Stack_size       2048        /*# (V1) #*///IP-CS‘Î‰žíœ 2004.04
-#define     ipl_Stack_size          2048        /*# IPL—p(V1) #*/
-//#define       bootpsrv_Stack_size     2048        /*# BOOTPƒT[ƒoƒXƒ^ƒbƒNƒTƒCƒY #*/   //2000.07 V2.1’Ç‰Á//IP-CS‘Î‰žíœ 2004.04
-//#define       tftpsrv_Stack_size      2048        /*# TFTPƒT[ƒoƒXƒ^ƒbƒNƒTƒCƒY #*/    //2000.07 V2.1’Ç‰Á//IP-CS‘Î‰žíœ 2004.04
-//#define       sioctl_Stack_size       2048        /*# SIO§ŒäƒXƒ^ƒbƒNƒTƒCƒY #*/       //2000.07 V2.1’Ç‰Á//IP-CS‘Î‰žíœ 2004.04
-#define     mnt_Stack_size          2048        /*# •ÛŽçÝ’èƒXƒ^ƒbƒNƒTƒCƒY #*/      //2001.02.07 V2.2’Ç‰Á
-#define     lu_log_Stack_size       2048        /*# ‚k‚tƒƒOƒXƒ^ƒbƒNƒTƒCƒY #*/      //2001.08 V2.3’Ç‰Á
-/* ˆ³kLU */
-//#define       fcl_mng_Stack_size      2048        /*# FAXŠÇ—ƒXƒ^ƒbƒNƒTƒCƒY #*///IP-CS FAX‘Î‰žíœ 2004.04
-//#define       fcl_t30_Stack_size      2048        /*# T30 ƒXƒ^ƒbƒNƒTƒCƒY #*/
-//#define       fcl_t38_Stack_size      2048        /*# T38 ƒXƒ^ƒbƒNƒTƒCƒY #*/
-//#define       fcl_mdm_Stack_size      2048        /*# MDM ƒXƒ^ƒbƒNƒTƒCƒY #*/
-//#define       fcl_acc1_Stack_size     2048        /*# ACC1ƒXƒ^ƒbƒNƒTƒCƒY #*/
-//#define       fcl_acc2_Stack_size     2048        /*# ACC2ƒXƒ^ƒbƒNƒTƒCƒY #*/
-//#define       fcl_acc3_Stack_size     2048        /*# ACC3ƒXƒ^ƒbƒNƒTƒCƒY #*/
-//#define       fcl_acc4_Stack_size     2048        /*# ACC4ƒXƒ^ƒbƒNƒTƒCƒY #*/
-//#define       fcl_acc5_Stack_size     2048        /*# ACC5ƒXƒ^ƒbƒNƒTƒCƒY #*/
-//#define       fcl_acc6_Stack_size     2048        /*# ACC6ƒXƒ^ƒbƒNƒTƒCƒY #*/
-//#define       fcl_acc7_Stack_size     2048        /*# ACC7ƒXƒ^ƒbƒNƒTƒCƒY #*/
-//#define       fcl_acc8_Stack_size     2048        /*# ACC8ƒXƒ^ƒbƒNƒTƒCƒY #*/
-//#define       fcl_con1_Stack_size     2048        /*# CON1ƒXƒ^ƒbƒNƒTƒCƒY #*/
-//#define       fcl_con2_Stack_size     2048        /*# CON2ƒXƒ^ƒbƒNƒTƒCƒY #*/
-//#define       fcl_con3_Stack_size     2048        /*# CON3ƒXƒ^ƒbƒNƒTƒCƒY #*/
-//#define       fcl_con4_Stack_size     2048        /*# CON4ƒXƒ^ƒbƒNƒTƒCƒY #*/
-//#define       fcl_con5_Stack_size     2048        /*# CON5ƒXƒ^ƒbƒNƒTƒCƒY #*/
-//#define       fcl_con6_Stack_size     2048        /*# CON6ƒXƒ^ƒbƒNƒTƒCƒY #*/
-//#define       fcl_con7_Stack_size     2048        /*# CON7ƒXƒ^ƒbƒNƒTƒCƒY #*/
-//#define       fcl_con8_Stack_size     2048        /*# CON8ƒXƒ^ƒbƒNƒTƒCƒY #*/
-
-//ˆ³kLU‘Î‰ž 2003.08.22
-//#define       dspcommand_Stack_size   2048        /*# DSPƒRƒ}ƒ“ƒhƒ^ƒXƒNƒXƒ^ƒbƒNƒTƒCƒY #*/
-//ˆ³kLU‘Î‰ž 2003.09.03
-#define     dspcommand0_Stack_size  2048        /*# DSPƒRƒ}ƒ“ƒhƒ^ƒXƒN0ƒXƒ^ƒbƒNƒTƒCƒY #*/
-//#define       dspcommand1_Stack_size  2048        /*# DSPƒRƒ}ƒ“ƒhƒ^ƒXƒN1ƒXƒ^ƒbƒNƒTƒCƒY #*///IP-CS‘Î‰žíœ 2004.04
-
+#define     COM_NOMAL       0           /*# ç„¡å¤‰æ›è»¢é€ï¼ˆWORDè»¢é€æ™‚ã«ä½¿ç”¨ï¼‰#*/
+#define     COM_CHANGE      1           /*# å¤‰æ›è»¢é€ï¼ˆWORDè»¢é€æ™‚ã«ä½¿ç”¨ï¼‰#*/
 
 #ifdef  NO_BOOTP_USE
-//#define   LU_IP                   0x02010b0a
-//#define   CCU_IP                  0x01010b0a
-//#define   DEFAULT_MASK            0x00ffffff
-//#define   LU_IP                   0x0a0b0102      // 10.11.1.2
-//#define   CCU_IP                  0x0a0b0101      // 10.11.1.1
 #define     LU_IP                   0xc0a80164      // 192.168.1.100
-//#define   LU_IP                   0xc0a8010a      // 192.168.1.10
-//#define   CCU_IP                  0xc0a801dd      // 192.168.1.221
-//#define   CCU_IP                  0xc0a801de      // 192.168.1.222
 #define     CCU_IP                  0xc0a801e0      // 192.168.1.222
 #define     DEFAULT_MASK            0xffffff00
-//#define   CCU_IP1                 0xde01a8c0      // 192.168.1.222
-//#define   CCU_IP2                 0xde01a8c0      // 192.168.1.222
 #define     CCU_IP1                 0xe001a8c0      // 192.168.1.222
 #define     CCU_IP2                 0xe101a8c0      // 192.168.1.222
 #endif  // NO_BOOTP_USE
 
-//#define           DOEP_CCU_PORT       49200
 #define         DOEP_CCU_PORT       0x30c0          // 49200
-//#define           DOEP_MY_PORT        49200
 #define         DOEP_MY_PORT        0x30c0          // 49200
 
 #define         LU_LOG_PORT     0x32c0          // 49202
 
-/*# ƒ}ƒWƒbƒNƒNƒbƒL[#*/
+/*# ãƒžã‚¸ãƒƒã‚¯ã‚¯ãƒƒã‚­ãƒ¼#*/
 #define BOOTP_MAGIC     0x63825363
 #define BOOTP_MAGIC_LE  0x63538263
 
-/*# ‘Ží•Êi‚u‚Pj #*/
+/*# å›½ç¨®åˆ¥ï¼ˆï¼¶ï¼‘ï¼‰ #*/
 #define         LU_JAPAN        0x00
 #define         LU_USA          0x01
 
-//#define           LU_NUM_MAX      96              /*# —LŒø‚k‚t”Ô†‚l‚`‚w #*/
-#define         LU_NUM_MAX      255             /*# —LŒø‚k‚t”Ô†‚l‚`‚w #*///2004.01 LU32B
+//#define           LU_NUM_MAX      96              /*# æœ‰åŠ¹ï¼¬ï¼µç•ªå·ï¼­ï¼¡ï¼¸ #*/
+#define         LU_NUM_MAX      255             /*# æœ‰åŠ¹ï¼¬ï¼µç•ªå·ï¼­ï¼¡ï¼¸ #*///2004.01 LU32B
 
 #define         LU_NUM_DIAL_MAX 98              //2004.01 LU32B
 
-#define     FAN_MSK 0x04                                    /*# áŠQî•ñÚ¼Þ½À bit2Ï½¸—p  #*/
-//#define       POW_MSK 0x18                                    /*# áŠQî•ñÚ¼Þ½À bit3,4Ï½¸—p  #*/
-//#define       UPS_MSK 0x60                                    /*# áŠQî•ñÚ¼Þ½À bit5,6Ï½¸—p  #*/
-#define     AC_MSK      0x18                                /*# áŠQî•ñƒŒƒWƒXƒ^ bit3,4ƒ}ƒXƒN—p  #*/
-#define     AC_OK       0x18                                /*# ‚`‚b³í #*/
-#define     AC_OFF      0x00                                /*# ’â“d‚`‚bƒIƒt #*/
-#define     AC_FAIL0    0x10                                /*# ‚OŒnˆÙí #*/
-#define     AC_FAIL1    0x08                                /*# ‚PŒnˆÙí #*/
+#define     FAN_MSK 0x04                                    /*# éšœå®³æƒ…å ±ï¾šï½¼ï¾žï½½ï¾€ bit2ï¾ï½½ï½¸ç”¨  #*/
+#define     AC_MSK      0x18                                /*# éšœå®³æƒ…å ±ãƒ¬ã‚¸ã‚¹ã‚¿ bit3,4ãƒžã‚¹ã‚¯ç”¨  #*/
+#define     AC_OK       0x18                                /*# ï¼¡ï¼£æ­£å¸¸ #*/
+#define     AC_OFF      0x00                                /*# åœé›»ï¼¡ï¼£ã‚ªãƒ• #*/
+#define     AC_FAIL0    0x10                                /*# ï¼ç³»ç•°å¸¸ #*/
+#define     AC_FAIL1    0x08                                /*# ï¼‘ç³»ç•°å¸¸ #*/
 
-#define     EMA_OK      0x0001                              /*# ’Êíi‰^—p’†j #*/
-#define     EMA_NG      0x0000                              /*# áŠQi’¼’ÊØ‘Öj #*/
+#define     EMA_OK      0x0001                              /*# é€šå¸¸ï¼ˆé‹ç”¨ä¸­ï¼‰ #*/
+#define     EMA_NG      0x0000                              /*# éšœå®³ï¼ˆç›´é€šåˆ‡æ›¿ï¼‰ #*/
 
-// ƒn[ƒhƒEƒFƒAƒo[ƒWƒ‡ƒ“
-//#define       E_V1_2_HARD 0x13                                /*# V1.2’l+1iV1.1ƒn[ƒh‚Í0xff‚ÉŒ©‚¦‚é‚½‚ß+1‚µ‚Ä0‚Æ‚·‚éj #*/   // 2000.05.12 V1.2’Ç‰Á
-//#define       E_V2_1_HARD 0x22                                /*# V2.1’l+1iV1.1ƒn[ƒh‚Í0xff‚ÉŒ©‚¦‚é‚½‚ß+1‚µ‚Ä0‚Æ‚·‚éj #*/   // 2000.07 V2.1’Ç‰Á
-#define     E_V1_1_HARD 0x11                                /*# V1.1’liV1.1ƒn[ƒh‚Í0xff‚ÉŒ©‚¦‚é‚ªˆ—‚Å‹­§•ÏŠ·‚·‚éj #*/      // 2000.09 V2.1’Ç‰Á
-#define     E_V1_2_HARD 0x12                                /*# V1.2’l #*/                                                      // 2000.09 V1.2•ÏX
-#define     E_V2_1_HARD 0x21                                /*# V2.1’l #*/                                                      // 2000.09 V2.1•ÏX
+// ãƒãƒ¼ãƒ‰ã‚¦ã‚§ã‚¢ãƒãƒ¼ã‚¸ãƒ§ãƒ³
+#define     E_V1_1_HARD 0x11                                /*# V1.1å€¤ï¼ˆV1.1ãƒãƒ¼ãƒ‰ã¯0xffã«è¦‹ãˆã‚‹ãŒå‡¦ç†ã§å¼·åˆ¶å¤‰æ›ã™ã‚‹ï¼‰ #*/      // 2000.09 V2.1è¿½åŠ 
+#define     E_V1_2_HARD 0x12                                /*# V1.2å€¤ #*/                                                      // 2000.09 V1.2å¤‰æ›´
+#define     E_V2_1_HARD 0x21                                /*# V2.1å€¤ #*/                                                      // 2000.09 V2.1å¤‰æ›´
 
-#define     E_V1_0_KAPPA    0x0000                          /*# ƒÈ‚u‚P #*/  //2000.09 V2.1’Ç‰Á
-#define     E_V2_0_KAPPA    0x0100                          /*# ƒÈ‚u‚Q #*/  //2000.09 V2.1’Ç‰Á
+#define     E_V1_0_KAPPA    0x0000                          /*# Îºï¼¶ï¼‘ #*/  //2000.09 V2.1è¿½åŠ 
+#define     E_V2_0_KAPPA    0x0100                          /*# Îºï¼¶ï¼’ #*/  //2000.09 V2.1è¿½åŠ 
 
-// ‚b‚b‚tƒo[ƒWƒ‡ƒ“
-//#define       E_V1_1_CCU  0x0101                              /*# ƒ_ƒ~[i–¢Žg—pj#*/ // 2000.07 V2.1’Ç‰Á
-//#define       E_V1_2_CCU  0x0102                              /*# ƒ_ƒ~[i–¢Žg—pj#*/ // 2000.07 V2.1’Ç‰Á
-//#define       E_V2_1_CCU  0x0201                              /*# CCUƒo[ƒWƒ‡ƒ“”Ô† #*/   // 2000.07 V2.1’Ç‰Á
-#define     E_V2_1_CCU  0x3231                              /*# CCUƒo[ƒWƒ‡ƒ“”Ô† #*/   // 2000.07 V2.1’Ç‰Á     2001.08 •ÏX
-#define     E_V2_2_CCU  0x3232                              /*# CCUƒo[ƒWƒ‡ƒ“”Ô† #*/
-#define     E_V2_3_CCU  0x3233                              /*# CCUƒo[ƒWƒ‡ƒ“”Ô† #*/
+// ï¼£ï¼£ï¼µãƒãƒ¼ã‚¸ãƒ§ãƒ³
+#define     E_V2_1_CCU  0x3231                              /*# CCUãƒãƒ¼ã‚¸ãƒ§ãƒ³ç•ªå· #*/   // 2000.07 V2.1è¿½åŠ      2001.08 å¤‰æ›´
+#define     E_V2_2_CCU  0x3232                              /*# CCUãƒãƒ¼ã‚¸ãƒ§ãƒ³ç•ªå· #*/
+#define     E_V2_3_CCU  0x3233                              /*# CCUãƒãƒ¼ã‚¸ãƒ§ãƒ³ç•ªå· #*/
 
-//  “¯Šú§Œä•ûŽ®’è‹` V1.2’Ç‰Á
-#define     E_SYN_STOP  0                                   /*# “¯Šú§Œä–¢Šm’è #*/  // 2000.05.22 V1.2’Ç‰Á
-#define     E_MST_V1_1  1                                   /*# ƒ}ƒXƒ^‚k‚t V1.1 #*/ // 2000.05.11 V1.2’Ç‰Á
-#define     E_MST_V1_2  2                                   /*# ƒ}ƒXƒ^‚k‚t V1.2 #*/ // 2000.05.11 V1.2’Ç‰Á
-#define     E_BETUSEN1  3                                   /*# •Êü“¯Šú‚P #*/      // 2000.05.11 V1.2’Ç‰Á
-#define     E_DOUKI1    4                                   /*# “¯Šú§Œä‚P #*/      // 2000.05.11 V1.2’Ç‰Á
-#define     E_PACKET1   5                                   /*# ƒpƒPƒbƒg“¯Šú‚P #*/  // 2000.05.11 V1.2’Ç‰Á
-#define     E_BETUSEN2  6                                   /*# •Êü“¯Šú‚Q #*/      // 2000.05.11 V1.2’Ç‰Á
-#define     E_DOUKI2    7                                   /*# “¯Šú§Œä‚Q #*/      // 2000.05.11 V1.2’Ç‰Á
-#define     E_PACKET2   8                                   /*# ƒpƒPƒbƒg“¯Šú‚Q #*/  // 2000.10.19 V2.1’Ç‰Á
+//  åŒæœŸåˆ¶å¾¡æ–¹å¼å®šç¾© V1.2è¿½åŠ 
+#define     E_SYN_STOP  0                                   /*# åŒæœŸåˆ¶å¾¡æœªç¢ºå®š #*/  // 2000.05.22 V1.2è¿½åŠ 
+#define     E_MST_V1_1  1                                   /*# ãƒžã‚¹ã‚¿ï¼¬ï¼µ V1.1 #*/ // 2000.05.11 V1.2è¿½åŠ 
+#define     E_MST_V1_2  2                                   /*# ãƒžã‚¹ã‚¿ï¼¬ï¼µ V1.2 #*/ // 2000.05.11 V1.2è¿½åŠ 
+#define     E_BETUSEN1  3                                   /*# åˆ¥ç·šåŒæœŸï¼‘ #*/      // 2000.05.11 V1.2è¿½åŠ 
+#define     E_DOUKI1    4                                   /*# åŒæœŸåˆ¶å¾¡ï¼‘ #*/      // 2000.05.11 V1.2è¿½åŠ 
+#define     E_PACKET1   5                                   /*# ãƒ‘ã‚±ãƒƒãƒˆåŒæœŸï¼‘ #*/  // 2000.05.11 V1.2è¿½åŠ 
+#define     E_BETUSEN2  6                                   /*# åˆ¥ç·šåŒæœŸï¼’ #*/      // 2000.05.11 V1.2è¿½åŠ 
+#define     E_DOUKI2    7                                   /*# åŒæœŸåˆ¶å¾¡ï¼’ #*/      // 2000.05.11 V1.2è¿½åŠ 
+#define     E_PACKET2   8                                   /*# ãƒ‘ã‚±ãƒƒãƒˆåŒæœŸï¼’ #*/  // 2000.10.19 V2.1è¿½åŠ 
 
-// ‚e‚k‚`‚r‚gƒf[ƒ^Ží•Ê 2000.09 V2.1’Ç‰Á
-enum {
-    FLS_DATID_IPL,                  /*# ‚h‚o‚kiŽg—p•s‰Âj #*/
-    FLS_DATID_CMD,                  /*# ƒRƒ}ƒ“ƒh”­s #*/
-    FLS_DATID_DAT,                  /*# ŠÇ—ƒf[ƒ^ #*/
-    FLS_DATID_HORY,                 /*# •Û—¯‰¹ #*/
-    FLS_DATID_TALKY,                /*# ƒg[ƒL[ #*/
-    FLS_DATID_SYS,                  /*# ƒIƒ“ƒ‰ƒCƒ“ƒVƒXƒeƒ€ƒtƒ@ƒCƒ‹ #*/
-    FLS_DATID_DSP,                  /*# ‚c‚r‚oƒvƒƒOƒ‰ƒ€ #*/
-    FLS_DATID_V3DSP,                /*# ŠO•t‚¯‚c‚r‚oƒvƒƒOƒ‰ƒ€ #*///2003.8’Ç‰Á
-    FLS_DATID_CADATA,               /*# CAØ‚è‘Ö‚¦î•ñFIP-CS(SS9100_PH1ÄŠJ) ’Ç‰Á #*/
-    FLS_DATID_ETC,                  /*# ‚»‚Ì‘¼ #*/
-    FLS_DATID_MAX                   /*# ƒf[ƒ^Ží•ÊÅ‘åŒÂ” #*/
-};
-
-/*# ‚r‚h‚n’ÊM“à•”ƒf[ƒ^ƒtƒH[ƒ}ƒbƒg #*/
+/*# ï¼³ï¼©ï¼¯é€šä¿¡å†…éƒ¨ãƒ‡ãƒ¼ã‚¿ãƒ•ã‚©ãƒ¼ãƒžãƒƒãƒˆ #*/
 enum{
-    SIOCTL_IN_VER,                  /*# ‚r‚h‚n’Ê’mƒo[ƒWƒ‡ƒ“iRESERVEj #*/     //LU32B
-    SIOCTL_IN_LUNUM_H,              /*# ‚k‚t”Ô†ãˆÊ #*/    //LU32B
-    SIOCTL_IN_LUNUM,                /*# ‚k‚t”Ô† #*/
-    SIOCTL_IN_VLAN,                 /*# ‚u‚k‚`‚m|‚h‚c#*/
-    SIOCTL_IN_CCUID,                /*# ‚b‚b‚t|‚h‚c #*/
-    SIOCTL_IN_DIPSW,                /*# ‚c‚h‚o‚r‚vî•ñ #*/  //LU32B
-    SIOCTL_IN_EXT,                  /*# Šg’£î•ñ #*/    //LU32B
-    SIOCTL_IN_SUV,                  /*# ƒTƒoƒCƒoƒ‹î•ñ #*/  //LU32B 
-    SIOCTL_IN_DATAMAX               /*# ƒf[ƒ^”Å‘å’l #*/
+    SIOCTL_IN_VER,                  /*# ï¼³ï¼©ï¼¯é€šçŸ¥ãƒãƒ¼ã‚¸ãƒ§ãƒ³ï¼ˆRESERVEï¼‰ #*/     //LU32B
+    SIOCTL_IN_LUNUM_H,              /*# ï¼¬ï¼µç•ªå·ä¸Šä½ #*/    //LU32B
+    SIOCTL_IN_LUNUM,                /*# ï¼¬ï¼µç•ªå· #*/
+    SIOCTL_IN_VLAN,                 /*# ï¼¶ï¼¬ï¼¡ï¼®ï¼ï¼©ï¼¤#*/
+    SIOCTL_IN_CCUID,                /*# ï¼£ï¼£ï¼µï¼ï¼©ï¼¤ #*/
+    SIOCTL_IN_DIPSW,                /*# ï¼¤ï¼©ï¼°ï¼³ï¼·æƒ…å ± #*/  //LU32B
+    SIOCTL_IN_EXT,                  /*# æ‹¡å¼µæƒ…å ± #*/    //LU32B
+    SIOCTL_IN_SUV,                  /*# ã‚µãƒã‚¤ãƒãƒ«æƒ…å ± #*/  //LU32B 
+    SIOCTL_IN_DATAMAX               /*# ãƒ‡ãƒ¼ã‚¿æ•°æœ€å¤§å€¤ #*/
 };
 #define SIOCTL_IN_BUFMAX    1024
 
-/*# ‚r‚h‚n“à•”’ÊMƒf[ƒ^ƒtƒH[ƒ}ƒbƒg #*/
+/*# ï¼³ï¼©ï¼¯å†…éƒ¨é€šä¿¡ãƒ‡ãƒ¼ã‚¿ãƒ•ã‚©ãƒ¼ãƒžãƒƒãƒˆ #*/
 enum{
-    SIOCTL_OUT_STX,                 /*# ‚r‚s‚w #*/
-    SIOCTL_OUT_VER_10,              /*# ‚r‚h‚n’Ê’mƒo[ƒWƒ‡ƒ“i‚P‚O‚ÌˆÊjiRESERVEj #*/     //LU32B
-    SIOCTL_OUT_VER_1,               /*# ‚r‚h‚n’Ê’mƒo[ƒWƒ‡ƒ“i‚P‚ÌˆÊjiRESERVEj #*/       //LU32B
-    SIOCTL_OUT_LUNUM_1000,          /*# ‚k‚t”Ô†i‚P‚O‚O‚O‚ÌˆÊj #*/        //LU32B
-    SIOCTL_OUT_LUNUM_100,           /*# ‚k‚t”Ô†i‚P‚O‚O‚ÌˆÊj #*/          //LU32B
-    SIOCTL_OUT_LUNUM_10,            /*# ‚k‚t”Ô†i‚P‚O‚ÌˆÊj #*/
-    SIOCTL_OUT_LUNUM_1,             /*# ‚k‚t”Ô†i‚P‚ÌˆÊj #*/
-    SIOCTL_OUT_VLAN_10,             /*# ‚u‚k‚`‚m|‚h‚ci‚P‚O‚ÌˆÊj#*/
-    SIOCTL_OUT_VLAN_1,              /*# ‚u‚k‚`‚m|‚h‚ci‚P‚ÌˆÊj #*/
-    SIOCTL_OUT_CCUID_10,            /*# ‚b‚b‚t|‚h‚ci‚P‚O‚ÌˆÊj #*/
-    SIOCTL_OUT_CCUID_1,             /*# ‚b‚b‚t|‚h‚ci‚P‚ÌˆÊj #*/
-    SIOCTL_OUT_DIPSW_10,            /*# ‚c‚h‚o‚r‚vî•ñi‚P‚O‚ÌˆÊj #*/  //LU32B
-    SIOCTL_OUT_DIPSW_1,             /*# ‚c‚h‚o‚r‚vî•ñi‚P‚ÌˆÊj #*/    //LU32B
+    SIOCTL_OUT_STX,                 /*# ï¼³ï¼´ï¼¸ #*/
+    SIOCTL_OUT_VER_10,              /*# ï¼³ï¼©ï¼¯é€šçŸ¥ãƒãƒ¼ã‚¸ãƒ§ãƒ³ï¼ˆï¼‘ï¼ã®ä½ï¼‰ï¼ˆRESERVEï¼‰ #*/     //LU32B
+    SIOCTL_OUT_VER_1,               /*# ï¼³ï¼©ï¼¯é€šçŸ¥ãƒãƒ¼ã‚¸ãƒ§ãƒ³ï¼ˆï¼‘ã®ä½ï¼‰ï¼ˆRESERVEï¼‰ #*/       //LU32B
+    SIOCTL_OUT_LUNUM_1000,          /*# ï¼¬ï¼µç•ªå·ï¼ˆï¼‘ï¼ï¼ï¼ã®ä½ï¼‰ #*/        //LU32B
+    SIOCTL_OUT_LUNUM_100,           /*# ï¼¬ï¼µç•ªå·ï¼ˆï¼‘ï¼ï¼ã®ä½ï¼‰ #*/          //LU32B
+    SIOCTL_OUT_LUNUM_10,            /*# ï¼¬ï¼µç•ªå·ï¼ˆï¼‘ï¼ã®ä½ï¼‰ #*/
+    SIOCTL_OUT_LUNUM_1,             /*# ï¼¬ï¼µç•ªå·ï¼ˆï¼‘ã®ä½ï¼‰ #*/
+    SIOCTL_OUT_VLAN_10,             /*# ï¼¶ï¼¬ï¼¡ï¼®ï¼ï¼©ï¼¤ï¼ˆï¼‘ï¼ã®ä½ï¼‰#*/
+    SIOCTL_OUT_VLAN_1,              /*# ï¼¶ï¼¬ï¼¡ï¼®ï¼ï¼©ï¼¤ï¼ˆï¼‘ã®ä½ï¼‰ #*/
+    SIOCTL_OUT_CCUID_10,            /*# ï¼£ï¼£ï¼µï¼ï¼©ï¼¤ï¼ˆï¼‘ï¼ã®ä½ï¼‰ #*/
+    SIOCTL_OUT_CCUID_1,             /*# ï¼£ï¼£ï¼µï¼ï¼©ï¼¤ï¼ˆï¼‘ã®ä½ï¼‰ #*/
+    SIOCTL_OUT_DIPSW_10,            /*# ï¼¤ï¼©ï¼°ï¼³ï¼·æƒ…å ±ï¼ˆï¼‘ï¼ã®ä½ï¼‰ #*/  //LU32B
+    SIOCTL_OUT_DIPSW_1,             /*# ï¼¤ï¼©ï¼°ï¼³ï¼·æƒ…å ±ï¼ˆï¼‘ã®ä½ï¼‰ #*/    //LU32B
     
-    SIOCTL_OUT_EXT_10,              /*# Šg’£î•ñi‚P‚O‚ÌˆÊj #*///LU32B 
-    SIOCTL_OUT_EXT_1,               /*# Šg’£î•ñi‚P‚ÌˆÊj #*///LU32B
-    SIOCTL_OUT_SUV_10,              /*# ƒTƒoƒCƒoƒ‹“®ìi‚P‚O‚ÌˆÊj #*///LU32B   
-    SIOCTL_OUT_SUV_1,               /*# ƒTƒoƒCƒoƒ‹“®ìi‚P‚ÌˆÊj #*///LU32B 
+    SIOCTL_OUT_EXT_10,              /*# æ‹¡å¼µæƒ…å ±ï¼ˆï¼‘ï¼ã®ä½ï¼‰ #*///LU32B 
+    SIOCTL_OUT_EXT_1,               /*# æ‹¡å¼µæƒ…å ±ï¼ˆï¼‘ã®ä½ï¼‰ #*///LU32B
+    SIOCTL_OUT_SUV_10,              /*# ã‚µãƒã‚¤ãƒãƒ«å‹•ä½œï¼ˆï¼‘ï¼ã®ä½ï¼‰ #*///LU32B   
+    SIOCTL_OUT_SUV_1,               /*# ã‚µãƒã‚¤ãƒãƒ«å‹•ä½œï¼ˆï¼‘ã®ä½ï¼‰ #*///LU32B 
     
-    SIOCTL_OUT_SUM0,                /*# ƒTƒ€’lF‚OƒoƒCƒg–Ú #*/
-    SIOCTL_OUT_SUM1,                /*# ƒTƒ€’lF‚PƒoƒCƒg–Ú #*/
-    SIOCTL_OUT_ETX,                 /*# ‚d‚s‚w #*/
-    SIOCTL_OUT_DATAMAX              /*# ƒf[ƒ^”Å‘å’l #*/
+    SIOCTL_OUT_SUM0,                /*# ã‚µãƒ å€¤ï¼šï¼ãƒã‚¤ãƒˆç›® #*/
+    SIOCTL_OUT_SUM1,                /*# ã‚µãƒ å€¤ï¼šï¼‘ãƒã‚¤ãƒˆç›® #*/
+    SIOCTL_OUT_ETX,                 /*# ï¼¥ï¼´ï¼¸ #*/
+    SIOCTL_OUT_DATAMAX              /*# ãƒ‡ãƒ¼ã‚¿æ•°æœ€å¤§å€¤ #*/
 };
 #define SIOCTL_OUT_BUFMAX   (SIOCTL_IN_BUFMAX*2)
 
 #define     EXT_D01     0x0001  //2004.01 LU32B
-
-//SS9100 2004.11.12 EXT_IPstage‚Ííœ‚µ‚ÄˆÈ~‚Â‚ß‚é
-//#define       EXT_IPstage     0x0002  //2004.04 IP-CS
 #define     EXT_SS9100      0x0002      //0x0004    //2004.08 SS9100
 #define     EXT_OTHERS      0x0004      //0x0008    //2004.08 SS9100
 
-// CAØ‚è‘Ö‚¦î•ñƒfƒtƒHƒ‹ƒg’lFIP-CS(SS9100_PH1ÄŠJ) ’Ç‰Á
-#define     CA_DATA_SERV_ID         0x00            // Ú‘±æŽ¯•ÊŽq(ƒvƒ‰ƒCƒ}ƒŠ:0)
-#define     CA_DATA_SURV_CHG_TIME   0x02            // ƒTƒoƒCƒoƒ‹Ø‚è‘Ö‚¦ƒ^ƒCƒ}(120•b:2•ª)
-#define     CA_DATA_SURV_RET_TIME   0x00            // ƒTƒoƒCƒoƒ‹Ø‚è–ß‚µƒ^ƒCƒ}(0•b)
-#define     CA_DATA_CONNECT_TIME    0x00            // ƒRƒlƒNƒVƒ‡ƒ“ÄÚ‘±ƒ^ƒCƒ}(0•b)
+// CAåˆ‡ã‚Šæ›¿ãˆæƒ…å ±ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆå€¤ï¼šIP-CS(SS9100_PH1å†é–‹) è¿½åŠ 
+#define     CA_DATA_SERV_ID         0x00            // æŽ¥ç¶šå…ˆè­˜åˆ¥å­(ãƒ—ãƒ©ã‚¤ãƒžãƒª:0)
+#define     CA_DATA_SURV_CHG_TIME   0x02            // ã‚µãƒã‚¤ãƒãƒ«åˆ‡ã‚Šæ›¿ãˆã‚¿ã‚¤ãƒž(120ç§’:2åˆ†)
+#define     CA_DATA_SURV_RET_TIME   0x00            // ã‚µãƒã‚¤ãƒãƒ«åˆ‡ã‚Šæˆ»ã—ã‚¿ã‚¤ãƒž(0ç§’)
+#define     CA_DATA_CONNECT_TIME    0x00            // ã‚³ãƒã‚¯ã‚·ãƒ§ãƒ³å†æŽ¥ç¶šã‚¿ã‚¤ãƒž(0ç§’)
 
 
 /*###########################################################################*/
 /*#                                                                         #*/
-/*#                           ƒƒbƒZ[ƒWŠÖ˜A                                #*/
+/*#                           ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸é–¢é€£                                #*/
 /*#                                                                         #*/
 /*###########################################################################*/
-#ifdef  MAKE_IPL
-#define     SUP_ID          0x00        /*# ƒTƒ|[ƒgƒ^ƒXƒN #*/
-#define     DRIVER_ID       0x01        /*# ƒfƒoƒCƒXƒhƒ‰ƒCƒo[ŽóMƒ^ƒXƒN #*/
-#define     FUSION_ID       0x02        /*# FUSIONƒ^ƒCƒ}ƒ^ƒXƒN #*/
-#define     IPL_ID          0x03        /*# IPLƒ^ƒXƒN #*/
-//#define       SIOCTL_ID       0x04        /*# ‚r‚h‚n§Œä #*/      // 2000.07 V2.1//IP-CSíœ2004.04
-#define     FLASH_ID        0x05        /*# ‚e‚k‚`‚r‚g§Œä #*/  // 2000.09 V2.1’Ç‰Á
-#else//ƒIƒ“ƒ‰ƒCƒ“
-#ifdef  MENTE
-#define     SUP_ID          0x00        /*# ƒTƒ|[ƒgƒ^ƒXƒN #*/
-#define     LUMNG_ID        0x01        /*# ‚k‚tŠÇ—ƒ^ƒXƒN #*/
-#define     DOEP_ID         0x02        /*# ‚c‚n‚d‚o§Œä #*/
-#define     TMR_ID          0x03        /*# ƒ^ƒCƒ}ƒ^ƒXƒN #*/
-#define     DRIVER_ID       0x04        /*# ƒfƒoƒCƒXƒhƒ‰ƒCƒo[ŽóMƒ^ƒXƒN #*/
-#define     FUSION_ID       0x05        /*# FUSIONƒ^ƒCƒ}ƒ^ƒXƒN #*/
-#define     MNT_ID          0x06        /*# •ÛŽçÝ’è§Œä #*/    // 2001.02.07 V2.2’Ç‰Á
-#define     DSPINT_ID       0x07        /*# ‚c‚r‚oŠ„‚èž‚Ý #*/      //2000.07.13 V2.1DEBUG
-#define     FLASH_ID        0x08        /*# ‚e‚k‚`‚r‚g§Œä #*/  // 2000.09 V2.1’Ç‰Á
+/*# ã‚¿ã‚¹ã‚¯ID(ã‚¿ã‚¹ã‚¯ã‚¢ã‚¿ãƒƒãƒç”¨,ãã®ä»–ã‚¿ã‚¹ã‚¯è­˜åˆ¥ç”¨) #*/
+enum {
+		MON_ID = 0,				/*# WDTç®¡ç†ã‚¹ãƒ¬ãƒƒãƒ‰ #*/
+		TMR_ID,					/*# ã‚¿ã‚¤ãƒžç®¡ç†ã‚¹ãƒ¬ãƒƒãƒ‰  #*/
+		CSCTL_ID,				/*# CSç®¡ç†ã‚¹ãƒ¬ãƒƒãƒ‰ #*/
+		MDA_ID,					/*# éŸ³å£°ç®¡ç†ã‚¹ãƒ¬ãƒƒãƒ‰ #*/
+		LUMNG_ID,				/*# è£…ç½®ç®¡ç†ã‚¹ãƒ¬ãƒƒãƒ‰ #*/
+		DOEPR_ID,				/*# ã‚ªãƒ¼ãƒ€å—ä¿¡ã‚¹ãƒ¬ãƒƒãƒ‰ #*/
+		DOEPS_ID,				/*# ã‚¤ãƒ™ãƒ³ãƒˆé€ä¿¡ã‚¹ãƒ¬ãƒƒãƒ‰ #*/
+		DWL_ID,					/*# tftpã‚µãƒ¼ãƒç®¡ç†ã‚¹ãƒ¬ãƒƒãƒ‰ #*/
+		MNT_ID,					/*# ä¿å®ˆç®¡ç†ã‚¹ãƒ¬ãƒƒãƒ‰ #*/
+		LULOG_ID,				/*# ãƒ­ã‚°ç®¡ç†ã‚¹ãƒ¬ãƒƒãƒ‰ #*/
+		SUP_ID,					/*# ã‚µãƒãƒ¼ãƒˆæ©Ÿèƒ½ã‚¹ãƒ¬ãƒƒãƒ‰ #*/
+		DSPEVT_ID,				/*# dspevt #*/
+		DSP2LAN_ID,				/*# dsp2lan #*/
+		LAN2DSP_ID,				/*# lan2dsp #*/
+		CYCCTL_ID,				/*# sys_ctl #*/
+		SPROCTL_ID,				/*# spro_ctl #*/
+		LPBCTL_ID,				/*# lpb_ctl #*/
+		FPGAR_ID,				/*# fpga_read #*/
+		WRT_ID,					/*# writer #*/
+		FPGAW_ID,				/*# fpga_write #*/
+		COM_TASK_MAX_N,			/*# æœ€å¤§ã‚¿ã‚¹ã‚¯IDæ•° #*/
+		COM_ID = 0x80,			/*# å…±é€šé–¢æ•°(ã‚¿ã‚¹ã‚¯ã§ã¯ãªã„ï¼ï¼) #*/
+		MAIN_ID,				/*# MAINã‚¹ãƒ¬ãƒƒãƒ‰(ã‚¿ã‚¹ã‚¯ã§ã¯ãªã„ï¼ï¼) #*/
+		SYS_ER_NORMAL = 0xFF	/*# é€šå¸¸å†é–‹æ™‚ã‚·ã‚¹ãƒ†ãƒ ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰ #*/
+} COM_TASK_ID;
 
-#define     COM_ID          0x80        /*# ‹¤’ÊŠÖ”(ƒ^ƒXƒN‚Å‚Í‚È‚¢II) #*/
-#else   //#ifdef    MENTE
-    /*# ƒ^ƒXƒNID(ƒ^ƒXƒNƒAƒ^ƒbƒ`—p,‚»‚Ì‘¼ƒ^ƒXƒNŽ¯•Ê—p) #*/
-#define     SUP_ID          0x00        /*# ƒTƒ|[ƒgƒ^ƒXƒN #*/
-#define     DPISR_ID        0x01        /*# ‚c‚o‚q‚`‚l§Œä  #*/
-#define     LUMNG_ID        0x02        /*# ‚k‚tŠÇ—ƒ^ƒXƒN #*/
-#define     DOEP_ID         0x03        /*# ‚c‚n‚d‚o§Œä #*/
-#define     H323_ID         0x04        /*# ‚g‚R‚Q‚R§Œä #*/
-#define     CLKD_ID         0x05        /*# ‚b‚k‚j‚c§Œä #*/
-#define     CRINTCTL_ID     0x06        /*# ‚b‚q‚h‚m‚s§Œä #*/
-#define     TFTP_ID         0x07        /*# ‚s‚e‚s‚o§Œä #*/
-#define     TMR_ID          0x08        /*# ƒ^ƒCƒ}ƒ^ƒXƒN #*/
-//#define       DOOR_ID         0x09        /*# ƒhƒAƒzƒ“§Œä #*///IP-CSíœ2004.04
-#define     DSPMNG_ID       0x09        /*# ‚c‚r‚oó‘ÔŠÇ— #*/
-#define     DRIVER_ID       0x0A        /*# ƒfƒoƒCƒXƒhƒ‰ƒCƒo[ŽóMƒ^ƒXƒN #*/
-#define     FUSION_ID       0x0B        /*# FUSIONƒ^ƒCƒ}ƒ^ƒXƒN #*/
-//#define       ALMMNG_ID       0x0D        /*# ‚`‚k‚l‚l‚m‚f #*///IP-CSíœ2004.04
-//#define       BOOTPSRV_ID     0x0E        /*# ‚a‚n‚n‚s‚oƒT[ƒo #*/// 2000.07 V2.1’Ç‰Á//IP-CSíœ2004.04
-//#define       TFTPSRV_ID      0x0F        /*# ‚s‚e‚s‚oƒT[ƒo #*/  // 2000.07 V2.1’Ç‰Á//IP-CSíœ2004.04
-//#define       SIOCTL_ID       0x10        /*# ‚r‚h‚n§Œä #*/      // 2000.07 V2.1’Ç‰Á//IP-CSíœ2004.04
-#define     LULOG_ID        0x0C        /*# ‚k‚tƒƒO #*/        // 2001.08 V2.3’Ç‰Á
-//
-//#define       FAXMNG_ID       0x12        /*# FAXŠÇ—ƒ^ƒXƒN #*//* ˆ³kLU *///IP-CS FAXíœ2004.04
-//#define       T30_ID          0x13        /*# T30ƒ^ƒXƒN #*/
-//#define       T38_ID          0x14        /*# T38ƒ^ƒXƒN #*/
-//#define       MDM_ID          0x15        /*# MDMƒ^ƒXƒN #*/
-//#define       ACC1_ID         0x16        /*# accept(CH1)ƒ^ƒXƒN #*/
-//#define       ACC2_ID         0x17        /*# accept(CH2)ƒ^ƒXƒN #*/
-//#define       ACC3_ID         0x18        /*# accept(CH3)ƒ^ƒXƒN #*/
-//#define       ACC4_ID         0x19        /*# accept(CH4)ƒ^ƒXƒN #*/
-//#define       ACC5_ID         0x1A        /*# accept(CH5)ƒ^ƒXƒN #*/
-//#define       ACC6_ID         0x1B        /*# accept(CH6)ƒ^ƒXƒN #*/
-//#define       ACC7_ID         0x1C        /*# accept(CH7)ƒ^ƒXƒN #*/
-//#define       ACC8_ID         0x1D        /*# accept(CH8)ƒ^ƒXƒN #*/
-//#define       CON1_ID         0x1E        /*# connect(CH1)ƒ^ƒXƒN #*/
-//#define       CON2_ID         0x1F        /*# connect(CH2)ƒ^ƒXƒN #*/
-//#define       CON3_ID         0x20        /*# connect(CH3)ƒ^ƒXƒN #*/
-//#define       CON4_ID         0x21        /*# connect(CH4)ƒ^ƒXƒN #*/
-//#define       CON5_ID         0x22        /*# connect(CH5)ƒ^ƒXƒN #*/
-//#define       CON6_ID         0x23        /*# connect(CH6)ƒ^ƒXƒN #*/
-//#define       CON7_ID         0x24        /*# connect(CH7)ƒ^ƒXƒN #*/
-//#define       CON8_ID         0x25        /*# connect(CH8)ƒ^ƒXƒN #*/
-//ˆ³kLU‘Î‰žBƒ^ƒXƒNID’Ç‰Á 2003.08.22
-//ˆ³kLU‘Î‰žBƒ^ƒXƒNID’Ç‰Á 2003.09.03
-
-#define     DSPCOMMAND0_ID  0x0D        /*# DSP0ƒRƒ}ƒ“ƒhƒ^ƒXƒN #*/
-//#define       DSPCOMMAND1_ID  0x0E        /*# DSP1ƒRƒ}ƒ“ƒhƒ^ƒXƒN #*/
-
-#define     CRINT_ID        0x0E        /*# ‚b‚q‚h‚m‚sŠ„‚èž‚Ý #*/  //2000.07.13 V2.1DEBUG
-#define     DSPINT_ID       0x0F        /*# ‚c‚r‚oŠ„‚èž‚Ý #*/      //2000.07.13 V2.1DEBUG
-#define     DSPINT2_ID      0x10        /*# ‚c‚r‚oŠ„‚èž‚Ý2 #*/ // 2003.08 V3.1’Ç‰Á
-#define     FLASH_ID        0x11        /*# ‚e‚k‚`‚r‚g§Œä #*/  // 2000.09 V2.1’Ç‰Á
+/* ã‚¿ã‚¹ã‚¯çŠ¶æ…‹ */
+enum {
+	TASK_INACTIVE= 0,	/* éžèµ·å‹•ä¸­ */
+	TASK_ACTIVE			/* èµ·å‹•ä¸­ */
+} COM_TASK_STATUS;
+#define COM_TASK_MAX_N   20  /* æœ€å¤§ã‚¿ã‚¹ã‚¯æ•° */
 
 
-#define     COM_ID          0x80        /*# ‹¤’ÊŠÖ”(ƒ^ƒXƒN‚Å‚Í‚È‚¢II) #*/
-#endif  //#ifdef    MENTE
+/*# ã‚¿ã‚¹ã‚¯ECB(SND_MSGç”¨) #*/
+enum {
+	SUP_ECB = 0,   /* ãƒ¢ãƒ‹ã‚¿ã‚¿ã‚¹ã‚¯ç”¨ */
+	LUMNG_ECB ,   /* LUç®¡ç†ã‚¿ã‚¹ã‚¯ç”¨ */
+	DOEP_ECB ,    /* DOEPåˆ¶å¾¡ç”¨ */
+	MDA_ECB ,     /* ãƒ¡ãƒ‡ã‚£ã‚¢åˆ¶å¾¡ç”¨ */
+	TFTP_ECB ,    /* ï¼´ï¼¦ï¼´ï¼°åˆ¶å¾¡ç”¨ */
+	TMR_ECB ,     /* ã‚¿ã‚¤ãƒžã‚¿ã‚¹ã‚¯ç”¨ */
+	WRITER_ECB ,  /* TFTP-writerã‚¹ãƒ¬ãƒƒãƒ‰ç”¨ */
+	DSPEVT_ECB ,  /* DSPã‚¨ãƒ™ãƒ³ãƒˆå—ä¿¡ã‚¹ãƒ¬ãƒƒãƒ‰ç”¨ */
+	DSP2LAN_ECB , /* DSP2LANã‚¹ãƒ¬ãƒƒãƒ‰ç”¨ */
+	LAN2DSP_ECB , /* LAB2DSPã‚¹ãƒ¬ãƒƒãƒ‰ç”¨ */
+	CSCTL_ECB ,   /* cs_ctlã‚¹ãƒ¬ãƒƒãƒ‰ç”¨ */
+	SPROCTL_ECB , /* spro_ctlã‚¹ãƒ¬ãƒƒãƒ‰ç”¨ */
+	FPGAWRI_ECB , /* fpga_writeã‚¹ãƒ¬ãƒƒãƒ‰ç”¨ */
+	MNT_ECB ,     /* ä¿å®ˆç”¨ã‚¤ãƒ³ã‚¿ãƒ•ã‚§ãƒ¼ã‚¹ç”¨ */
+	LULOG_ECB ,   /* ï¼¬ï¼µãƒ­ã‚°ç”¨ */
+	COM_ECB_MAX   /* ECBæ•° */
+} COM_ECB_NO;
 
-#endif  // MAKE_IPL
+    /*# ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸åŒºåˆ† #*/
+#define     IN_MSG          0x01        /*# å†…éƒ¨ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ #*/
+#define     LU_ODR          0x02        /*# ï¼¬ï¼µã‚ªãƒ¼ãƒ€ #*/
+#define     LU_EVT          0x03        /*# ï¼¬ï¼µã‚¤ãƒ™ãƒ³ãƒˆ #*/
+#define     TIM_OUT         0x04        /*# ã‚¿ã‚¤ãƒ ã‚¢ã‚¦ãƒˆãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ #*/
 
-    /*# ƒ^ƒXƒNECB(SND_MSG—p) #*/
-#define     SUP_ECB         0x00        /*# ƒTƒ|[ƒgƒ^ƒXƒN #*/
-#define     DPISR_ECB       0x01        /*# ‚c‚o‚q‚`‚l§Œä  #*/
-#define     LUMNG_ECB       0x02        /*# ‚k‚tŠÇ—ƒ^ƒXƒN #*/
-#define     DOEP_ECB        0x03        /*# ‚c‚n‚d‚o§Œä #*/
-#define     H323_ECB        0x04        /*# ‚g‚R‚Q‚R§Œä #*/
-#define     CLKD_ECB        0x05        /*# ‚b‚k‚j‚c§Œä #*/
-#define     CRINTCTL_ECB    0x06        /*# ‚b‚q‚h‚m‚s§Œä #*/
-#define     TFTP_ECB        0x07        /*# ‚s‚e‚s‚o§Œä #*/
-#define     TMR_ECB         0x08        /*# ƒ^ƒCƒ}ƒ^ƒXƒN #*/
-#define     CRINT_ECB       0x09        /*# ‚b‚q‚h‚m‚sŠ„‚èž‚Ý #*/
-#define     DOOR_ECB        0x0A        /*# ƒhƒAƒzƒ“§Œä #*/
-#define     DSPMNG_ECB      0x0B        /*# ‚c‚r‚oó‘ÔŠÇ— #*/
-#define     DSPINT_ECB      0x0C        /*# ‚c‚r‚oŠ„‚èž‚Ý #*/
-#define     ALMMNG_ECB      0x0D        /*# ‚`‚k‚l‚l‚m‚f #*/
-#define     BOOTPSRV_ECB    0x0E        /*# ‚a‚n‚n‚s‚oƒT[ƒo #*/                // 2000.07 V2.1’Ç‰Á
-#define     TFTPSRV_ECB     0x0F        /*# ‚s‚e‚s‚oƒT[ƒo #*/                  // 2000.07 V2.1’Ç‰Á
-#define     SIOCTL_ECB      0x10        /*# ‚r‚h‚n§Œä #*/                      // 2000.07 V2.1’Ç‰Á
-//#define       DRIVER_ECB      0x0E        /*# ƒfƒoƒCƒXƒhƒ‰ƒCƒo[ŽóMƒ^ƒXƒN #*/
-#define     DRIVER_ECB      0x11        /*# ƒfƒoƒCƒXƒhƒ‰ƒCƒo[ŽóMƒ^ƒXƒN #*/    // 2000.07 V2.1•ÏX
-//#define       FUSION_ECB1     0x0F        /*# FUSION—pECB1 #*/
-#define     FUSION_ECB1     0x12        /*# FUSION—pECB1 #*/                    // 2000.07 V2.1•ÏX
-//#define       FUSION_ECB29    0x2F    /*# FUSION—pECB29iRESERVEƒŒƒ“ƒWj #*/  // 2000.07 V2.1•ÏX
-//#define       FUSION_ECB53    0x47    /*# FUSION—pECB53iRESERVEƒŒƒ“ƒWj #*/  // 2003.10 V3.1•ÏX
+    /*# ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ç¨®åˆ¥ï¼šå†…éƒ¨ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ #*/
 
-#define     MNT_ECB         0x48        /*# •ÛŽç—pƒCƒ“ƒ^ƒtƒF[ƒX #*/            // 2001.02.07 V2.2’Ç‰Á
-#define     LULOG_ECB       0x49        /*# ‚k‚tƒƒO #*/                        // 2001.08.08 V2.3’Ç‰Á
+#define     I_VOSTART       0x01        /*# éŸ³å£°é€šä¿¡ã‚¹ã‚¿ãƒ¼ãƒˆ #*/
+#define     I_VOSTOP        0x02        /*# éŸ³å£°é€šä¿¡ã‚¹ãƒˆãƒƒãƒ— #*/
+#define     I_VOPAUSE       0x03        /*# éŸ³å£°é€šä¿¡ä¸€æ™‚åœæ­¢ #*/
+#define     I_VORESTART     0x04        /*# éŸ³å£°é€šä¿¡å†é–‹ #*/
+#define     I_VODISKREP     0x05        /*# éŸ³å£°é€šä¿¡åˆ‡æ–­é€šçŸ¥ #*/
+#define     I_VOSTOPRSP     0x06        /*# éŸ³å£°é€šä¿¡ã‚¹ãƒˆãƒƒãƒ—ãƒ¬ã‚¹ãƒãƒ³ã‚¹ #*/
+#define     I_CRINT         0x07        /*# CRINTé€šçŸ¥ #*/
+#define     I_PLSEND        0x08        /*# ãƒ‘ãƒ«ã‚¹é€å‡ºå®Œäº† #*/
+#define     I_TONESTART     0x09        /*# ãƒˆãƒ¼ãƒ³é€å‡ºé–‹å§‹ #*/
+#define     I_TONESTOP      0x0A        /*# ãƒˆãƒ¼ãƒ³é€å‡ºåœæ­¢ #*/
+#define     I_PBSNDSTART    0x0B        /*# PBé€å‡ºé–‹å§‹ #*/
+#define     I_PBSNDSTOP     0x0C        /*# PBé€å‡ºåœæ­¢ #*/
+#define     I_BTDETSTART    0x0D        /*# BTç›£è¦–é–‹å§‹ #*/
+#define     I_BTDETSTOP     0x0E        /*# BTç›£è¦–åœæ­¢ #*/
+#define     I_DTDETSTART    0x0F        /*# DTç›£è¦–é–‹å§‹ #*/
+#define     I_DTDETSTOP     0x10        /*# DTç›£è¦–åœæ­¢ #*/
+#define     I_PBDETSTART    0x11        /*# PBç›£è¦–é–‹å§‹ #*/
+#define     I_PBDETSTOP     0x12        /*# PBç›£è¦–åœæ­¢ #*/
+#define     I_CHSWCHG       0x13        /*# CHSWåˆ‡ã‚Šæ›¿ãˆ #*/
+#define     I_DSPCTL        0x14        /*# DSPåˆ¶å¾¡ #*/
+#define     I_MUONPTNSET    0x15        /*# ç„¡éŸ³ãƒ‘ã‚¿ãƒ¼ãƒ³æŒ‡å®š #*/
+#define     I_CODECCHG      0x16        /*# CODECåˆ‡ã‚Šæ›¿ãˆ #*/
+#define     I_PADCTL        0x17        /*# PAD/ECåˆ¶å¾¡ #*/
 
-#define     FAXMNG_ECB      0x4A        /*# FAXŠÇ—ƒ^ƒXƒN #*//* ˆ³kLU */
-#define     T30_ECB         0x4B        /*# T30ƒ^ƒXƒN #*/
-#define     T38_ECB         0x4C        /*# T38ƒ^ƒXƒN #*/
-#define     MDM_ECB         0x4D        /*# MDMƒ^ƒXƒN #*/
-#define     ACC1_ECB        0x4E        /*# accept(CH1)ƒ^ƒXƒN #*/
-#define     ACC2_ECB        0x4F        /*# accept(CH2)ƒ^ƒXƒN #*/
-#define     ACC3_ECB        0x50        /*# accept(CH3)ƒ^ƒXƒN #*/
-#define     ACC4_ECB        0x51        /*# accept(CH4)ƒ^ƒXƒN #*/
-#define     ACC5_ECB        0x52        /*# accept(CH5)ƒ^ƒXƒN #*/
-#define     ACC6_ECB        0x53        /*# accept(CH6)ƒ^ƒXƒN #*/
-#define     ACC7_ECB        0x54        /*# accept(CH7)ƒ^ƒXƒN #*/
-#define     ACC8_ECB        0x55        /*# accept(CH8)ƒ^ƒXƒN #*/
-#define     CON1_ECB        0x56        /*# connect(CH1)ƒ^ƒXƒN #*/
-#define     CON2_ECB        0x57        /*# connect(CH2)ƒ^ƒXƒN #*/
-#define     CON3_ECB        0x58        /*# connect(CH3)ƒ^ƒXƒN #*/
-#define     CON4_ECB        0x59        /*# connect(CH4)ƒ^ƒXƒN #*/
-#define     CON5_ECB        0x5A        /*# connect(CH5)ƒ^ƒXƒN #*/
-#define     CON6_ECB        0x5B        /*# connect(CH6)ƒ^ƒXƒN #*/
-#define     CON7_ECB        0x5C        /*# connect(CH7)ƒ^ƒXƒN #*/
-#define     CON8_ECB        0x5D        /*# connect(CH8)ƒ^ƒXƒN #*/
-
-//ˆ³kLU‘Î‰žBECB’Ç‰Á
-#define     DSPCOMMAND0_ECB 0x5E        /*# DSPƒRƒ}ƒ“ƒhƒ^ƒXƒN0 #*/
-#define     DSPCOMMAND1_ECB 0x5F        /*# DSPƒRƒ}ƒ“ƒhƒ^ƒXƒN1 #*/
-#define     DSPINT2_ECB     0x60        /*# DSPŠ„ž‚Ýˆ—2 #*/
-
-
-
-    /*# ƒƒbƒZ[ƒW‹æ•ª #*/
-#define     IN_MSG          0x01        /*# “à•”ƒƒbƒZ[ƒW #*/
-#define     LU_ODR          0x02        /*# ‚k‚tƒI[ƒ_ #*/
-#define     LU_EVT          0x03        /*# ‚k‚tƒCƒxƒ“ƒg #*/
-#define     TIM_OUT         0x04        /*# ƒ^ƒCƒ€ƒAƒEƒgƒƒbƒZ[ƒW #*/
-
-    /*# ƒƒbƒZ[ƒWŽí•ÊF“à•”ƒƒbƒZ[ƒW #*/
-
-#define     I_VOSTART       0x01        /*# ‰¹º’ÊMƒXƒ^[ƒg #*/
-#define     I_VOSTOP        0x02        /*# ‰¹º’ÊMƒXƒgƒbƒv #*/
-#define     I_VOPAUSE       0x03        /*# ‰¹º’ÊMˆêŽž’âŽ~ #*/
-#define     I_VORESTART     0x04        /*# ‰¹º’ÊMÄŠJ #*/
-#define     I_VODISKREP     0x05        /*# ‰¹º’ÊMØ’f’Ê’m #*/
-#define     I_VOSTOPRSP     0x06        /*# ‰¹º’ÊMƒXƒgƒbƒvƒŒƒXƒ|ƒ“ƒX #*/
-#define     I_CRINT         0x07        /*# CRINT’Ê’m #*/
-#define     I_PLSEND        0x08        /*# ƒpƒ‹ƒX‘—oŠ®—¹ #*/
-#define     I_TONESTART     0x09        /*# ƒg[ƒ“‘—oŠJŽn #*/
-#define     I_TONESTOP      0x0A        /*# ƒg[ƒ“‘—o’âŽ~ #*/
-#define     I_PBSNDSTART    0x0B        /*# PB‘—oŠJŽn #*/
-#define     I_PBSNDSTOP     0x0C        /*# PB‘—o’âŽ~ #*/
-#define     I_BTDETSTART    0x0D        /*# BTŠÄŽ‹ŠJŽn #*/
-#define     I_BTDETSTOP     0x0E        /*# BTŠÄŽ‹’âŽ~ #*/
-#define     I_DTDETSTART    0x0F        /*# DTŠÄŽ‹ŠJŽn #*/
-#define     I_DTDETSTOP     0x10        /*# DTŠÄŽ‹’âŽ~ #*/
-#define     I_PBDETSTART    0x11        /*# PBŠÄŽ‹ŠJŽn #*/
-#define     I_PBDETSTOP     0x12        /*# PBŠÄŽ‹’âŽ~ #*/
-#define     I_CHSWCHG       0x13        /*# CHSWØ‚è‘Ö‚¦ #*/
-#define     I_DSPCTL        0x14        /*# DSP§Œä #*/
-#define     I_MUONPTNSET    0x15        /*# –³‰¹ƒpƒ^[ƒ“Žw’è #*/
-#define     I_CODECCHG      0x16        /*# CODECØ‚è‘Ö‚¦ #*/
-#define     I_PADCTL        0x17        /*# PAD/EC§Œä #*/
-
-//ˆ³kLU‘Î‰žBDSPŒnMSGB2003.09.08
+//åœ§ç¸®LUå¯¾å¿œã€‚DSPç³»MSGã€‚2003.09.08
 #define     I_DSPCMDSND             0x18    
-#define     I_HPI_ECHO_REPLY        0x19    /* HPIƒGƒR[‰ž“šŽóM */
+#define     I_HPI_ECHO_REPLY        0x19    /* HPIã‚¨ã‚³ãƒ¼å¿œç­”å—ä¿¡ */
 #define     I_DSP_REALTIME_COMMAND  0x1a
-#define     I_DSP_MODECHG           0x1b    /* DSPÌFAXØ‘Ö’Ê’m */
-#define     I_DSPSTART              0x1c    /* DSPŠJŽn’Ê’m */
-#define     I_PASSCHGEND            0x1d    /* ƒpƒXØ‘ÖŠ®—¹ */
-#define     I_DSPERROR              0x1e    /* ƒpƒXØ‘ÖŠ®—¹ */
-//2003.10.02’Ç‰Á
-#define     I_DTMFCOMPLETE          0x1f    /* DTMF‘—oŠ®—¹ */
+#define     I_DSP_MODECHG           0x1b    /* DSPâ‡”FAXåˆ‡æ›¿é€šçŸ¥ */
+#define     I_DSPSTART              0x1c    /* DSPé–‹å§‹é€šçŸ¥ */
+#define     I_PASSCHGEND            0x1d    /* ãƒ‘ã‚¹åˆ‡æ›¿å®Œäº† */
+#define     I_DSPERROR              0x1e    /* ãƒ‘ã‚¹åˆ‡æ›¿å®Œäº† */
+//2003.10.02è¿½åŠ 
+#define     I_DTMFCOMPLETE          0x1f    /* DTMFé€å‡ºå®Œäº† */
 
 
-#define     I_HELCHKREQ     0x20        /*# ƒwƒ‹ƒXƒ`ƒFƒbƒN—v‹ #*/
-#define     I_HELCHKRSP     0x21        /*# ƒwƒ‹ƒXƒ`ƒFƒbƒNŒ‹‰Ê #*/
-#define     I_LINKUP        0x22        /*# DOEPƒŠƒ“ƒN§Œä #*/
-#define     I_DOEPRCV       0x23        /*# DOEPŽóM #*/
+#define     I_HELCHKREQ     0x20        /*# ãƒ˜ãƒ«ã‚¹ãƒã‚§ãƒƒã‚¯è¦æ±‚ #*/
+#define     I_HELCHKRSP     0x21        /*# ãƒ˜ãƒ«ã‚¹ãƒã‚§ãƒƒã‚¯çµæžœ #*/
+#define     I_LINKUP        0x22        /*# DOEPãƒªãƒ³ã‚¯åˆ¶å¾¡ #*/
+#define     I_DOEPRCV       0x23        /*# DOEPå—ä¿¡ #*/
 
-#define     I_LINKUPCMP     0x40        /*# DOEPƒŠƒ“ƒN§ŒäŒ‹‰Ê #*/
-#define     I_CLKDOBS       0x41        /*# CLKDáŠQ’Ê’m—v‹ #*/
-#define     I_FANOBS        0x42        /*# FANáŠQ’Ê’m—v‹ #*/
-#define     I_SYNCMP        0x43        /*# CLKD“¯Šú‡‚í‚¹Š®—¹’Ê’m—v‹ #*/  // 2000.05.13 ’Ç‰Á
+#define     I_LINKUPCMP     0x40        /*# DOEPãƒªãƒ³ã‚¯åˆ¶å¾¡çµæžœ #*/
+#define     I_CLKDOBS       0x41        /*# CLKDéšœå®³é€šçŸ¥è¦æ±‚ #*/
+#define     I_FANOBS        0x42        /*# FANéšœå®³é€šçŸ¥è¦æ±‚ #*/
+#define     I_SYNCMP        0x43        /*# CLKDåŒæœŸåˆã‚ã›å®Œäº†é€šçŸ¥è¦æ±‚ #*/  // 2000.05.13 è¿½åŠ 
 
-//#define       I_DPRAMRD       0x50        /*# DPRAMƒf[ƒ^“Ç‚Ýo‚µ—v‹ #*/
-#define     I_PGDLCMP       0x51        /*# ƒvƒƒOƒ‰ƒ€ƒ_ƒEƒ“ƒ[ƒhŠ®—¹ #*///2004.04 IP-CS ’Ç‰Á
+//#define       I_DPRAMRD       0x50        /*# DPRAMãƒ‡ãƒ¼ã‚¿èª­ã¿å‡ºã—è¦æ±‚ #*/
+#define     I_PGDLCMP       0x51        /*# ãƒ—ãƒ­ã‚°ãƒ©ãƒ ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰å®Œäº† #*///2004.04 IP-CS è¿½åŠ 
 
-#define     I_CRINTSRT      0x60        /*# CRINT‹N“®—v‹ #*/
+#define     I_CRINTSRT      0x60        /*# CRINTèµ·å‹•è¦æ±‚ #*/
 
-#define     I_CLKDSRT       0x70        /*# CLKD‹N“®—v‹ #*/
+#define     I_CLKDSRT       0x70        /*# CLKDèµ·å‹•è¦æ±‚ #*/
 
-#define     I_VOICESND      0x80        /*# ‰¹º‘—M—v‹ #*/
-#define     I_SDESRCV       0x81        /*# SDESŽóM #*/
-#define     I_BYERCV        0x82        /*# BYEŽóM #*/
+#define     I_VOICESND      0x80        /*# éŸ³å£°é€ä¿¡è¦æ±‚ #*/
+#define     I_SDESRCV       0x81        /*# SDESå—ä¿¡ #*/
+#define     I_BYERCV        0x82        /*# BYEå—ä¿¡ #*/
 
-#define     I_BOOTPREQRCV   0x90        /*# BOOTPreqŽóM #*/    //2000.07 V2.1’Ç‰Á
+#define     I_BOOTPREQRCV   0x90        /*# BOOTPreqå—ä¿¡ #*/    //2000.07 V2.1è¿½åŠ 
 
-#define     I_TFTPDATRCV    0xa0        /*# TFTPƒf[ƒ^ŽóM #*/  //2000.07 V2.1’Ç‰Á
+#define     I_TFTPDATRCV    0xa0        /*# TFTPãƒ‡ãƒ¼ã‚¿å—ä¿¡ #*/  //2000.07 V2.1è¿½åŠ 
 
-#define     I_SIODATRCV     0xb0        /*# SIOƒf[ƒ^ŽóM #*/   //2000.07 V2.1’Ç‰Á
+#define     I_SIODATRCV     0xb0        /*# SIOãƒ‡ãƒ¼ã‚¿å—ä¿¡ #*/   //2000.07 V2.1è¿½åŠ 
 
-/* FAXŠÇ—ƒ^ƒXƒN‚É‚ÄŽóM‚·‚éƒƒbƒZ[ƒW‚Ì’è‹`    */
-#define     I_FAXTONE       0xc0        /*# FAXƒg[ƒ“ŒŸo #*/
-#define     I_FAXEND        0xc1        /*# FAXŽè‡I—¹ #*/
-#define     I_T38STATUS     0xc2        /*# T38ó‘Ô’Ê’m #*/
-#define     I_FAXKILL       0xc3        /*# FAX‹­§’âŽ~ŽwŽ¦ #*/
-#define     I_FAXTOVOICE        0xc4        /*# FAXtoVOICEI—¹ #*/
-#define     I_FAXPASS       0xc5        /*# FAXƒpƒXØ’fŽwŽ¦ #*/ //2003.11.10’Ç‰Á
+/* FAXç®¡ç†ã‚¿ã‚¹ã‚¯ã«ã¦å—ä¿¡ã™ã‚‹ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã®å®šç¾©    */
+#define     I_FAXTONE       0xc0        /*# FAXãƒˆãƒ¼ãƒ³æ¤œå‡º #*/
+#define     I_FAXEND        0xc1        /*# FAXæ‰‹é †çµ‚äº† #*/
+#define     I_T38STATUS     0xc2        /*# T38çŠ¶æ…‹é€šçŸ¥ #*/
+#define     I_FAXKILL       0xc3        /*# FAXå¼·åˆ¶åœæ­¢æŒ‡ç¤º #*/
+#define     I_FAXTOVOICE        0xc4        /*# FAXtoVOICEçµ‚äº† #*/
+#define     I_FAXPASS       0xc5        /*# FAXãƒ‘ã‚¹åˆ‡æ–­æŒ‡ç¤º #*/ //2003.11.10è¿½åŠ 
 
-/* T30ƒ^ƒXƒN‚É‚ÄŽóM‚·‚éƒƒbƒZ[ƒW‚Ì’è‹`    */
-#define     I_T30REQ        0xc8        /*# T30ˆ——v‹ #*/
+/* T30ã‚¿ã‚¹ã‚¯ã«ã¦å—ä¿¡ã™ã‚‹ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã®å®šç¾©    */
+#define     I_T30REQ        0xc8        /*# T30å‡¦ç†è¦æ±‚ #*/
 
-/* MDMƒ^ƒXƒN‚É‚ÄŽóM‚·‚éƒƒbƒZ[ƒW‚Ì’è‹`    */
-#define     I_FAXMDMREQ     0xcc        /*# faxƒ‚ƒfƒ€ˆ——v‹ #*/
+/* MDMã‚¿ã‚¹ã‚¯ã«ã¦å—ä¿¡ã™ã‚‹ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã®å®šç¾©    */
+#define     I_FAXMDMREQ     0xcc        /*# faxãƒ¢ãƒ‡ãƒ å‡¦ç†è¦æ±‚ #*/
 
-/* T38ƒ^ƒXƒN‚É‚ÄŽóM‚·‚éƒƒbƒZ[ƒW‚Ì’è‹`    */
-#define     I_T38REQ        0xd0        /*# T38ˆ——v‹ #*/
-#define     I_ACCEPTRECV        0xd1        /*# T38ƒf[ƒ^ŽóM(ƒAƒNƒZƒvƒg) #*/
-#define     I_CONNECTRECV       0xd2        /*# T38ƒf[ƒ^ŽóM(ƒRƒlƒNƒg) #*/
-#define     I_UDPRECV       0xd3        /*# T38ƒf[ƒ^ŽóM(UDP) #*/
-#define     I_CONNECTRES        0xd4        /*# ƒRƒlƒNƒgŒ‹‰Ê’Ê’m #*/
-#define     I_ACCEPTRES     0xd5        /*# ƒAƒNƒZƒvƒg’Ê’m #*/
-#define     I_SENDERR       0xd6        /*# ‘—MƒGƒ‰[’Ê’m #*/
+/* T38ã‚¿ã‚¹ã‚¯ã«ã¦å—ä¿¡ã™ã‚‹ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã®å®šç¾©    */
+#define     I_T38REQ        0xd0        /*# T38å‡¦ç†è¦æ±‚ #*/
+#define     I_ACCEPTRECV        0xd1        /*# T38ãƒ‡ãƒ¼ã‚¿å—ä¿¡(ã‚¢ã‚¯ã‚»ãƒ—ãƒˆ) #*/
+#define     I_CONNECTRECV       0xd2        /*# T38ãƒ‡ãƒ¼ã‚¿å—ä¿¡(ã‚³ãƒã‚¯ãƒˆ) #*/
+#define     I_UDPRECV       0xd3        /*# T38ãƒ‡ãƒ¼ã‚¿å—ä¿¡(UDP) #*/
+#define     I_CONNECTRES        0xd4        /*# ã‚³ãƒã‚¯ãƒˆçµæžœé€šçŸ¥ #*/
+#define     I_ACCEPTRES     0xd5        /*# ã‚¢ã‚¯ã‚»ãƒ—ãƒˆé€šçŸ¥ #*/
+#define     I_SENDERR       0xd6        /*# é€ä¿¡ã‚¨ãƒ©ãƒ¼é€šçŸ¥ #*/
 
-/* ƒAƒNƒZƒvƒgƒ^ƒXƒN‚É‚ÄŽóM‚·‚éƒƒbƒZ[ƒW‚Ì’è‹` */
-#define     I_ACCEPTREQ     0xd8        /*# ƒAƒNƒZƒvƒgŽwŽ¦ #*/
+/* ã‚¢ã‚¯ã‚»ãƒ—ãƒˆã‚¿ã‚¹ã‚¯ã«ã¦å—ä¿¡ã™ã‚‹ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã®å®šç¾© */
+#define     I_ACCEPTREQ     0xd8        /*# ã‚¢ã‚¯ã‚»ãƒ—ãƒˆæŒ‡ç¤º #*/
 
-/* ƒRƒlƒNƒgƒ^ƒXƒN‚É‚ÄŽóM‚·‚éƒƒbƒZ[ƒW‚Ì’è‹`   */
-#define     I_CONNECTREQ        0xd9        /*# ƒRƒlƒNƒgŽwŽ¦ #*/
-#define     I_T38SENDREQ        0xda        /*# T38‘—MŽwŽ¦ #*/
+/* ã‚³ãƒã‚¯ãƒˆã‚¿ã‚¹ã‚¯ã«ã¦å—ä¿¡ã™ã‚‹ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã®å®šç¾©   */
+#define     I_CONNECTREQ        0xd9        /*# ã‚³ãƒã‚¯ãƒˆæŒ‡ç¤º #*/
+#define     I_T38SENDREQ        0xda        /*# T38é€ä¿¡æŒ‡ç¤º #*/
 
-//SS9100(PH1ÄŠJ)‘Î‰ž 2006.06
-#define     I_PH1ORDEND     0xe0        /*# PH1ÄŠJ’†ƒI[ƒ_I—¹ #*/
+//SS9100(PH1å†é–‹)å¯¾å¿œ 2006.06
+#define     I_PH1ORDEND     0xe0        /*# PH1å†é–‹ä¸­ã‚ªãƒ¼ãƒ€çµ‚äº† #*/
 
-#define     I_LOGSTART      0xf0        /*# ƒƒOƒI[ƒvƒ“ #*/    // 2001.08 V2.3’Ç‰Á
-#define     I_LOGCMD        0xf1        /*# ƒƒOƒRƒ}ƒ“ƒh #*/    // 2001.08 V2.3’Ç‰Á
-#define     I_LOGTRACE      0xf2        /*# ƒƒOƒgƒŒ[ƒX #*/    // 2003.09 ’Ç‰Á
+#define     I_LOGSTART      0xf0        /*# ãƒ­ã‚°ã‚ªãƒ¼ãƒ—ãƒ³ #*/    // 2001.08 V2.3è¿½åŠ 
+#define     I_LOGCMD        0xf1        /*# ãƒ­ã‚°ã‚³ãƒžãƒ³ãƒ‰ #*/    // 2001.08 V2.3è¿½åŠ 
+#define     I_LOGTRACE      0xf2        /*# ãƒ­ã‚°ãƒˆãƒ¬ãƒ¼ã‚¹ #*/    // 2003.09 è¿½åŠ 
 
 
-    /*# ƒƒbƒZ[ƒWŽí•ÊF‚k‚tƒI[ƒ_ #*/
-#define     O_DOWNLOAD      0x01        /*# ƒ_ƒEƒ“ƒ[ƒh #*/
-#define     O_DPRAMID       0x02        /*# DPRAMŽí•Êƒ_ƒEƒ“ƒ[ƒh #*/
-#define     O_HORYDOWN      0x03        /*# •Û—¯‰¹ƒf[ƒ^ƒ_ƒEƒ“ƒ[ƒh—v‹ #*/
-#define     O_PKGINITREQ    0x04        /*# ŒÂ•ÊPKG‰ŠúÝ’è—v‹ #*/
-#define     O_LUHELREQ      0x05        /*# LUƒwƒ‹ƒXƒ`ƒFƒbƒN—v‹ #*/
-#define     O_PKGHELREQ     0x06        /*# PKGƒwƒ‹ƒXƒ`ƒFƒbƒN—v‹ #*/
-#define     O_PASSCTLREQ    0x07        /*# ƒpƒX§Œä—v‹ #*/
-#define     O_TONECTLREQ    0x08        /*# TONE§Œä—v‹ #*/
-#define     O_HORYCTLREQ    0x09        /*# •Û—¯‰¹§Œä—v‹ #*/
-#define     O_PBDETSTART    0x0A        /*# PBM†ŠÄŽ‹ŠJŽn—v‹ #*/
-#define     O_PBDETSTOP     0x0B        /*# PBM†ŠÄŽ‹’âŽ~—v‹ #*/
-#define     O_BTDETSTART    0x0C        /*# BTŠÄŽ‹—v‹ #*/
-#define     O_DTDETSTART    0x0D        /*# DTŠÄŽ‹—v‹ #*/
-#define     O_BTDETSTOP     0x0E        /*# BTŠÄŽ‹’âŽ~—v‹ #*/
-#define     O_DTDETSTOP     0x0F        /*# DTŠÄŽ‹’âŽ~—v‹ #*/
-#define     O_PBSNDSTART    0x10        /*# PB‘—M—v‹ #*/
-#define     O_PBSNDSTOP     0x11        /*# PBM†‘—M’âŽ~—v‹ #*/
-#define     O_DOORHACT      0x12        /*# ƒhƒAƒzƒ“Šˆ« #*/
-#define     O_GHORYCTL      0x13        /*# ŠO•”•Û—¯‰¹§Œä #*/
-#define     O_BROADCTL      0x14        /*# •ú‘—‘•’u§Œä #*/
-#define     O_MUONPTNSET    0x15        /*# –³‰¹ƒpƒ^[ƒ“Žw’è #*/
-#define     O_DOORHSCNREQ   0x16        /*# ƒhƒAƒzƒ“ƒXƒLƒƒƒ“—v‹ #*/
-#define     O_PKGHELILG     0x17        /*# PKGƒwƒ‹ƒXƒ`ƒFƒbƒNƒCƒŠ[ƒKƒ‹PKGŽí•Êƒ_ƒEƒ“ƒ[ƒh #*/
-#define     O_MEMDMPREQ     0x18        /*# ƒƒ‚ƒŠDUMP—v‹#*/ // 99-5-18
-#define     O_SYNCSNDCTL    0x19        /*# “¯Šú/CRINTƒpƒPƒbƒg‘—M§Œä #*/  //2000.07 V2.1’Ç‰Á
-#define     O_SYNCRCVCTL    0x1a        /*# “¯Šú/CRINTƒpƒPƒbƒgŽóM§Œä #*/  //2000.07 V2.1’Ç‰Á
-#define     O_DSPCHCTL      0x1b        /*# DSPch§Œä #*/                   //2000.08 V2.1’Ç‰Á
+    /*# ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ç¨®åˆ¥ï¼šï¼¬ï¼µã‚ªãƒ¼ãƒ€ #*/
+#define     O_DOWNLOAD      0x01        /*# ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ #*/
+#define     O_DPRAMID       0x02        /*# DPRAMç¨®åˆ¥ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ #*/
+#define     O_HORYDOWN      0x03        /*# ä¿ç•™éŸ³ãƒ‡ãƒ¼ã‚¿ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰è¦æ±‚ #*/
+#define     O_PKGINITREQ    0x04        /*# å€‹åˆ¥PKGåˆæœŸè¨­å®šè¦æ±‚ #*/
+#define     O_LUHELREQ      0x05        /*# LUãƒ˜ãƒ«ã‚¹ãƒã‚§ãƒƒã‚¯è¦æ±‚ #*/
+#define     O_PKGHELREQ     0x06        /*# PKGãƒ˜ãƒ«ã‚¹ãƒã‚§ãƒƒã‚¯è¦æ±‚ #*/
+#define     O_PASSCTLREQ    0x07        /*# ãƒ‘ã‚¹åˆ¶å¾¡è¦æ±‚ #*/
+#define     O_TONECTLREQ    0x08        /*# TONEåˆ¶å¾¡è¦æ±‚ #*/
+#define     O_HORYCTLREQ    0x09        /*# ä¿ç•™éŸ³åˆ¶å¾¡è¦æ±‚ #*/
+#define     O_PBDETSTART    0x0A        /*# PBä¿¡å·ç›£è¦–é–‹å§‹è¦æ±‚ #*/
+#define     O_PBDETSTOP     0x0B        /*# PBä¿¡å·ç›£è¦–åœæ­¢è¦æ±‚ #*/
+#define     O_BTDETSTART    0x0C        /*# BTç›£è¦–è¦æ±‚ #*/
+#define     O_DTDETSTART    0x0D        /*# DTç›£è¦–è¦æ±‚ #*/
+#define     O_BTDETSTOP     0x0E        /*# BTç›£è¦–åœæ­¢è¦æ±‚ #*/
+#define     O_DTDETSTOP     0x0F        /*# DTç›£è¦–åœæ­¢è¦æ±‚ #*/
+#define     O_PBSNDSTART    0x10        /*# PBé€ä¿¡è¦æ±‚ #*/
+#define     O_PBSNDSTOP     0x11        /*# PBä¿¡å·é€ä¿¡åœæ­¢è¦æ±‚ #*/
+#define     O_DOORHACT      0x12        /*# ãƒ‰ã‚¢ãƒ›ãƒ³æ´»æ€§ #*/
+#define     O_GHORYCTL      0x13        /*# å¤–éƒ¨ä¿ç•™éŸ³åˆ¶å¾¡ #*/
+#define     O_BROADCTL      0x14        /*# æ”¾é€è£…ç½®åˆ¶å¾¡ #*/
+#define     O_MUONPTNSET    0x15        /*# ç„¡éŸ³ãƒ‘ã‚¿ãƒ¼ãƒ³æŒ‡å®š #*/
+#define     O_DOORHSCNREQ   0x16        /*# ãƒ‰ã‚¢ãƒ›ãƒ³ã‚¹ã‚­ãƒ£ãƒ³è¦æ±‚ #*/
+#define     O_PKGHELILG     0x17        /*# PKGãƒ˜ãƒ«ã‚¹ãƒã‚§ãƒƒã‚¯ã‚¤ãƒªãƒ¼ã‚¬ãƒ«PKGç¨®åˆ¥ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ #*/
+#define     O_MEMDMPREQ     0x18        /*# ãƒ¡ãƒ¢ãƒªDUMPè¦æ±‚#*/ // 99-5-18
+#define     O_SYNCSNDCTL    0x19        /*# åŒæœŸ/CRINTãƒ‘ã‚±ãƒƒãƒˆé€ä¿¡åˆ¶å¾¡ #*/  //2000.07 V2.1è¿½åŠ 
+#define     O_SYNCRCVCTL    0x1a        /*# åŒæœŸ/CRINTãƒ‘ã‚±ãƒƒãƒˆå—ä¿¡åˆ¶å¾¡ #*/  //2000.07 V2.1è¿½åŠ 
+#define     O_DSPCHCTL      0x1b        /*# DSPchåˆ¶å¾¡ #*/                   //2000.08 V2.1è¿½åŠ 
 
-#define     O_FAXPASSCTLREQ     0x1C        /*# FAXƒpƒX§Œä—v‹ #*//* ˆ³kLU */
-#define     O_T38LISTENREQ      0x1E        /*# T38Listen—v‹ #*/
-#define     O_FAXDOWNLOAD       0x1D        /*# FAXƒ_ƒEƒ“ƒ[ƒh #*/
+#define     O_FAXPASSCTLREQ     0x1C        /*# FAXãƒ‘ã‚¹åˆ¶å¾¡è¦æ±‚ #*//* åœ§ç¸®LU */
+#define     O_T38LISTENREQ      0x1E        /*# T38Listenè¦æ±‚ #*/
+#define     O_FAXDOWNLOAD       0x1D        /*# FAXãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ #*/
 
-#define     O_TEST_ORD_TYPE 0xf8        /*# HêŽŽŒ±—pŽ¯•Ê #*/
-#define     O_TST_DRAM_CHK  0xf8        /*# HêŽŽŒ±—p ‚c‚q‚`‚lƒ`ƒFƒbƒN #*/
-#define     O_TST_MEM_CHK   0xf9        /*# HêŽŽŒ±—p ƒƒ‚ƒŠƒ`ƒFƒbƒN #*/
-#define     O_TST_LED_CTL   0xfa        /*# HêŽŽŒ±—p ‚k‚d‚c•\Ž¦ #*/
-#define     O_TST_MEM_RD    0xfb        /*# HêŽŽŒ±—p ƒƒ‚ƒŠƒŠ[ƒh #*/
-#define     O_TST_MEM_WT    0xfc        /*# HêŽŽŒ±—p ƒƒ‚ƒŠƒ‰ƒCƒg #*/
-#define     O_TST_DSP_CK    0xfd        /*# HêŽŽŒ±—p ‚c‚r‚oƒƒ‚ƒŠƒ`ƒFƒbƒN #*/ // 2001.05.22 ’Ç‰Á
-#define     O_TEST_ORD_TEND 0xff        /*# HêŽŽŒ±—pŽ¯•ÊI—¹ #*/          //2000.07 V2.1’Ç‰Á
+#define     O_TEST_ORD_TYPE 0xf8        /*# å·¥å ´è©¦é¨“ç”¨è­˜åˆ¥ #*/
+#define     O_TST_DRAM_CHK  0xf8        /*# å·¥å ´è©¦é¨“ç”¨ ï¼¤ï¼²ï¼¡ï¼­ãƒã‚§ãƒƒã‚¯ #*/
+#define     O_TST_MEM_CHK   0xf9        /*# å·¥å ´è©¦é¨“ç”¨ ãƒ¡ãƒ¢ãƒªãƒã‚§ãƒƒã‚¯ #*/
+#define     O_TST_LED_CTL   0xfa        /*# å·¥å ´è©¦é¨“ç”¨ ï¼¬ï¼¥ï¼¤è¡¨ç¤º #*/
+#define     O_TST_MEM_RD    0xfb        /*# å·¥å ´è©¦é¨“ç”¨ ãƒ¡ãƒ¢ãƒªãƒªãƒ¼ãƒ‰ #*/
+#define     O_TST_MEM_WT    0xfc        /*# å·¥å ´è©¦é¨“ç”¨ ãƒ¡ãƒ¢ãƒªãƒ©ã‚¤ãƒˆ #*/
+#define     O_TST_DSP_CK    0xfd        /*# å·¥å ´è©¦é¨“ç”¨ ï¼¤ï¼³ï¼°ãƒ¡ãƒ¢ãƒªãƒã‚§ãƒƒã‚¯ #*/ // 2001.05.22 è¿½åŠ 
+#define     O_TEST_ORD_TEND 0xff        /*# å·¥å ´è©¦é¨“ç”¨è­˜åˆ¥çµ‚äº† #*/          //2000.07 V2.1è¿½åŠ 
 
-#define     O_FLASHTOOL     0x2F        /*# ƒtƒ‰ƒbƒVƒ…ƒc[ƒ‹—v‹ #*/        //2000.12.04 V2.1FLASH_TOOL
+#define     O_FLASHTOOL     0x2F        /*# ãƒ•ãƒ©ãƒƒã‚·ãƒ¥ãƒ„ãƒ¼ãƒ«è¦æ±‚ #*/        //2000.12.04 V2.1FLASH_TOOL
 
-#define     O_BUFFVALUE     0x30        /*# ƒoƒbƒtƒ@–ÊŽw’è #*/              //2000.07 V2.1’Ç‰Á
-#define     O_LUCHGBAK      0x31        /*# Ø‚è–ß‚µ #*/                //2004.02 LU32B’Ç‰Á
-#define     O_OBSNTFYREQ    0x32        /*# áŠQî•ñ’Ê’m—v‹ #*/        //2004.02 LU32B
-#define     O_PGDOWNLOAD    0x33        /*# ƒvƒƒOƒ‰ƒ€ƒ_ƒEƒ“ƒ[ƒh—v‹ #*/      //2004.04 IP-CS
-#define     O_AQACT         0x35        /*# ‰¹ºî•ñ’Ê’m‹N“®/’âŽ~—v‹ #*/       //2004.10 SS9100
+#define     O_BUFFVALUE     0x30        /*# ãƒãƒƒãƒ•ã‚¡é¢æŒ‡å®š #*/              //2000.07 V2.1è¿½åŠ 
+#define     O_LUCHGBAK      0x31        /*# åˆ‡ã‚Šæˆ»ã— #*/                //2004.02 LU32Bè¿½åŠ 
+#define     O_OBSNTFYREQ    0x32        /*# éšœå®³æƒ…å ±é€šçŸ¥è¦æ±‚ #*/        //2004.02 LU32B
+#define     O_PGDOWNLOAD    0x33        /*# ãƒ—ãƒ­ã‚°ãƒ©ãƒ ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰è¦æ±‚ #*/      //2004.04 IP-CS
+#define     O_AQACT         0x35        /*# éŸ³å£°æƒ…å ±é€šçŸ¥èµ·å‹•/åœæ­¢è¦æ±‚ #*/       //2004.10 SS9100
 
-//SS9100(PH1ÄŠJ)‘Î‰ž 2006.06
-#define     O_PH1ENDREQ    0x37         /*PH1I—¹—v‹*/
-#define     O_RESTARTREQ   0x38         /*ÄŠJˆ——v‹*/
+//SS9100(PH1å†é–‹)å¯¾å¿œ 2006.06
+#define     O_PH1ENDREQ    0x37         /*PH1çµ‚äº†è¦æ±‚*/
+#define     O_RESTARTREQ   0x38         /*å†é–‹å‡¦ç†è¦æ±‚*/
 
-#define     O_PKGORDER     0x80         /*# Šù‘¶PKGƒI[ƒ_ #*/
-//SS9100(PH1ÄŠJ)‘Î‰ž 2006.06
-#define     O_PH1ORDER     0x81         /*PH1ÄŠJƒI[ƒ_*/
+#define     O_PKGORDER     0x80         /*# æ—¢å­˜PKGã‚ªãƒ¼ãƒ€ #*/
+//SS9100(PH1å†é–‹)å¯¾å¿œ 2006.06
+#define     O_PH1ORDER     0x81         /*PH1å†é–‹ã‚ªãƒ¼ãƒ€*/
 
-#define     O_MNT_ORD_START     0xf0    /*# ƒƒ“ƒeƒiƒ“ƒX—pƒI[ƒ_ŠJŽn’l #*/  //2001.01.11 V2.2 ’Ç‰Á
-#define     O_MNT_ORD_END       0xff    /*# ƒƒ“ƒeƒiƒ“ƒX—pƒI[ƒ_I—¹’l #*/  //2001.01.11 V2.2 ’Ç‰Á
+#define     O_MNT_ORD_START     0xf0    /*# ãƒ¡ãƒ³ãƒ†ãƒŠãƒ³ã‚¹ç”¨ã‚ªãƒ¼ãƒ€é–‹å§‹å€¤ #*/  //2001.01.11 V2.2 è¿½åŠ 
+#define     O_MNT_ORD_END       0xff    /*# ãƒ¡ãƒ³ãƒ†ãƒŠãƒ³ã‚¹ç”¨ã‚ªãƒ¼ãƒ€çµ‚äº†å€¤ #*/  //2001.01.11 V2.2 è¿½åŠ 
 
-//ˆ³kLU‘Î‰žBDSP’²¸—pƒI[ƒ_’Ç‰ÁB2003.11.13
-//DSP’²¸—pƒI[ƒ_ƒR[ƒh start and end
+//åœ§ç¸®LUå¯¾å¿œã€‚DSPèª¿æŸ»ç”¨ã‚ªãƒ¼ãƒ€è¿½åŠ ã€‚2003.11.13
+//DSPèª¿æŸ»ç”¨ã‚ªãƒ¼ãƒ€ã‚³ãƒ¼ãƒ‰ start and end
 #define O_DSP_ORD_TYPE      0xe0
 #define O_DSP_ORD_TEND      0xef
 
-//DSP’²¸—pƒI[ƒ_ƒR[ƒh
+//DSPèª¿æŸ»ç”¨ã‚ªãƒ¼ãƒ€ã‚³ãƒ¼ãƒ‰
 #define     O_DSP_GET_SYSTEMSTATUS  0xe0
 #define     O_DSP_GET_CHANNELSTATUS 0xe1
 #define     O_DSP_REQUEST_PARAM     0xe2
 
-    /*# ƒƒbƒZ[ƒWŽí•ÊF‚k‚tƒCƒxƒ“ƒg #*/
-#define     E_LUONLINE      0x01        /*# LUƒIƒ“ƒ‰ƒCƒ“’Ê’m #*/
-#define     E_PKGINITRSP    0x02        /*# ŒÂ•ÊPKG‰ŠúÝ’è‰ž“š #*/
-#define     E_LUHELRSP      0x03        /*# LUƒwƒ‹ƒXƒ`ƒFƒbƒNŒ‹‰Ê #*/
-#define     E_PKGHELRSP     0x04        /*# PKGƒwƒ‹ƒXƒ`ƒFƒbƒNŒ‹‰Ê #*/
-#define     E_PKGSTATE      0x05        /*# PKGó‘Ô’Ê’m #*/
-#define     E_PBDET         0x06        /*# PBM†ŽóM #*/
-#define     E_BTDET         0x07        /*# BTŽóM #*/
-#define     E_DTDET         0x08        /*# DTŽóM #*/
-#define     E_PBSNDEND      0x09        /*# PB‘—MŠ®—¹ #*/
-#define     E_DOORHSCNRSP   0x0A        /*# ƒhƒAƒzƒ“ƒXƒLƒƒƒ“ #*/
-#define     E_PKGTROUBLE    0x0B        /*# PKGáŠQŒŸo #*/
-#define     E_CLKDTROUBLE   0x0C        /*# CLKDáŠQŒŸo #*/
-#define     E_CLKDRESTORE   0x0D        /*# CLKDáŠQ•œ‹ŒŒŸo #*/
-#define     E_FANTROUBLE    0x0E        /*# FANáŠQŒŸo #*/
-#define     E_MEMDMPRSP     0x0F        /*# ƒƒ‚ƒŠDUMPŒ‹‰Ê #*/ // 99-5-18
-#define     E_SYNC_COMP     0x10        /*# ‚b‚k‚j‚c“¯Šú‡‚í‚¹Š®—¹’Ê’miˆÀ’è•â³Žž‚É’Ê’mj #*/  // 2000.05.11 V1.2 ’Ç‰Á
-#define     E_HORYDLEND     0x11        /*# •Û—¯‰¹ƒ_ƒEƒ“ƒ[ƒhŠ®—¹’Ê’m #*/                      //2000.07 V2.1’Ç‰Á
-#define     E_RELDET        0x12        /*# ƒ`ƒƒƒlƒ‹‰ð•ú’Ê’m #*/                                //2001.08 V2.3’Ç‰Á
+    /*# ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ç¨®åˆ¥ï¼šï¼¬ï¼µã‚¤ãƒ™ãƒ³ãƒˆ #*/
+#define     E_LUONLINE      0x01        /*# LUã‚ªãƒ³ãƒ©ã‚¤ãƒ³é€šçŸ¥ #*/
+#define     E_PKGINITRSP    0x02        /*# å€‹åˆ¥PKGåˆæœŸè¨­å®šå¿œç­” #*/
+#define     E_LUHELRSP      0x03        /*# LUãƒ˜ãƒ«ã‚¹ãƒã‚§ãƒƒã‚¯çµæžœ #*/
+#define     E_PKGHELRSP     0x04        /*# PKGãƒ˜ãƒ«ã‚¹ãƒã‚§ãƒƒã‚¯çµæžœ #*/
+#define     E_PKGSTATE      0x05        /*# PKGçŠ¶æ…‹é€šçŸ¥ #*/
+#define     E_PBDET         0x06        /*# PBä¿¡å·å—ä¿¡ #*/
+#define     E_BTDET         0x07        /*# BTå—ä¿¡ #*/
+#define     E_DTDET         0x08        /*# DTå—ä¿¡ #*/
+#define     E_PBSNDEND      0x09        /*# PBé€ä¿¡å®Œäº† #*/
+#define     E_DOORHSCNRSP   0x0A        /*# ãƒ‰ã‚¢ãƒ›ãƒ³ã‚¹ã‚­ãƒ£ãƒ³ #*/
+#define     E_PKGTROUBLE    0x0B        /*# PKGéšœå®³æ¤œå‡º #*/
+#define     E_CLKDTROUBLE   0x0C        /*# CLKDéšœå®³æ¤œå‡º #*/
+#define     E_CLKDRESTORE   0x0D        /*# CLKDéšœå®³å¾©æ—§æ¤œå‡º #*/
+#define     E_FANTROUBLE    0x0E        /*# FANéšœå®³æ¤œå‡º #*/
+#define     E_MEMDMPRSP     0x0F        /*# ãƒ¡ãƒ¢ãƒªDUMPçµæžœ #*/ // 99-5-18
+#define     E_SYNC_COMP     0x10        /*# ï¼£ï¼¬ï¼«ï¼¤åŒæœŸåˆã‚ã›å®Œäº†é€šçŸ¥ï¼ˆå®‰å®šè£œæ­£æ™‚ã«é€šçŸ¥ï¼‰ #*/  // 2000.05.11 V1.2 è¿½åŠ 
+#define     E_HORYDLEND     0x11        /*# ä¿ç•™éŸ³ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰å®Œäº†é€šçŸ¥ #*/                      //2000.07 V2.1è¿½åŠ 
+#define     E_RELDET        0x12        /*# ãƒãƒ£ãƒãƒ«è§£æ”¾é€šçŸ¥ #*/                                //2001.08 V2.3è¿½åŠ 
 
-#define     E_FAXERROR  0x16        /*# FANáŠQŒŸo #*//* ˆ³kLU */
-#define     E_FAXPASSCHG    0x17        /*# ŒÄŽí•ÊØ‚è‘Ö‚¦ #*/
+#define     E_FAXERROR  0x16        /*# FANéšœå®³æ¤œå‡º #*//* åœ§ç¸®LU */
+#define     E_FAXPASSCHG    0x17        /*# å‘¼ç¨®åˆ¥åˆ‡ã‚Šæ›¿ãˆ #*/
 
-/*ˆ³kLU‘Î‰ž*/
+/*åœ§ç¸®LUå¯¾å¿œ*/
 #define     E_DSP_ERROR_DETECT  0x18
 #define     E_DSP_REPAIR_DETECT 0x19
 
@@ -947,123 +662,123 @@ enum{
 //#define       E_DSP_CHANNELSTATUS 0x1b
 
 
-// HêŽŽŒ±—p
-#define     E_TST_DRAM_CHK  0xf8        /*# HêŽŽŒ±—p ‚c‚q‚`‚lƒ`ƒFƒbƒN #*/
-#define     E_TST_MEM_CHK   0xf9        /*# HêŽŽŒ±—p ƒƒ‚ƒŠƒ`ƒFƒbƒN #*/
-#define     E_TST_LED_CTL   0xfa        /*# HêŽŽŒ±—p ‚k‚d‚c•\Ž¦ #*/
-#define     E_TST_MEM_RD    0xfb        /*# HêŽŽŒ±—p ƒƒ‚ƒŠƒŠ[ƒh #*/
-#define     E_TST_MEM_WT    0xfc        /*# HêŽŽŒ±—p ƒƒ‚ƒŠƒ‰ƒCƒg #*/
-#define     E_TST_DSP_CK    0xfd        /*# HêŽŽŒ±—p ‚c‚r‚oƒƒ‚ƒŠƒ`ƒFƒbƒN #*/ // 2001.05.22 ’Ç‰Á
-// HêŽŽŒ±—p
+// å·¥å ´è©¦é¨“ç”¨
+#define     E_TST_DRAM_CHK  0xf8        /*# å·¥å ´è©¦é¨“ç”¨ ï¼¤ï¼²ï¼¡ï¼­ãƒã‚§ãƒƒã‚¯ #*/
+#define     E_TST_MEM_CHK   0xf9        /*# å·¥å ´è©¦é¨“ç”¨ ãƒ¡ãƒ¢ãƒªãƒã‚§ãƒƒã‚¯ #*/
+#define     E_TST_LED_CTL   0xfa        /*# å·¥å ´è©¦é¨“ç”¨ ï¼¬ï¼¥ï¼¤è¡¨ç¤º #*/
+#define     E_TST_MEM_RD    0xfb        /*# å·¥å ´è©¦é¨“ç”¨ ãƒ¡ãƒ¢ãƒªãƒªãƒ¼ãƒ‰ #*/
+#define     E_TST_MEM_WT    0xfc        /*# å·¥å ´è©¦é¨“ç”¨ ãƒ¡ãƒ¢ãƒªãƒ©ã‚¤ãƒˆ #*/
+#define     E_TST_DSP_CK    0xfd        /*# å·¥å ´è©¦é¨“ç”¨ ï¼¤ï¼³ï¼°ãƒ¡ãƒ¢ãƒªãƒã‚§ãƒƒã‚¯ #*/ // 2001.05.22 è¿½åŠ 
+// å·¥å ´è©¦é¨“ç”¨
 
-#define     E_PKGEVENT      0x80        /*# Šù‘¶PKGƒCƒxƒ“ƒg #*/
+#define     E_PKGEVENT      0x80        /*# æ—¢å­˜PKGã‚¤ãƒ™ãƒ³ãƒˆ #*/
 
 
-/*# ƒI[ƒ_/ƒCƒxƒ“ƒgƒf[ƒ^ #*/
-#define     NUM_OF_MSG      0x0FF       /*# ƒƒbƒZ[ƒWŽí•ÊMAX’l #*/
-#define     ORD_MIN         2           /*# ƒ~ƒjƒ}ƒ€ƒTƒCƒY #*/
+/*# ã‚ªãƒ¼ãƒ€/ã‚¤ãƒ™ãƒ³ãƒˆãƒ‡ãƒ¼ã‚¿ #*/
+#define     NUM_OF_MSG      0x0FF       /*# ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ç¨®åˆ¥MAXå€¤ #*/
+#define     ORD_MIN         2           /*# ãƒŸãƒ‹ãƒžãƒ ã‚µã‚¤ã‚º #*/
 
-/*# LUƒLƒƒƒrƒlƒbƒgƒ^ƒCƒv #*/
+/*# LUã‚­ãƒ£ãƒ“ãƒãƒƒãƒˆã‚¿ã‚¤ãƒ— #*/
 #define     LU_BS_LU        0           /*# BS-LU #*/
 #define     LU_EX_LU        1           /*# EX-LU #*/
 
-/*# LUƒ^ƒCƒv #*/
-#define     LU_MASTER       0           /*# LUƒ}ƒXƒ^ #*/
-#define     LU_SLAVE        1           /*# LUƒXƒŒ[ƒu #*/
+/*# LUã‚¿ã‚¤ãƒ— #*/
+#define     LU_MASTER       0           /*# LUãƒžã‚¹ã‚¿ #*/
+#define     LU_SLAVE        1           /*# LUã‚¹ãƒ¬ãƒ¼ãƒ– #*/
 
-/*# CLKDƒ^ƒCƒv #*/
-#define     CLKD_MASTER     0           /*# ƒNƒƒbƒNƒ}ƒXƒ^ #*/
-#define     CLKD_SLAVE      1           /*# ƒNƒƒbƒNƒXƒŒ[ƒu #*/
+/*# CLKDã‚¿ã‚¤ãƒ— #*/
+#define     CLKD_MASTER     0           /*# ã‚¯ãƒ­ãƒƒã‚¯ãƒžã‚¹ã‚¿ #*/
+#define     CLKD_SLAVE      1           /*# ã‚¯ãƒ­ãƒƒã‚¯ã‚¹ãƒ¬ãƒ¼ãƒ– #*/
 
-/*# ŽÀ‘•MAX’l #*/
-//#define       SLOT_MAX        4           /*# Å‘åŽÀ‘•‰Â”\ƒXƒƒbƒg” #*/
-#define     DPRAM_MAX       8           /*# Å‘åDPRAM” #*/
+/*# å®Ÿè£…MAXå€¤ #*/
+//#define       SLOT_MAX        4           /*# æœ€å¤§å®Ÿè£…å¯èƒ½ã‚¹ãƒ­ãƒƒãƒˆæ•° #*/
+#define     DPRAM_MAX       8           /*# æœ€å¤§DPRAMæ•° #*/
 
-//#define       LU_MAX          96          /*# Å‘åLU”(V1) #*/
-#define     LU_MAX          255         /*# Å‘åLU”(V4) #*///2004.01 LU32B
-#define     SLV_MAX         16          /*# Å‘åSLV”(V1) #*/
+//#define       LU_MAX          96          /*# æœ€å¤§LUæ•°(V1) #*/
+#define     LU_MAX          255         /*# æœ€å¤§LUæ•°(V4) #*///2004.01 LU32B
+#define     SLV_MAX         16          /*# æœ€å¤§SLVæ•°(V1) #*/
 
-/*# Š„‚èž‚Ý #*/
-#define     IRQ_ENABLE      1           /*# IRQŠ„‚èž‚Ý‚Ì‚Ý‹–‰Â #*/
+/*# å‰²ã‚Šè¾¼ã¿ #*/
+#define     IRQ_ENABLE      1           /*# IRQå‰²ã‚Šè¾¼ã¿ã®ã¿è¨±å¯ #*/
 
-/*# ƒXƒƒbƒgŽÀ‘•ó‘Ô #*/
-#define     INS_SLOT    0               /*# PKGŽÀ‘•’† #*/
-#define     OUS_SLOT    1               /*# PKG–¢ŽÀ‘• #*/
+/*# ã‚¹ãƒ­ãƒƒãƒˆå®Ÿè£…çŠ¶æ…‹ #*/
+#define     INS_SLOT    0               /*# PKGå®Ÿè£…ä¸­ #*/
+#define     OUS_SLOT    1               /*# PKGæœªå®Ÿè£… #*/
 
-/*# ‘—MŒ³^‘—MæŽ¯•ÊŽq #*/
-#define     SNDID_LU    0               /*# LUƒI[ƒ_ƒCƒxƒ“ƒg #*/
-#define     SNDID_PKG   1               /*# PKGƒI[ƒ_ƒCƒxƒ“ƒg #*/
+/*# é€ä¿¡å…ƒï¼é€ä¿¡å…ˆè­˜åˆ¥å­ #*/
+#define     SNDID_LU    0               /*# LUã‚ªãƒ¼ãƒ€ã‚¤ãƒ™ãƒ³ãƒˆ #*/
+#define     SNDID_PKG   1               /*# PKGã‚ªãƒ¼ãƒ€ã‚¤ãƒ™ãƒ³ãƒˆ #*/
 
-/*# ‘—MŒ³PKG’l #*///IP-CS‘Î‰ž
-#define     FROM_SLAVE  1               /*# ‹ŒƒXƒŒ[ƒu‘—MŒ³ƒCƒxƒ“ƒgPKG”Ô†ƒGƒŠƒA’l #*/
+/*# é€ä¿¡å…ƒPKGå€¤ #*///IP-CSå¯¾å¿œ
+#define     FROM_SLAVE  1               /*# æ—§ã‚¹ãƒ¬ãƒ¼ãƒ–é€ä¿¡å…ƒã‚¤ãƒ™ãƒ³ãƒˆPKGç•ªå·ã‚¨ãƒªã‚¢å€¤ #*/
 
 
-/*# ‘‚«ž‚ÝŽí•Ê #*/
-#define PKG_ORDER           1           /*# ˆê”ÊƒI[ƒ_ #*/
-#define HELTH_CHECK         2           /*# ƒwƒ‹ƒXƒ`ƒFƒbƒNƒI[ƒ_ #*/
-#define DOOR_CTL            3           /*# ƒhƒAƒzƒ“§Œä—v‹ #*/
-//SS9100(PH1ÄŠJ)‘Î‰ž 2006.06
-#define PH1_ORDER           4           /*# PH1ÄŠJƒI[ƒ_ #*/
+/*# æ›¸ãè¾¼ã¿ç¨®åˆ¥ #*/
+#define PKG_ORDER           1           /*# ä¸€èˆ¬ã‚ªãƒ¼ãƒ€ #*/
+#define HELTH_CHECK         2           /*# ãƒ˜ãƒ«ã‚¹ãƒã‚§ãƒƒã‚¯ã‚ªãƒ¼ãƒ€ #*/
+#define DOOR_CTL            3           /*# ãƒ‰ã‚¢ãƒ›ãƒ³åˆ¶å¾¡è¦æ±‚ #*/
+//SS9100(PH1å†é–‹)å¯¾å¿œ 2006.06
+#define PH1_ORDER           4           /*# PH1å†é–‹ã‚ªãƒ¼ãƒ€ #*/
 
 /*# BOOTP #*/ 
-#define VEND_LU_TAG         128         /*# ƒxƒ“ƒ_ƒf[ƒ^ƒ^ƒCƒv #*/
-#define VEND_LU_SIZE        7           /*# ‚k‚tƒxƒ“ƒ_î•ñƒTƒCƒY #*/ // 99.05.21 •ÏX
-#define VEND_VLAN_TAG       131         /*# ‚u‚k‚`‚mƒ^ƒO #*/ // 99.08.18
-#define VEND_VER_TAG        132         /*# IPLƒo[ƒWƒ‡ƒ“ƒ^ƒO #*/               // 2000.06.20 V1.2’Ç‰Á
-#define VEND_VER_SIZE       4           /*# ‚k‚tƒo[ƒWƒ‡ƒ“ƒTƒCƒY #*/            // 2000.06.20 V1.2’Ç‰Á
-#define VEND_CCUID_TAG      133         /*# CCU IDƒ^ƒO #*/                      // 2000.07 V2.1’Ç‰Á
-#define VEND_CCUID_SIZE     1           /*# CCU IDƒTƒCƒY #*/                    // 2000.07 V2.1’Ç‰Á
-#define VEND_CCUIP_TAG      134         /*# CCU IPƒAƒhƒŒƒXƒ^ƒO #*/              // 2000.07 V2.1’Ç‰Á
-#define VEND_CCUIP_SIZE     4           /*# CCU IPƒAƒhƒŒƒXƒAƒhƒŒƒX #*/          // 2000.07 V2.1’Ç‰Á
-#define VEND_CCUVER_TAG     135         /*# CCUƒo[ƒWƒ‡ƒ“ƒ^ƒO #*/               // 2000.07 V2.1’Ç‰Á
-#define VEND_CCUVER_SIZE    2           /*# CCUƒo[ƒWƒ‡ƒ“ƒTƒCƒY #*/             // 2000.07 V2.1’Ç‰Á
-#define VEND_EOL_TAG        255         /*# ƒGƒ“ƒhƒIƒuƒŠƒXƒg #*/ // 99.05.21 ’Ç‰Á
-#define VEND_SUBNET_SIZE    4           /*# ƒTƒuƒlƒbƒgƒ}ƒXƒN #*/                // 2000.09 V2.1’Ç‰Á
-#define VEND_GATEWAY_SIZE   4           /*# ƒQ[ƒgƒEƒFƒCIPƒAƒhƒŒƒX #*/          // 2000.09 V2.1’Ç‰Á
-#define VEND_VLAN_SIZE      5           /*# ƒTƒuƒlƒbƒgƒ}ƒXƒN #*/                // 2000.09 V2.1’Ç‰Á
-#define VEND_LUTYPE_TAG     136         /*# ‚k‚tƒ^ƒCƒvƒ^ƒO #*/                  // 2001.07.05 ’Ç‰Á
-#define VEND_LUTYPE_SIZE    1           /*# ‚k‚tƒ^ƒCƒvƒTƒCƒY #*/                // 2001.07.05 ’Ç‰Á
-#define VEND_LUTYPE_TYPE    9           /*# ‚k‚tƒ^ƒCƒviIP-CSj #*/             // 2004.04 ’Ç‰Á
-#define VEND_CCU2_TAG       137         /*# CCU2 IPƒAƒhƒŒƒXƒ^ƒO #*/             // 2001.08 V2.3 ’Ç‰Á
-#define VEND_CCU2_SIZE      4           /*# CCU2 IPƒAƒhƒŒƒXƒAƒhƒŒƒX #*/         // 2001.08 V2.3 ’Ç‰Á
+#define VEND_LU_TAG         128         /*# ãƒ™ãƒ³ãƒ€ãƒ‡ãƒ¼ã‚¿ã‚¿ã‚¤ãƒ— #*/
+#define VEND_LU_SIZE        7           /*# ï¼¬ï¼µãƒ™ãƒ³ãƒ€æƒ…å ±ã‚µã‚¤ã‚º #*/ // 99.05.21 å¤‰æ›´
+#define VEND_VLAN_TAG       131         /*# ï¼¶ï¼¬ï¼¡ï¼®ã‚¿ã‚° #*/ // 99.08.18
+#define VEND_VER_TAG        132         /*# IPLãƒãƒ¼ã‚¸ãƒ§ãƒ³ã‚¿ã‚° #*/               // 2000.06.20 V1.2è¿½åŠ 
+#define VEND_VER_SIZE       4           /*# ï¼¬ï¼µãƒãƒ¼ã‚¸ãƒ§ãƒ³ã‚µã‚¤ã‚º #*/            // 2000.06.20 V1.2è¿½åŠ 
+#define VEND_CCUID_TAG      133         /*# CCU IDã‚¿ã‚° #*/                      // 2000.07 V2.1è¿½åŠ 
+#define VEND_CCUID_SIZE     1           /*# CCU IDã‚µã‚¤ã‚º #*/                    // 2000.07 V2.1è¿½åŠ 
+#define VEND_CCUIP_TAG      134         /*# CCU IPã‚¢ãƒ‰ãƒ¬ã‚¹ã‚¿ã‚° #*/              // 2000.07 V2.1è¿½åŠ 
+#define VEND_CCUIP_SIZE     4           /*# CCU IPã‚¢ãƒ‰ãƒ¬ã‚¹ã‚¢ãƒ‰ãƒ¬ã‚¹ #*/          // 2000.07 V2.1è¿½åŠ 
+#define VEND_CCUVER_TAG     135         /*# CCUãƒãƒ¼ã‚¸ãƒ§ãƒ³ã‚¿ã‚° #*/               // 2000.07 V2.1è¿½åŠ 
+#define VEND_CCUVER_SIZE    2           /*# CCUãƒãƒ¼ã‚¸ãƒ§ãƒ³ã‚µã‚¤ã‚º #*/             // 2000.07 V2.1è¿½åŠ 
+#define VEND_EOL_TAG        255         /*# ã‚¨ãƒ³ãƒ‰ã‚ªãƒ–ãƒªã‚¹ãƒˆ #*/ // 99.05.21 è¿½åŠ 
+#define VEND_SUBNET_SIZE    4           /*# ã‚µãƒ–ãƒãƒƒãƒˆãƒžã‚¹ã‚¯ #*/                // 2000.09 V2.1è¿½åŠ 
+#define VEND_GATEWAY_SIZE   4           /*# ã‚²ãƒ¼ãƒˆã‚¦ã‚§ã‚¤IPã‚¢ãƒ‰ãƒ¬ã‚¹ #*/          // 2000.09 V2.1è¿½åŠ 
+#define VEND_VLAN_SIZE      5           /*# ã‚µãƒ–ãƒãƒƒãƒˆãƒžã‚¹ã‚¯ #*/                // 2000.09 V2.1è¿½åŠ 
+#define VEND_LUTYPE_TAG     136         /*# ï¼¬ï¼µã‚¿ã‚¤ãƒ—ã‚¿ã‚° #*/                  // 2001.07.05 è¿½åŠ 
+#define VEND_LUTYPE_SIZE    1           /*# ï¼¬ï¼µã‚¿ã‚¤ãƒ—ã‚µã‚¤ã‚º #*/                // 2001.07.05 è¿½åŠ 
+#define VEND_LUTYPE_TYPE    9           /*# ï¼¬ï¼µã‚¿ã‚¤ãƒ—ï¼ˆIP-CSï¼‰ #*/             // 2004.04 è¿½åŠ 
+#define VEND_CCU2_TAG       137         /*# CCU2 IPã‚¢ãƒ‰ãƒ¬ã‚¹ã‚¿ã‚° #*/             // 2001.08 V2.3 è¿½åŠ 
+#define VEND_CCU2_SIZE      4           /*# CCU2 IPã‚¢ãƒ‰ãƒ¬ã‚¹ã‚¢ãƒ‰ãƒ¬ã‚¹ #*/         // 2001.08 V2.3 è¿½åŠ 
 
 
-/*# ƒ_ƒEƒ“ƒ[ƒhƒI[ƒ_ #*/
-/*# ƒ_ƒEƒ“ƒ[ƒhƒI[ƒ_ƒTƒCƒY #*/
-#define     V1_1_DL_SIZE    45                  /*# V1.1CCU‚Ìƒ_ƒEƒ“ƒ[ƒhƒI[ƒ_ƒTƒCƒY #*/       // 2000.05.12 V1.2’Ç‰Á
-#define     V2_1_DL_SIZE    51                  /*# V2.1CCU‚Ìƒ_ƒEƒ“ƒ[ƒhƒI[ƒ_ƒTƒCƒY #*/       // 2000.07 V2.1’Ç‰Á
-#define     V2_1_DL_SIZEV2  91                  /*# V2.1CCU‚Ìƒ_ƒEƒ“ƒ[ƒhƒI[ƒ_ƒTƒCƒYVer.2# */  // 2000.09 V2.1’Ç‰Á
-//#define       V2_2_DL_SIZE    97                  /*# V2.2CCU‚Ìƒ_ƒEƒ“ƒ[ƒhƒI[ƒ_ƒTƒCƒY# */       // 2000.12.27 V2.2’Ç‰Á
-#define     V2_2_DL_SIZE    98                  /*# V2.2CCU‚Ìƒ_ƒEƒ“ƒ[ƒhƒI[ƒ_ƒTƒCƒY# */       // 2001.03.08 •ÏX
-#define     V2_3_DL_SIZE    100                 /*# V2.3CCU‚Ìƒ_ƒEƒ“ƒ[ƒhƒI[ƒ_ƒTƒCƒY# */       // 2001.08 ’Ç‰Á
+/*# ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ã‚ªãƒ¼ãƒ€ #*/
+/*# ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ã‚ªãƒ¼ãƒ€ã‚µã‚¤ã‚º #*/
+#define     V1_1_DL_SIZE    45                  /*# V1.1CCUã®ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ã‚ªãƒ¼ãƒ€ã‚µã‚¤ã‚º #*/       // 2000.05.12 V1.2è¿½åŠ 
+#define     V2_1_DL_SIZE    51                  /*# V2.1CCUã®ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ã‚ªãƒ¼ãƒ€ã‚µã‚¤ã‚º #*/       // 2000.07 V2.1è¿½åŠ 
+#define     V2_1_DL_SIZEV2  91                  /*# V2.1CCUã®ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ã‚ªãƒ¼ãƒ€ã‚µã‚¤ã‚ºVer.2# */  // 2000.09 V2.1è¿½åŠ 
+//#define       V2_2_DL_SIZE    97                  /*# V2.2CCUã®ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ã‚ªãƒ¼ãƒ€ã‚µã‚¤ã‚º# */       // 2000.12.27 V2.2è¿½åŠ 
+#define     V2_2_DL_SIZE    98                  /*# V2.2CCUã®ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ã‚ªãƒ¼ãƒ€ã‚µã‚¤ã‚º# */       // 2001.03.08 å¤‰æ›´
+#define     V2_3_DL_SIZE    100                 /*# V2.3CCUã®ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ã‚ªãƒ¼ãƒ€ã‚µã‚¤ã‚º# */       // 2001.08 è¿½åŠ 
 
-//  ‚ä‚ç‚¬Å‘å’l’è‹` 2000.09 V2.1’Ç‰Á
-#define     V2_1_CCU_YURAGIMAX  11                          /*# V2.1 CCUŽw’è‚ä‚ç‚¬Å‘å’l #*/
-#define     V1_1_CCU_YURAGIMAX  5                           /*# V1.1 CCUŽw’è‚ä‚ç‚¬Å‘å’l #*/
+//  ã‚†ã‚‰ãŽæœ€å¤§å€¤å®šç¾© 2000.09 V2.1è¿½åŠ 
+#define     V2_1_CCU_YURAGIMAX  11                          /*# V2.1 CCUæŒ‡å®šã‚†ã‚‰ãŽæœ€å¤§å€¤ #*/
+#define     V1_1_CCU_YURAGIMAX  5                           /*# V1.1 CCUæŒ‡å®šã‚†ã‚‰ãŽæœ€å¤§å€¤ #*/
 
-//  ƒoƒbƒtƒ@–ÊŽw’èÅ‘å’l’è‹` 2000.09 V2.1’Ç‰Á
-#define     V2_1_CCU_BUFFNUMMAX 10                          /*# V2.1 CCUŽw’èƒoƒbƒtƒ@–ÊŽw’èÅ‘å’l #*/
-#define     V1_1_CCU_BUFFNUMMAX 5                           /*# V1.1 CCUŽw’èƒoƒbƒtƒ@–ÊŽw’èÅ‘å’l #*/
+//  ãƒãƒƒãƒ•ã‚¡é¢æŒ‡å®šæœ€å¤§å€¤å®šç¾© 2000.09 V2.1è¿½åŠ 
+#define     V2_1_CCU_BUFFNUMMAX 10                          /*# V2.1 CCUæŒ‡å®šãƒãƒƒãƒ•ã‚¡é¢æŒ‡å®šæœ€å¤§å€¤ #*/
+#define     V1_1_CCU_BUFFNUMMAX 5                           /*# V1.1 CCUæŒ‡å®šãƒãƒƒãƒ•ã‚¡é¢æŒ‡å®šæœ€å¤§å€¤ #*/
 
-//  D01ƒTƒoƒCƒoƒ‹‘Î‰ž 2004.02 LU32B’Ç‰Á
-#define     SURV_SWITCH_TIM     1800                    /*# PowerOnŽž‚ÌƒfƒtƒHƒ‹ƒgCCUØŠ·ƒ^ƒCƒ}’l(•b) #*/
+//  D01ã‚µãƒã‚¤ãƒãƒ«å¯¾å¿œ 2004.02 LU32Bè¿½åŠ 
+#define     SURV_SWITCH_TIM     1800                    /*# PowerOnæ™‚ã®ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆCCUåˆ‡æ›ã‚¿ã‚¤ãƒžå€¤(ç§’) #*/
 
-//SS9100‘Î‰ž’Ç‰Á 2004.11.01
-#define     SURV_SWITCH_SS9100_TIM  120                 /*# SS9100Žž‚ÌƒfƒtƒHƒ‹ƒgCCUØŠ·ƒ^ƒCƒ}’l(•b) #*/
+//SS9100å¯¾å¿œè¿½åŠ  2004.11.01
+#define     SURV_SWITCH_SS9100_TIM  120                 /*# SS9100æ™‚ã®ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆCCUåˆ‡æ›ã‚¿ã‚¤ãƒžå€¤(ç§’) #*/
 
 /****************************************************************************/
-/* FAXƒg[ƒ“ŒŸoŽí•Ê                                                        */
+/* FAXãƒˆãƒ¼ãƒ³æ¤œå‡ºç¨®åˆ¥                                                        */
 /****************************************************************************/
 enum
 {
     FAXTONE_CNG         ,       /* CNG      */
     FAXTONE_CED         ,       /* CED          */
-    FAXTONE_PRI             /* ƒvƒŠƒAƒ“ƒuƒ‹ */
+    FAXTONE_PRI             /* ãƒ—ãƒªã‚¢ãƒ³ãƒ–ãƒ« */
 } ;
 
 
 /***********************************************************************/
-/* DSPŽí•Ê                                 */
+/* DSPç¨®åˆ¥                                 */
 /***********************************************************************/
 enum
 {
@@ -1072,7 +787,7 @@ enum
 } ;
 
 /***********************************************************************/
-/* ‹­§’âŽ~Ží•Ê                                */
+/* å¼·åˆ¶åœæ­¢ç¨®åˆ¥                                */
 /***********************************************************************/
 enum
 {
@@ -1084,218 +799,161 @@ enum
 
 /*###########################################################################*/
 /*#                                                                         #*/
-/*#                               BOOTPŠÖ˜A                                 #*/
+/*#                               BOOTPé–¢é€£                                 #*/
 /*#                                                                         #*/
 /*###########################################################################*/
-#define     BOOTP_RESP_AERA 0x60000         /*# BOOTP RESP ‘‚«ž‚Ýæ“ªƒAƒhƒŒƒX(‰¼j #*/
-
-/*###########################################################################*/
-/*#                                                                         #*/
-/*#                               •Û—¯‰¹ŠÖ˜A                                #*/
-/*#                                                                         #*/
-/*###########################################################################*/
-//#define       HORYSIZE        (256*1024+40)               /*# •Û—¯‰¹ƒTƒCƒY #*/
-#define     HORYSIZE        (256*1024)                  /*# •Û—¯‰¹ƒTƒCƒY #*/
-#define     HORYSAVESIZE    (256*1024)                  /*# •Û—¯‰¹ƒtƒ‰ƒbƒVƒ…•Û‘¶ƒTƒCƒY #*/  //2001.01.16 V2.2’Ç‰Á
-//#define       TALKYSIZE       (128*1024+40)               /*# ƒg[ƒL[ƒTƒCƒY #*/
-#define     TALKYSIZE       (128*1024)                  /*# ƒg[ƒL[ƒTƒCƒY #*/
-#define     TALKYSAVESIZE   (128*1024)                  /*# ƒg[ƒL[ƒtƒ‰ƒbƒVƒ…•Û‘¶ƒTƒCƒY #*/    //2001.01.16 V2.2’Ç‰Á
-//#define       HORY1_ADR       0x2130000               /*# •Û—¯‰¹‚Pæ“ªƒAƒhƒŒƒX(‰¼j #*/
-//#define       HORY2_ADR       HORY1_ADR+HORYSIZE      /*# •Û—¯‰¹‚Qæ“ªƒAƒhƒŒƒX #*/
-//#define       HORY_RDMAX      0x1770      /*# •Û—¯‰¹ƒf[ƒ^“Ç‚Ýž‚ÝÅ‘å’l(40BYTE’PˆÊ) #*/
+#define     BOOTP_RESP_AERA 0x60000         /*# BOOTP RESP æ›¸ãè¾¼ã¿å…ˆé ­ã‚¢ãƒ‰ãƒ¬ã‚¹(ä»®ï¼‰ #*/
 
 /*###########################################################################*/
 /*#                                                                         #*/
-/*#                           ‹¤’ÊŠÖ”—pƒfƒtƒ@ƒCƒ“                          #*/
+/*#                               ä¿ç•™éŸ³é–¢é€£                                #*/
 /*#                                                                         #*/
 /*###########################################################################*/
-#define     POOL0           0x00        /*# ˆê”ÊƒƒbƒZ[ƒW—p        #*//*# DOEP‚É‚ÄUSER-QUEŽg—p #*/
-#define     POOL1           0x01        /*# “ñŽŸƒƒbƒZ[ƒW—p        #*//*# LUŠÇ—‚É‚ÄUSER-QUEŽg—p #*/
-#define     POOL2           0x02        /*# DSP§Œäƒf[ƒ^—p     #*//*# DSP‚É‚ÄUSER-QUEŽg—p #*/
-#define     POOL3           0x03        /*# ‰¹ºŽóM—p #*/
-#define     POOL4           0x04        /*# ‰¹º‘—M—p #*/
-#define     POOL5           0x05        /*# UDP‘—M—p #*/
-#define     POOL6           0x06        /*# FUSION—p #*/
-#define     POOL7           0x07        /*# TAG—p #*/
-#define     POOL8           0x08        /*# DMY #*//*# DPRAMˆ—CN0‚É‚ÄUSER-QUEŽg—p #*/
-#define     POOL9           0x09        /*# DMY #*//*# DPRAMˆ—CN1‚É‚ÄUSER-QUEŽg—p #*/
-#define     POOLA           0x0A        /*# DMY #*//*# DPRAMˆ—CN2‚É‚ÄUSER-QUEŽg—p #*/
-#define     POOLB           0x0B        /*# DMY #*//*# DPRAMˆ—CN3‚É‚ÄUSER-QUEŽg—p #*/
-#define     POOLC           0x0C        /*# DMY #*//*# DPRAMˆ—CN4‚É‚ÄUSER-QUEŽg—p #*/
-#define     POOLD           0x0D        /*# DMY #*//*# DPRAMˆ—CN5‚É‚ÄUSER-QUEŽg—p #*/
-#define     POOLE           0x0E        /*# DMY #*//*# DPRAMˆ—CN6‚É‚ÄUSER-QUEŽg—p #*/
-#define     POOLF           0x0F        /*# DMY #*//*# DPRAMˆ—CN7‚É‚ÄUSER-QUEŽg—p #*/
-#define     POOL10          0x10        /*# DMY #*//*# DPRAMˆ—CN8‚É‚ÄUSER-QUEŽg—p #*/ //2000.07 V2.1’Ç‰Á
-#define     POOL11          0x11        /*# DMY #*//*# DPRAMˆ—CN9‚É‚ÄUSER-QUEŽg—p #*/ //2000.07 V2.1’Ç‰Á
-#define     POOL12          0x12        /*# DMY #*//*# DPRAMˆ—CN10‚É‚ÄUSER-QUEŽg—p #*///2000.07 V2.1’Ç‰Á
-#define     POOL13          0x13        /*# DMY #*//*# DPRAMˆ—CN11‚É‚ÄUSER-QUEŽg—p #*///2000.07 V2.1’Ç‰Á
-#define     POOL14          0x14        /*# DMY #*//*# DPRAMˆ—CN12‚É‚ÄUSER-QUEŽg—p #*///2000.07 V2.1’Ç‰Á
-#define     POOL15          0x15        /*# DMY #*//*# DPRAMˆ—CN13‚É‚ÄUSER-QUEŽg—p #*///2000.07 V2.1’Ç‰Á
-#define     POOL16          0x16        /*# DMY #*//*# DPRAMˆ—CN14‚É‚ÄUSER-QUEŽg—p #*///2000.07 V2.1’Ç‰Á
-#define     POOL17          0x17        /*# DMY #*//*# DPRAMˆ—CN15‚É‚ÄUSER-QUEŽg—p #*///2000.07 V2.1’Ç‰Á
-#define     POOL18          0x18        /*# TFTPƒT[ƒo—p #*/                            //2000.07 V2.1’Ç‰Á
-#define     POOL19          0x19        /*# T38ƒpƒPƒbƒg—p  #*//* ˆ³kLU */                          //2003.08 ’Ç‰Á
-#define     POOL1A          0x1A        /*# FAXƒf[ƒ^—p    #*/                          //2003.08 ’Ç‰Á
-#define     POOL1B          0x1B        /*# FAXƒf[ƒ^ŠÇ——p#*/                          //2003.08 ’Ç‰Á
-//ˆ³kLU‘Î‰žBDSPƒŠƒAƒ‹ƒ^ƒCƒ€ƒRƒ}ƒ“ƒh—pB2003.09.03
-#define     POOL1C          0x1C        /*# DSPƒŠƒAƒ‹ƒ^ƒCƒ€ƒRƒ}ƒ“ƒh—p#*/
-#define     POOL1D          0x1D        /*# ƒgƒŒ[ƒXî•ñ—p#*/                       //2003.09
-#define     POOL1E          0x1E        /*# DSP‰Šú‰»—p#*/                      //2003.09
-#define     POOL1F          0x1F        /*# DSP‰Šú‰»—p#*/                      //2003.09
+//#define       HORYSIZE        (256*1024+40)               /*# ä¿ç•™éŸ³ã‚µã‚¤ã‚º #*/
+#define     HORYSIZE        (256*1024)                  /*# ä¿ç•™éŸ³ã‚µã‚¤ã‚º #*/
+#define     HORYSAVESIZE    (256*1024)                  /*# ä¿ç•™éŸ³ãƒ•ãƒ©ãƒƒã‚·ãƒ¥ä¿å­˜ã‚µã‚¤ã‚º #*/  //2001.01.16 V2.2è¿½åŠ 
+//#define       TALKYSIZE       (128*1024+40)               /*# ãƒˆãƒ¼ã‚­ãƒ¼ã‚µã‚¤ã‚º #*/
+#define     TALKYSIZE       (128*1024)                  /*# ãƒˆãƒ¼ã‚­ãƒ¼ã‚µã‚¤ã‚º #*/
+#define     TALKYSAVESIZE   (128*1024)                  /*# ãƒˆãƒ¼ã‚­ãƒ¼ãƒ•ãƒ©ãƒƒã‚·ãƒ¥ä¿å­˜ã‚µã‚¤ã‚º #*/    //2001.01.16 V2.2è¿½åŠ 
+//#define       HORY1_ADR       0x2130000               /*# ä¿ç•™éŸ³ï¼‘å…ˆé ­ã‚¢ãƒ‰ãƒ¬ã‚¹(ä»®ï¼‰ #*/
+//#define       HORY2_ADR       HORY1_ADR+HORYSIZE      /*# ä¿ç•™éŸ³ï¼’å…ˆé ­ã‚¢ãƒ‰ãƒ¬ã‚¹ #*/
+//#define       HORY_RDMAX      0x1770      /*# ä¿ç•™éŸ³ãƒ‡ãƒ¼ã‚¿èª­ã¿è¾¼ã¿æœ€å¤§å€¤(40BYTEå˜ä½) #*/
 
+/*###########################################################################*/
+/*#                                                                         #*/
+/*#                           å…±é€šé–¢æ•°ç”¨ãƒ‡ãƒ•ã‚¡ã‚¤ãƒ³                          #*/
+/*#                                                                         #*/
+/*###########################################################################*/
+enum {
+		POOL0 = 0x00,		/*# ä¸€èˆ¬ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ç”¨        #*//*# DOEPã«ã¦USER-QUEä½¿ç”¨ #*//* æ—§CDLCéƒ¨ã§ã¯ã€CD_MPID_TSK_MSGã¨å®šç¾© */
+		POOL1,				/*# äºŒæ¬¡ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ç”¨        #*//*# LUç®¡ç†ã«ã¦USER-QUEä½¿ç”¨ #*/
+		POOL2,				 /*# DSPåˆ¶å¾¡ãƒ‡ãƒ¼ã‚¿ç”¨     #*//*# DSPã«ã¦USER-QUEä½¿ç”¨ #*/
+		POOL3,				/*# éŸ³å£°å—ä¿¡ç”¨ #*/
+		POOL4,				/*# éŸ³å£°é€ä¿¡ç”¨ #*/
+		POOL5,				/*# UDPé€ä¿¡ç”¨ #*/
+		POOL6,				/*# FUSIONç”¨ #*/
+		POOL7,				/*# TAGç”¨ #*/
+		POOL8,				/*# DMY #*//*# ãƒ€ãƒŸãƒ¼ã§ã¯ãªã„ã€DOEPã§ä½¿ç”¨ã—ã¦ã„ã‚‹ #*/
+		CD_MPID_EVT_DATA,	/*# æ—§CDLCéƒ¨ã€€ã‚¤ãƒ™ãƒ³ãƒˆé€šçŸ¥(ãƒ‡ãƒ¼ã‚¿å—ä¿¡é€šçŸ¥)ç”¨ #*/
+		CD_MPID_EVT,		/*# æ—§CDLCéƒ¨ã€€ã‚¤ãƒ™ãƒ³ãƒˆé€šçŸ¥(ãƒ‡ãƒ¼ã‚¿å—ä¿¡é€šçŸ¥ä»¥å¤–)ç”¨ #*/
+		CD_MPID_ORD,		/*# æ—§CDLCéƒ¨ã€€ã‚ªãƒ¼ãƒ€åˆ¶å¾¡ã‚¿ã‚¹ã‚¯ç”¨ #*/
+		CD_MPID_SND_IDATA,	/*# æ—§CDLCéƒ¨ã€€é€ä¿¡Iãƒ‡ãƒ¼ã‚¿ç”¨ #*/
+		CD_MPID_RCV_IDATA,	/*# æ—§CDLCéƒ¨ã€€å—ä¿¡Iãƒ‡ãƒ¼ã‚¿ç”¨ #*/
+		CD_MPID_WAIT_CFRM,	/*# æ—§CDLCéƒ¨ã€€é€ä¿¡å¾…ã¡åˆ¶å¾¡ãƒ•ãƒ¬ãƒ¼ãƒ ç”¨ #*/
+		CD_MPID_RCV_SIO_MSG,/*# æ—§CDLCéƒ¨ã€€SIOå—ä¿¡é€šçŸ¥ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ç”¨ #*/
+		COM_POOL_MAX	/*# ãƒ—ãƒ¼ãƒ«IDæ•° #*/
+} COM_POOL_ID;
+#define CD_MPID_TSK_MSG		POOL0		/*# æ—§CDLCéƒ¨ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸é€ä¿¡ç”¨ãƒ—ãƒ¼ãƒ«å #*/
 
-    /*# ƒv[ƒ‹ƒTƒCƒY #*/
-//#define       POOL0_SIZE      40          /*# ˆê”ÊƒƒbƒZ[ƒW—p [12(os)+28(“à•”msg)] #*/
-#define     POOL0_SIZE      56          /*# ˆê”ÊƒƒbƒZ[ƒW—p [12(os)+44(“à•”msg)] #*/ //2003.10.23
-#define     POOL1_SIZE      280         /*# “ñŽŸƒƒbƒZ[ƒW—p [12(os)+12(LUÍ¯ÀÞ)+256(µ°ÀÞ/²ÍÞÝÄî•ñ)] #*/
-#define     POOL2_SIZE      80          /*# DSP§Œäƒf[ƒ^—p [12(os)+4(SystemSTS)+64] #*/
-#define     POOL3_SIZE      1540        /*# ‰¹ºŽóMƒƒbƒZ[ƒW—p [12(os)+1528(Max LAN Rcv Size)] #*/
-#define     POOL4_SIZE      984         /*# ‰¹º‘—MƒƒbƒZ[ƒW—p [12(os)+12(rtp)+960(‰¹º120ms)) #*/
-#define     POOL5_SIZE      140         /*# UDP‘—M—p [12(os)+128(RTCPACLKDACRINT)]#*/
-#define     POOL6_SIZE      20          /*# FUSION—p [12(os)+4(SystemSTS)+4(Dmy)] #*/
-#define     POOL7_SIZE      28          /*# TAG—p [12(os)+16(TAG)] #*/
-#define     POOL8_SIZE      1048        /*# EXƒƒbƒZ[ƒW—p [12(os)+12(LUÍ¯ÀÞ)+1024(µ°ÀÞ/²ÍÞÝÄî•ñ)]  #*/
-#define     POOL9_SIZE      16          /*# DMY USER-QUEŽg—p #*/
-#define     POOLA_SIZE      16          /*# DMY USER-QUEŽg—p #*/
-#define     POOLB_SIZE      16          /*# DMY USER-QUEŽg—p #*/
-#define     POOLC_SIZE      16          /*# DMY USER-QUEŽg—p #*/
-#define     POOLD_SIZE      16          /*# DMY USER-QUEŽg—p #*/
-#define     POOLE_SIZE      16          /*# DMY USER-QUEŽg—p #*/
-#define     POOLF_SIZE      16          /*# DMY USER-QUEŽg—p #*/
-#define     POOL10_SIZE     16          /*# DMY USER-QUEŽg—p #*///2000.07 V2.1’Ç‰Á
-#define     POOL11_SIZE     16          /*# DMY USER-QUEŽg—p #*///2000.07 V2.1’Ç‰Á
-#define     POOL12_SIZE     16          /*# DMY USER-QUEŽg—p #*///2000.07 V2.1’Ç‰Á
-#define     POOL13_SIZE     16          /*# DMY USER-QUEŽg—p #*///2000.07 V2.1’Ç‰Á
-#define     POOL14_SIZE     16          /*# DMY USER-QUEŽg—p #*///2000.07 V2.1’Ç‰Á
-#define     POOL15_SIZE     16          /*# DMY USER-QUEŽg—p #*///2000.07 V2.1’Ç‰Á
-#define     POOL16_SIZE     16          /*# DMY USER-QUEŽg—p #*///2000.07 V2.1’Ç‰Á
-#define     POOL17_SIZE     16          /*# DMY USER-QUEŽg—p #*///2000.07 V2.1’Ç‰Á
-#define     POOL18_SIZE     528         /*# TFTPƒT[ƒo—p[12(os)+2(op)+2(blk)+512(DUPƒpƒPƒbƒg’·Å‘å)] #*///2000.07 V2.1’Ç‰Á
-#define     POOL19_SIZE     (12+1500)       /*# T38ƒpƒPƒbƒg—p  #*//* ˆ³kLU */                          //2000.07 V2.1’Ç‰Á
-#define     POOL1A_SIZE     (12+400)        /*# FAXƒf[ƒ^—p    #*/                          //2000.07 V2.1’Ç‰Á
-#define     POOL1B_SIZE     (12+16)     /*# FAXƒf[ƒ^ŠÇ——p#*/                          //2000.07 V2.1’Ç‰Á
-//ˆ³kLU‘Î‰žBDSPƒŠƒAƒ‹ƒ^ƒCƒ€ƒRƒ}ƒ“ƒh—pB2003.09.03
-#define     POOL1C_SIZE     (12+2048)       /*# DSPƒŠƒAƒ‹ƒ^ƒCƒ€ƒRƒ}ƒ“ƒh—p@#*/
-#define     POOL1D_SIZE     (12+256)        /*# ƒgƒŒ[ƒXî•ñ—p@#*/                         //2003.09
-#define     POOL1E_SIZE     (12+4096+4)     /*# DSP—p@#*/                          //2003.09
-#define     POOL1F_SIZE     (12+4096+4)     /*# DSP—p@#*/                          //2003.09
+/*# ãƒ—ãƒ¼ãƒ«ã‚µã‚¤ã‚º #*/
+#define     POOL0_SIZE      		56          /*# ä¸€èˆ¬ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ç”¨ [12(os)+44(å†…éƒ¨msg)] #*/ //2003.10.23
+#define     POOL1_SIZE      		280         /*# äºŒæ¬¡ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ç”¨ [12(os)+12(LUï¾ï½¯ï¾€ï¾ž)+256(ï½µï½°ï¾€ï¾ž/ï½²ï¾ï¾žï¾ï¾„æƒ…å ±)] #*/
+#define     POOL2_SIZE      		80          /*# DSPåˆ¶å¾¡ãƒ‡ãƒ¼ã‚¿ç”¨ [12(os)+4(SystemSTS)+64] #*/
+#define     POOL3_SIZE      		1540        /*# éŸ³å£°å—ä¿¡ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ç”¨ [12(os)+1528(Max LAN Rcv Size)] #*/
+#define     POOL4_SIZE      		984         /*# éŸ³å£°é€ä¿¡ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ç”¨ [12(os)+12(rtp)+960(éŸ³å£°120ms)) #*/
+#define     POOL5_SIZE      		140         /*# UDPé€ä¿¡ç”¨ [12(os)+128(RTCPã€CLKDã€CRINT)]#*/
+#define     POOL6_SIZE      		20          /*# FUSIONç”¨ [12(os)+4(SystemSTS)+4(Dmy)] #*/
+#define     POOL7_SIZE      		28          /*# TAGç”¨ [12(os)+16(TAG)] #*/
+#define     POOL8_SIZE      		1048        /*# EXãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ç”¨ [12(os)+12(LUï¾ï½¯ï¾€ï¾ž)+1024(ï½µï½°ï¾€ï¾ž/ï½²ï¾ï¾žï¾ï¾„æƒ…å ±)]  #*/
+#define 	CD_BLKSZ_EVT_DATA   	144       	/* ã‚¤ãƒ™ãƒ³ãƒˆé€šçŸ¥(ãƒ‡ãƒ¼ã‚¿å—ä¿¡é€šçŸ¥)ç”¨ãƒ—ãƒ¼ãƒ« */
+#define 	CD_BLKSZ_EVT        	48    		/* ã‚¤ãƒ™ãƒ³ãƒˆé€šçŸ¥(ãƒ‡ãƒ¼ã‚¿å—ä¿¡é€šçŸ¥ä»¥å¤–)ç”¨ãƒ—ãƒ¼ãƒ« */
+#define 	CD_BLKSZ_ORD        	144         /* ã‚ªãƒ¼ãƒ€åˆ¶å¾¡ç”¨ãƒ—ãƒ¼ãƒ« */
+#define 	CD_BLKSZ_SND_IDATA  	288         /* é€ä¿¡ï¼©ãƒ‡ãƒ¼ã‚¿ç”¨ãƒ—ãƒ¼ãƒ« */
+#define 	CD_BLKSZ_RCV_IDATA  	288         /* å—ä¿¡ï¼©ãƒ‡ãƒ¼ã‚¿ç”¨ãƒ—ãƒ¼ãƒ« */
+#define 	CD_BLKSZ_WAIT_CFRM  	16          /* é€ä¿¡å¾…ã¡åˆ¶å¾¡ãƒ•ãƒ¬ãƒ¼ãƒ ç”¨ãƒ—ãƒ¼ãƒ« */
+#define 	CD_BLKSZ_RCV_SIO_MSG    32        	/* ï¼³ï¼©ï¼¯å—ä¿¡é€šçŸ¥ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ç”¨ãƒ—ãƒ¼ãƒ« */
 
+    /*# ãƒ—ãƒ¼ãƒ«é¢æ•° #*/
+#define     POOL0_CNT       		512         /*# ä¸€èˆ¬ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ç”¨ #*/
+#define     POOL1_CNT       		256         /*# äºŒæ¬¡ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ç”¨ #*/
+#define     POOL2_CNT       		32          /*# DSPåˆ¶å¾¡ãƒ‡ãƒ¼ã‚¿ç”¨ #*/
+#define     POOL3_CNT       		1           /*# éŸ³å£°å—ä¿¡ç”¨ #*/
+#define     POOL4_CNT       		512         /*# éŸ³å£°é€ä¿¡ç”¨ #*/
+#define     POOL5_CNT       		32          /*# UDPé€ä¿¡ç”¨ #*/
+#define     POOL6_CNT       		256         /*# FUSIONç”¨ #*/
+#define     POOL7_CNT       		224         /*# TAGç”¨[96(uni_CLKD)+96(uni_CRINT)+32(å…ƒã®æ•°)] #*/ // 2002.03.28å¤‰æ›´
+#define     POOL8_CNT       		10          /*# EXãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ç”¨ #*/
+#define 	CD_BLKCNT_EVT_DATA  	3         	/* ã‚¤ãƒ™ãƒ³ãƒˆé€šçŸ¥(ãƒ‡ãƒ¼ã‚¿å—ä¿¡é€šçŸ¥)ç”¨ãƒ—ãƒ¼ãƒ« */
+#define 	CD_BLKCNT_EVT       	12    		/* ã‚¤ãƒ™ãƒ³ãƒˆé€šçŸ¥(ãƒ‡ãƒ¼ã‚¿å—ä¿¡é€šçŸ¥ä»¥å¤–)ç”¨ãƒ—ãƒ¼ãƒ« */
+#define 	CD_BLKCNT_ORD       	8           /* ã‚ªãƒ¼ãƒ€åˆ¶å¾¡ç”¨ãƒ—ãƒ¼ãƒ« */
+#define 	CD_BLKCNT_SND_IDATA 	32          /* é€ä¿¡ï¼©ãƒ‡ãƒ¼ã‚¿ç”¨ãƒ—ãƒ¼ãƒ« */
+#define 	CD_BLKCNT_RCV_IDATA 	52          /* å—ä¿¡ï¼©ãƒ‡ãƒ¼ã‚¿ç”¨ãƒ—ãƒ¼ãƒ« */
+#define 	CD_BLKCNT_WAIT_CFRM 	36          /* é€ä¿¡å¾…ã¡åˆ¶å¾¡ãƒ•ãƒ¬ãƒ¼ãƒ ç”¨ãƒ—ãƒ¼ãƒ« */
+#define 	CD_BLKCNT_RCV_SIO_MSG   48        	/* ï¼³ï¼©ï¼¯å—ä¿¡é€šçŸ¥ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ç”¨ãƒ—ãƒ¼ãƒ« */
 
-    /*# ƒv[ƒ‹–Ê” #*/
-#define     POOL0_CNT       512         /*# ˆê”ÊƒƒbƒZ[ƒW—p #*/
-#define     POOL1_CNT       256         /*# “ñŽŸƒƒbƒZ[ƒW—p #*/
-#define     POOL2_CNT       32          /*# DSP§Œäƒf[ƒ^—p #*/
-#define     POOL3_CNT       1           /*# ‰¹ºŽóM—p #*/
-#define     POOL4_CNT       512         /*# ‰¹º‘—M—p #*/
-#define     POOL5_CNT       32          /*# UDP‘—M—p #*/
-#define     POOL6_CNT       256         /*# FUSION—p #*/
+    /*# ãƒ¦ãƒ¼ã‚¶ã‚­ãƒ¥ãƒ¼ID #*/
+#if 1 /* IPCS V4 Change */
+enum {
+	DOEP_QUEID = 0,		/*# DOEPç”¨ã‚­ãƒ¥ãƒ¼ID #*/
+	LUMNG_DPQID,		/*# LUç®¡ç†ç”¨ã‚­ãƒ¥ãƒ¼ID #*/
+	DSPMNG_QUEID,		/*# DSPåˆ¶å¾¡ãƒ‡ãƒ¼ã‚¿ç”¨ #*/
+	H323_CN0QUEID,		/*# å—ä¿¡éŸ³å£°å‡¦ç†CN0ã«ã¦USER-QUEä½¿ç”¨ #*/
+	H323_CN1QUEID,		/*# å—ä¿¡éŸ³å£°å‡¦ç†CN1ã«ã¦USER-QUEä½¿ç”¨ #*/
+	H323_CN2QUEID,		/*# å—ä¿¡éŸ³å£°å‡¦ç†CN2ã«ã¦USER-QUEä½¿ç”¨ #*/
+	H323_CN3QUEID,		/*# å—ä¿¡éŸ³å£°å‡¦ç†CN3ã«ã¦USER-QUEä½¿ç”¨ #*/
+	DPISR_SL0QUEID,		/*# DPRAMåˆ¶å¾¡CN0ã«ã¦USER-QUEä½¿ç”¨ #*/
+	TFTPSRV_QUEID,		/*# TFTPã‚µãƒ¼ãƒç”¨ã‚­ãƒ¥ãƒ¼ID #*/
+	CYCCTLORD_QUEID,	/*# å‘¨æœŸåˆ¶å¾¡ç”¨(ã‚ªãƒ¼ãƒ€å—ä¿¡) #*/
+	CYCCTLEVT_QUEID,	/*# å‘¨æœŸåˆ¶å¾¡ç”¨(ã‚¤ãƒ™ãƒ³ãƒˆé€å‡º) "*/
+	CBX_BS_DT_QUEID,	/*# ï¼¢ï¼³ãƒ‡ãƒ¼ã‚¿è“„ç©ãƒãƒƒãƒ•ã‚¡ã‚­ãƒ¥ãƒ¼ #*/
+	CBX_BS_DT_TMP_QUEID,/*# ï¼¢ï¼³ãƒ‡ãƒ¼ã‚¿è“„ç©ãƒãƒƒãƒ•ã‚¡ã‚­ãƒ¥ãƒ¼(ã‚¯ãƒªã‚¢å‡¦ç†æ™‚ã®ãƒ†ãƒ³ãƒãƒ©ãƒª) #*/
+	CBX_SIG_QUEID,		/*# ï¼¢ï¼³ç®¡ç†æƒ…å ±ãƒãƒƒãƒ•ã‚¡ã‚­ãƒ¥ãƒ¼ #*/
+	CBX_CFRM_QUEID,		/*# é€ä¿¡å¾…ã¡åˆ¶å¾¡ãƒ•ãƒ¬ãƒ¼ãƒ ãƒãƒƒãƒ•ã‚¡ã‚­ãƒ¥ãƒ¼ #*/
+	COM_QUE_MAX
+} COM_QUE_ID;
+#else /* IPCS V4 Change */
+#define     DOEP_QUEID      POOL0       /*# DOEPç”¨ã‚­ãƒ¥ãƒ¼ID #*/
+#define     LUMNG_DPQID     POOL1       /*# LUç®¡ç†ç”¨ã‚­ãƒ¥ãƒ¼ID #*/
+#define     DSPMNG_QUEID    POOL2       /*# DSPåˆ¶å¾¡ãƒ‡ãƒ¼ã‚¿ç”¨ #*/
+#define     H323_CN0QUEID   POOL4       /*# å—ä¿¡éŸ³å£°å‡¦ç†CN0ã«ã¦USER-QUEä½¿ç”¨ #*/
+#define     H323_CN1QUEID   POOL4+1     /*# å—ä¿¡éŸ³å£°å‡¦ç†CN1ã«ã¦USER-QUEä½¿ç”¨ #*/
+#define     H323_CN2QUEID   POOL4+2     /*# å—ä¿¡éŸ³å£°å‡¦ç†CN2ã«ã¦USER-QUEä½¿ç”¨ #*/
+#define     H323_CN3QUEID   POOL4+3     /*# å—ä¿¡éŸ³å£°å‡¦ç†CN3ã«ã¦USER-QUEä½¿ç”¨ #*/
+#define     DPISR_SL0QUEID  POOL8       /*# DPRAMåˆ¶å¾¡CN0ã«ã¦USER-QUEä½¿ç”¨ #*/
+#define     DPISR_SL1QUEID  POOL8+1     /*# DPRAMåˆ¶å¾¡CN1ã«ã¦USER-QUEä½¿ç”¨ #*/
+#define     DPISR_SL2QUEID  POOL8+2     /*# DPRAMåˆ¶å¾¡CN2ã«ã¦USER-QUEä½¿ç”¨ #*/
+#define     DPISR_SL3QUEID  POOL8+3     /*# DPRAMåˆ¶å¾¡CN3ã«ã¦USER-QUEä½¿ç”¨ #*/
+#define     DPISR_SL4QUEID  POOL8+4     /*# DPRAMåˆ¶å¾¡CN4ã«ã¦USER-QUEä½¿ç”¨ #*/
+#define     DPISR_SL5QUEID  POOL8+5     /*# DPRAMåˆ¶å¾¡CN5ã«ã¦USER-QUEä½¿ç”¨ #*/
+#define     DPISR_SL6QUEID  POOL8+6     /*# DPRAMåˆ¶å¾¡CN6ã«ã¦USER-QUEä½¿ç”¨ #*/
+#define     DPISR_SL7QUEID  POOL8+7     /*# DPRAMåˆ¶å¾¡CN7ã«ã¦USER-QUEä½¿ç”¨ #*/
+#define     DPISR_SL8QUEID  POOL8+8     /*# DPRAMåˆ¶å¾¡CN8ã«ã¦USER-QUEä½¿ç”¨ #*/    //2000.07 V2.1è¿½åŠ 
+#define     DPISR_SL9QUEID  POOL8+9     /*# DPRAMåˆ¶å¾¡CN9ã«ã¦USER-QUEä½¿ç”¨ #*/    //2000.07 V2.1è¿½åŠ 
+#define     DPISR_SL10QUEID POOL8+10    /*# DPRAMåˆ¶å¾¡CN10ã«ã¦USER-QUEä½¿ç”¨ #*/   //2000.07 V2.1è¿½åŠ 
+#define     DPISR_SL11QUEID POOL8+11    /*# DPRAMåˆ¶å¾¡CN11ã«ã¦USER-QUEä½¿ç”¨ #*/   //2000.07 V2.1è¿½åŠ 
+#define     DPISR_SL12QUEID POOL8+12    /*# DPRAMåˆ¶å¾¡CN12ã«ã¦USER-QUEä½¿ç”¨ #*/   //2000.07 V2.1è¿½åŠ 
+#define     DPISR_SL13QUEID POOL8+13    /*# DPRAMåˆ¶å¾¡CN13ã«ã¦USER-QUEä½¿ç”¨ #*/   //2000.07 V2.1è¿½åŠ 
+#define     DPISR_SL14QUEID POOL8+14    /*# DPRAMåˆ¶å¾¡CN14ã«ã¦USER-QUEä½¿ç”¨ #*/   //2000.07 V2.1è¿½åŠ 
+#define     DPISR_SL15QUEID POOL8+15    /*# DPRAMåˆ¶å¾¡CN15ã«ã¦USER-QUEä½¿ç”¨ #*/   //2000.07 V2.1è¿½åŠ 
+#define     TFTPSRV_QUEID   POOL18      /*# TFTPã‚µãƒ¼ãƒç”¨ã‚­ãƒ¥ãƒ¼ID #*/            //2000.07 V2.1è¿½åŠ 
 
-//#define       POOL7_CNT       32          /*# TAG—p #*/
-#define     POOL7_CNT       224         /*# TAG—p[96(uni_CLKD)+96(uni_CRINT)+32(Œ³‚Ì”)] #*/ // 2002.03.28•ÏX
-
-#define     POOL8_CNT       10          /*# EXƒƒbƒZ[ƒW—p #*/
-#define     POOL9_CNT       1           /*# DMY USER-QUEŽg—p #*/
-#define     POOLA_CNT       1           /*# DMY USER-QUEŽg—p #*/
-#define     POOLB_CNT       1           /*# DMY USER-QUEŽg—p #*/
-#define     POOLC_CNT       1           /*# DMY USER-QUEŽg—p #*/
-#define     POOLD_CNT       1           /*# DMY USER-QUEŽg—p #*/
-#define     POOLE_CNT       1           /*# DMY USER-QUEŽg—p #*/
-#define     POOLF_CNT       1           /*# DMY USER-QUEŽg—p #*/
-#define     POOL10_CNT      1           /*# DMY USER-QUEŽg—p #*///2000.07 V2.1’Ç‰Á
-#define     POOL11_CNT      1           /*# DMY USER-QUEŽg—p #*///2000.07 V2.1’Ç‰Á
-#define     POOL12_CNT      1           /*# DMY USER-QUEŽg—p #*///2000.07 V2.1’Ç‰Á
-#define     POOL13_CNT      1           /*# DMY USER-QUEŽg—p #*///2000.07 V2.1’Ç‰Á
-#define     POOL14_CNT      1           /*# DMY USER-QUEŽg—p #*///2000.07 V2.1’Ç‰Á
-#define     POOL15_CNT      1           /*# DMY USER-QUEŽg—p #*///2000.07 V2.1’Ç‰Á
-#define     POOL16_CNT      1           /*# DMY USER-QUEŽg—p #*///2000.07 V2.1’Ç‰Á
-#define     POOL17_CNT      1           /*# DMY USER-QUEŽg—p #*///2000.07 V2.1’Ç‰Á
-#define     POOL18_CNT      (32*2)      /*# TFTP&BOOTPƒT[ƒo—p #*/  //2000.07 V2.1’Ç‰Á
-#define     POOL19_CNT      (32)        /*# T38ƒpƒPƒbƒg—p   #*//* ˆ³kLU */
-#define     POOL1A_CNT      (240)       /*# FAXƒf[ƒ^—p     #*/
-#define     POOL1B_CNT      (250)       /*# FAXƒf[ƒ^ŠÇ——p #*/
-//ˆ³kLU‘Î‰žBDSPƒŠƒAƒ‹ƒ^ƒCƒ€ƒRƒ}ƒ“ƒh—pB2003.09.03
-#define     POOL1C_CNT      16          /*# DSPƒŠƒAƒ‹ƒ^ƒCƒ€ƒRƒ}ƒ“ƒh—p@#*/
-#define     POOL1D_CNT      50          /*# ƒgƒŒ[ƒXî•ñ—p@#*/             //2003.09
-#define     POOL1E_CNT      8           /*# ƒgƒŒ[ƒXî•ñ—p@#*/             //2003.09
-#define     POOL1F_CNT      8           /*# ƒgƒŒ[ƒXî•ñ—p@#*/             //2003.09
-
-
-
-    /*# ƒ†[ƒUƒLƒ…[ID #*/
-#define     DOEP_QUEID      POOL0       /*# DOEP—pƒLƒ…[ID #*/
-#define     LUMNG_DPQID     POOL1       /*# LUŠÇ——pƒLƒ…[ID #*/
-#define     DSPMNG_QUEID    POOL2       /*# DSP§Œäƒf[ƒ^—p #*/
-#define     H323_CN0QUEID   POOL4       /*# ŽóM‰¹ºˆ—CN0‚É‚ÄUSER-QUEŽg—p #*/
-#define     H323_CN1QUEID   POOL4+1     /*# ŽóM‰¹ºˆ—CN1‚É‚ÄUSER-QUEŽg—p #*/
-#define     H323_CN2QUEID   POOL4+2     /*# ŽóM‰¹ºˆ—CN2‚É‚ÄUSER-QUEŽg—p #*/
-#define     H323_CN3QUEID   POOL4+3     /*# ŽóM‰¹ºˆ—CN3‚É‚ÄUSER-QUEŽg—p #*/
-#define     DPISR_SL0QUEID  POOL8       /*# DPRAM§ŒäCN0‚É‚ÄUSER-QUEŽg—p #*/
-#define     DPISR_SL1QUEID  POOL8+1     /*# DPRAM§ŒäCN1‚É‚ÄUSER-QUEŽg—p #*/
-#define     DPISR_SL2QUEID  POOL8+2     /*# DPRAM§ŒäCN2‚É‚ÄUSER-QUEŽg—p #*/
-#define     DPISR_SL3QUEID  POOL8+3     /*# DPRAM§ŒäCN3‚É‚ÄUSER-QUEŽg—p #*/
-#define     DPISR_SL4QUEID  POOL8+4     /*# DPRAM§ŒäCN4‚É‚ÄUSER-QUEŽg—p #*/
-#define     DPISR_SL5QUEID  POOL8+5     /*# DPRAM§ŒäCN5‚É‚ÄUSER-QUEŽg—p #*/
-#define     DPISR_SL6QUEID  POOL8+6     /*# DPRAM§ŒäCN6‚É‚ÄUSER-QUEŽg—p #*/
-#define     DPISR_SL7QUEID  POOL8+7     /*# DPRAM§ŒäCN7‚É‚ÄUSER-QUEŽg—p #*/
-#define     DPISR_SL8QUEID  POOL8+8     /*# DPRAM§ŒäCN8‚É‚ÄUSER-QUEŽg—p #*/    //2000.07 V2.1’Ç‰Á
-#define     DPISR_SL9QUEID  POOL8+9     /*# DPRAM§ŒäCN9‚É‚ÄUSER-QUEŽg—p #*/    //2000.07 V2.1’Ç‰Á
-#define     DPISR_SL10QUEID POOL8+10    /*# DPRAM§ŒäCN10‚É‚ÄUSER-QUEŽg—p #*/   //2000.07 V2.1’Ç‰Á
-#define     DPISR_SL11QUEID POOL8+11    /*# DPRAM§ŒäCN11‚É‚ÄUSER-QUEŽg—p #*/   //2000.07 V2.1’Ç‰Á
-#define     DPISR_SL12QUEID POOL8+12    /*# DPRAM§ŒäCN12‚É‚ÄUSER-QUEŽg—p #*/   //2000.07 V2.1’Ç‰Á
-#define     DPISR_SL13QUEID POOL8+13    /*# DPRAM§ŒäCN13‚É‚ÄUSER-QUEŽg—p #*/   //2000.07 V2.1’Ç‰Á
-#define     DPISR_SL14QUEID POOL8+14    /*# DPRAM§ŒäCN14‚É‚ÄUSER-QUEŽg—p #*/   //2000.07 V2.1’Ç‰Á
-#define     DPISR_SL15QUEID POOL8+15    /*# DPRAM§ŒäCN15‚É‚ÄUSER-QUEŽg—p #*/   //2000.07 V2.1’Ç‰Á
-#define     TFTPSRV_QUEID   POOL18      /*# TFTPƒT[ƒo—pƒLƒ…[ID #*/            //2000.07 V2.1’Ç‰Á
-
-#define     T38_QUEID   POOL19      /*# T38PKTŽóM—pƒLƒ…[ID #*//* ˆ³kLU */
-#define     FAX_DATQUEID    POOL1A      /*# FAXƒf[ƒ^—pƒLƒ…[ID #*//* ˆ³kLU */
-#define     FAX_LINKQUEID   POOL1B      /*# FAXƒf[ƒ^ƒŠƒ“ƒN—pƒLƒ…[ID #*//* ˆ³kLU */
-//ˆ³kLU‘Î‰žBDSPƒŠƒAƒ‹ƒ^ƒCƒ€ƒRƒ}ƒ“ƒh—pB2003.09.03
-#define     DSP_REALQUEID   POOL1C          /*# DSPƒŠƒAƒ‹ƒ^ƒCƒ€ƒRƒ}ƒ“ƒh—p@#*/
-#define     LOG_TRACEQUEID  POOL1D          /*# ƒgƒŒ[ƒXî•ñ—p@#*/         //2003.09
-
-    /*# ƒ†[ƒUƒLƒ…[Ú‘±Ží•Ê #*/
+#define     T38_QUEID   POOL19      /*# T38PKTå—ä¿¡ç”¨ã‚­ãƒ¥ãƒ¼ID #*//* åœ§ç¸®LU */
+#define     FAX_DATQUEID    POOL1A      /*# FAXãƒ‡ãƒ¼ã‚¿ç”¨ã‚­ãƒ¥ãƒ¼ID #*//* åœ§ç¸®LU */
+#define     FAX_LINKQUEID   POOL1B      /*# FAXãƒ‡ãƒ¼ã‚¿ãƒªãƒ³ã‚¯ç”¨ã‚­ãƒ¥ãƒ¼ID #*//* åœ§ç¸®LU */
+//åœ§ç¸®LUå¯¾å¿œã€‚DSPãƒªã‚¢ãƒ«ã‚¿ã‚¤ãƒ ã‚³ãƒžãƒ³ãƒ‰ç”¨ã€‚2003.09.03
+#define     DSP_REALQUEID   POOL1C          /*# DSPãƒªã‚¢ãƒ«ã‚¿ã‚¤ãƒ ã‚³ãƒžãƒ³ãƒ‰ç”¨ã€€#*/
+#define     LOG_TRACEQUEID  POOL1D          /*# ãƒˆãƒ¬ãƒ¼ã‚¹æƒ…å ±ç”¨ã€€#*/         //2003.09
+#endif /* IPCS V4 Change */
+    /*# ãƒ¦ãƒ¼ã‚¶ã‚­ãƒ¥ãƒ¼æŽ¥ç¶šç¨®åˆ¥ #*/
 #define     QUE_TOP             0
 #define     QUE_TAIL            1
 
-    /*# ƒƒOŽûW–Ê” #*/
+    /*# ãƒ­ã‚°åŽé›†é¢æ•° #*/
 #define     MSG_LOG_SIZE        1024
 
-//2000.10 V2.1’Ç‰Á(start)
-#define     SYNC_1S_5MSBASE     200                     /* 5msƒx[ƒX‚Å‚Ì1s•ª‚ÌƒJƒEƒ“ƒg */
-#define     SYNC_CNT_MAX        (15*SYNC_1S_5MSBASE)    /*# •â³ƒJƒEƒ“ƒ^ƒJƒEƒ“ƒgÅ‘å’li5msF15•bj #*/
-//2000.10 V2.1’Ç‰Á(end)
+//2000.10 V2.1è¿½åŠ (start)
+#define     SYNC_1S_5MSBASE     200                     /* 5msãƒ™ãƒ¼ã‚¹ã§ã®1såˆ†ã®ã‚«ã‚¦ãƒ³ãƒˆ */
+#define     SYNC_CNT_MAX        (15*SYNC_1S_5MSBASE)    /*# è£œæ­£ã‚«ã‚¦ãƒ³ã‚¿ã‚«ã‚¦ãƒ³ãƒˆæœ€å¤§å€¤ï¼ˆ5msï¼š15ç§’ï¼‰ #*/
+//2000.10 V2.1è¿½åŠ (end)
 
-#define     DOEP_HELCHK_TO      30                      /*# ƒwƒ‹ƒXƒ`ƒFƒbƒNƒ^ƒCƒ}ƒJƒEƒ“ƒgƒfƒtƒHƒ‹ƒg’li•bj #*/  //2000.12.27 V2.2’Ç‰Ái–¼Ì•ÏX‚µ‚Ä‹¤’Ê‰»j
+#define     DOEP_HELCHK_TO      30                      /*# ãƒ˜ãƒ«ã‚¹ãƒã‚§ãƒƒã‚¯ã‚¿ã‚¤ãƒžã‚«ã‚¦ãƒ³ãƒˆãƒ‡ãƒ•ã‚©ãƒ«ãƒˆå€¤ï¼ˆç§’ï¼‰ #*/  //2000.12.27 V2.2è¿½åŠ ï¼ˆåç§°å¤‰æ›´ã—ã¦å…±é€šåŒ–ï¼‰
 
-//SS9100‘Î‰ž’Ç‰Á 2004.11.01
-#define     DOEP_HELCHK_SS9100_TO   60                      /*# SS9100ƒwƒ‹ƒXƒ`ƒFƒbƒNƒ^ƒCƒ}ƒJƒEƒ“ƒgƒfƒtƒHƒ‹ƒg’li•bj #*/
+//SS9100å¯¾å¿œè¿½åŠ  2004.11.01
+#define     DOEP_HELCHK_SS9100_TO   60                      /*# SS9100ãƒ˜ãƒ«ã‚¹ãƒã‚§ãƒƒã‚¯ã‚¿ã‚¤ãƒžã‚«ã‚¦ãƒ³ãƒˆãƒ‡ãƒ•ã‚©ãƒ«ãƒˆå€¤ï¼ˆç§’ï¼‰ #*/
 
 /*#########################################*/
-/*#            ƒ}ƒNƒ’è‹`                 #*/
+/*#            ãƒžã‚¯ãƒ­å®šç¾©                 #*/
 /*#########################################*/
-
-#ifdef LU_MACRO
-#if 0 /* Ozawa */
-#define     com_poolget(a)          XGETPB_R(a);
-#define     com_ipoolget(a)         XSGETPB_R(a);/* com_poolget‚Æ“¯‚¶‚É‚·‚é */
-#define     com_poolput(a,b)        XPUTPB_R(a,b)
-#define     com_ipoolput(a,b)       XSPUTPB_R(a,b)
-#define     com_iptdis(void)        pri = XIPTMR(void);\
-                                    XIPTMW(3);
-#define     com_iptena(a)           XIPTMW(a)
-#define     com_sndmsg(a,b)         XPOSTM(a,b)
-#define     com_isndmsg(a,b)        XSPOSTM(a,b)
-#define     com_rcvmsg(a,b)         XWTMR1(a,b)
-#define     com_getmsg(a)           XGETEV(a)
-#define     com_igetmsg(a)          XSGETEV(a)
-#define     com_queput(a,b,c)       XPUTUL_R(a,b,c)
-#define     com_iqueput(a,b,c)      XSPUTUL_R(a,b,c)
-#define     com_queget(a,b)         XGETUL_R(a,b)
-#define     com_iqueget(a,b)        XSGETUL_R(a,b)
-#define     com_quesns(a)           XULSNS_R(a)
-#define     com_iquesns(a)          XSULSNS_R(a)
-#endif /* Ozawa */
 #define     com_chgword(C)          (WORD)((((C)>>8)&0xFF)|(((C)<<8)&0xFF00))
 #define     com_chgdword(C)         ((DWORD)(((((DWORD)C)>>24)&0xFF)|((((DWORD)C)>>8)&0xFF00)|((((DWORD)C)<<8)&0xFF0000)|((((DWORD)C)<<24)&0xFF000000)))
 #define com_10dwordcopy(a,b)        *a++ = *b++;\
@@ -1308,12 +966,14 @@ enum
                                     *a++ = *b++;\
                                     *a++ = *b++;\
                                     *a = *b;
-//ˆ³kLU‘Î‰žBƒZƒ}ƒtƒH—pƒ}ƒNƒ’Ç‰ÁB2003.08.27
+#if 0 /* IPCS V4 Del */
+//åœ§ç¸®LUå¯¾å¿œã€‚ã‚»ãƒžãƒ•ã‚©ç”¨ãƒžã‚¯ãƒ­è¿½åŠ ã€‚2003.08.27
 #define     com_getsemp(a,b,c)      XGETSEM(a,b,c)
 #define     com_putsemp(a)          XPUTSEM(a)
 #define     com_initsemp(a,b)       XINITSEM(a,b)
 #define     com_sempsns(a)          XSEMSNS(a)
-#endif //LU_MACRO
+//#endif //LU_MACRO
+#endif /* IPCS V4 Del */
 
 #ifndef TMRIPT_START                                        // LU 99.7.14
     #define     TMRIPT_START    (fusion_ipt_flg |= 0x02)
@@ -1328,480 +988,77 @@ enum
     #define     LANCIPT_END     (fusion_ipt_flg &= ~0x01)
 #endif
 
-/*###########################################################################*/
-/*#                                                                         #*/
-/*#                           ‚b‚o‚tŽü•ÓƒAƒhƒŒƒX                            #*/
-/*#                                                                         #*/
-/*###########################################################################*/
-/*##################################################################*/
-/*#           ƒÈ|‚k‚r‚h“à•”ƒfƒoƒCƒX                               #*/
-/*##################################################################*/
-/*########################################################*/
-/*#           ƒvƒƒZƒbƒT“à                               #*/
-/*########################################################*/
-#define     IO_RESET_VECT       0x00000000          /*# ƒŠƒZƒbƒgƒxƒNƒ^ƒAƒhƒŒƒX #*/
-#define     IO_ROM_BASE         0x00000000          /*# ‚q‚n‚læ“ªƒAƒhƒŒƒX #*/
-#define     IO_INRAM_BASE       0x10000000          /*# “à•”‚q‚`‚læ“ªƒAƒhƒŒƒX #*/
-#define     IO_INRAM_LIMIT      0x10002000          /*# “à•”‚q‚`‚lI—¹ƒAƒhƒŒƒX #*/
 
-/*########################################################*/
-/*#           ‚`‚r‚aƒfƒoƒCƒX^‚`‚g‚aƒfƒoƒCƒX             #*/
-/*########################################################*/
-#define     IO_ICE              0x3fffffa0          /*# –½—ßƒLƒƒƒbƒVƒ…§ŒäƒŒƒWƒXƒ^ #*/
-#define     IO_WBE              0x3fffffc0          /*# ƒ‰ƒCƒgƒoƒbƒtƒ@§ŒäƒŒƒWƒXƒ^ #*/
+/*# ãƒ¢ãƒ¼ãƒ‰ãƒ¬ã‚¸ã‚¹ã‚¿ãƒ“ãƒƒãƒˆã‚¢ã‚µã‚¤ãƒ³ #*/
+#define     IO_MODE_VLAN        0x0001              /*# VLANè¨­å®š #*/    //å€¤å¤‰æ›´ä¸å¯ï¼ãƒãƒ¼ãƒ‰ä»•æ§˜å¤‰æ›´ä¸å¯
+#define     IO_MODE_REMOTE      0x0002              /*# é éš”è¨­å®š #*/
+#define     IO_MODE_AUTONEGO    0x0004              /*# AUTO-NEGOè¨­å®š #*/
+#define     IO_MODE_NEGOMODE    0x0018              /*# å¼·åˆ¶ãƒã‚´ã‚·ã‚¨ãƒ¼ã‚·ãƒ§ãƒ³ãƒ¢ãƒ¼ãƒ‰è¨­å®š #*/
+#define     IO_MODE_CCUID       0x0060              /*# CCUè­˜åˆ¥å­è¨­å®š #*/
+#define     IO_MODE_MNT         0x0080              /*# ä¿å®ˆãƒ¢ãƒ¼ãƒ‰è¨­å®š #*/
 
-/*#########################################*/
-/*#           ‚l‚`‚b                      #*/
-/*#########################################*/
-// ƒfƒoƒCƒXƒhƒ‰ƒCƒo•”‚Å’è‹`Ï‚Ý
-
-/*#########################################*/
-/*#           ‚o‚h‚b                      #*/
-/*#########################################*/
-//ˆ³kLU‘Î‰žBV1—pƒŒƒWƒXƒ^ƒRƒƒ“ƒgƒAƒEƒgB2003.08.25
-//íœ9ŒŽˆÈ~
-#define     IO_IRQ              0x78000090          /*# ‚h‚q‚pŠ„ž—vˆö #*/
-#define     IO_IRQ_SOFT         0x78000010          /*# ‚h‚q‚pƒ\ƒtƒgƒXƒe[ƒ^ƒX #*/
-#define     IO_FIQ              0x78000100          /*# ‚e‚h‚pŠ„ž—vˆö #*/
-#define     IO_FIQRAW           0x78000104          /*# ‚e‚h‚p ‚q‚`‚vƒXƒe[ƒ^ƒX #*/
-#define     IO_FIQEN            0x7800010c          /*# ‚e‚h‚pƒCƒl[ƒuƒ‹ #*/
-#define     IO_IRNR             0x78000080          /*# ‚h‚q‚p”Ô† #*/
-#define     IO_CILR             0x78000084          /*# Œ»‚h‚q‚p”Ô† #*/
-#define     IO_IRL              0x78000088          /*# ‚h‚q‚pƒŒƒxƒ‹ #*/
-#define     IO_IREL             0x7800008c          /*# ‚h‚q‚pƒGƒbƒW^ƒŒƒxƒ‹§Œä #*/
-#define     IO_IRCL             0x78000090          /*# ‚h‚q‚pƒXƒe[ƒ^ƒXƒNƒŠƒA #*/
-#define     IO_ILCR0            0x780000a0          /*# ‚h‚q‚pƒŒƒxƒ‹§Œä‚O #*/
-#define     IO_ILCR1            0x780000a4          /*# ‚h‚q‚pƒŒƒxƒ‹§Œä‚P #*/
-//‚u‚Qƒn[ƒh—pi‚h‚m‚s‚q‚bj    //2000.09 V2.1’Ç‰Á
-#define     IO_V2_IRQ           0x78000000          /*# ‚h‚q‚pŠ„ž—vˆö #*/
-#define     IO_V2_IRQ_SOFT      0x78000004          /*# ‚h‚q‚pƒ\ƒtƒgƒXƒe[ƒ^ƒX #*/
-#define     IO_V2_FIQ           0x78000008          /*# ‚e‚h‚pŠ„ž—vˆö #*/
-#define     IO_V2_FIQRAW        0x7800000c          /*# ‚e‚h‚p ‚q‚`‚vƒXƒe[ƒ^ƒX #*/
-#define     IO_V2_FIQEN         0x78000010          /*# ‚e‚h‚pƒCƒl[ƒuƒ‹ #*/
-#define     IO_V2_IRNR          0x78000014          /*# ‚h‚q‚p”Ô† #*/
-#define     IO_V2_CILR          0x78000018          /*# Œ»‚h‚q‚p”Ô† #*/
-#define     IO_V2_IRL           0x7800001c          /*# ‚h‚q‚pƒŒƒxƒ‹ #*/
-//#define   IO_V2_IREL          0x7800008c          /*# ‚h‚q‚pƒGƒbƒW^ƒŒƒxƒ‹§Œä #*/
-//#define   IO_V2_IRCL          0x78000090          /*# ‚h‚q‚pƒXƒe[ƒ^ƒXƒNƒŠƒA #*/
-#define     IO_V2_ILCR0         0x78000020          /*# ‚h‚q‚pƒŒƒxƒ‹§Œä‚O #*/
-#define     IO_V2_ILCR1         0x78000024          /*# ‚h‚q‚pƒŒƒxƒ‹§Œä‚P #*/
-
-/*#########################################*/
-/*#           ‚w‚l‚b                      #*/
-/*#########################################*/
-//ˆ³kLU‘Î‰žBV1—pƒŒƒWƒXƒ^ƒRƒƒ“ƒgƒAƒEƒgB2003.08.25
-#define     IO_BWCON            0x78100000          /*# ƒoƒX•ƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^ #*/
-#define     IO_OTCON            0x78100004          /*# ƒIƒtƒ^ƒCƒ€ƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^ #*/
-#define     IO_PWCON0           0x78100008          /*# ƒvƒƒOƒ‰ƒ}ƒuƒ‹ƒEƒFƒCƒgƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^‚O #*/
-#define     IO_PWCON1           0x7810000c          /*# ƒvƒƒOƒ‰ƒ}ƒuƒ‹ƒEƒFƒCƒgƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^‚P #*/
-#define     IO_PWCON2           0x78100010          /*# ƒvƒƒOƒ‰ƒ}ƒuƒ‹ƒEƒFƒCƒgƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^‚Q #*/
-#define     IO_DRCON            0x78100014          /*# ‚c‚q‚`‚lƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^ #*/
-#define     IO_RFTCN            0x78100018          /*# ƒŠƒtƒŒƒbƒVƒ…ƒ^ƒCƒ}ƒJƒEƒ“ƒ^ƒŒƒWƒXƒ^ #*/
-#define     IO_RCCON            0x7810001c          /*# ƒŠƒtƒŒƒbƒVƒ…ƒTƒCƒNƒ‹ƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^ #*/
-#define     IO_RFCON            0x78100024          /*# ƒŠƒtƒŒƒbƒVƒ…ƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^ #*/
-#define     IO_ATCON0           0x78100028          /*# ƒAƒNƒZƒXƒ^ƒCƒ~ƒ“ƒOƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^‚O #*/
-#define     IO_ATCON1           0x7810002c          /*# ƒAƒNƒZƒXƒ^ƒCƒ~ƒ“ƒOƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^‚P #*/
-#define     IO_ATCON2           0x78100030          /*# ƒAƒNƒZƒXƒ^ƒCƒ~ƒ“ƒOƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^‚Q #*/
-//‚u‚Qƒn[ƒh—pƒ_ƒ~[i–{’è‹`‚ÍƒVƒXƒeƒ€‹N“®ˆ—j//2000.09 V2.1’Ç‰Á
-#define     IO_V2_XMC_BWC       0x78100000          /*# ƒoƒX•ƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^ #*/
-#define     IO_V2_XMC_BAC       0x78100004          /*# ƒoƒXƒAƒNƒZƒXƒRƒ“ƒg[ƒ‹ƒŒƒWƒXƒ^ #*/
-#define     IO_V2_XMC_DRMC      0x78100008          /*# ‚c‚q‚`‚lƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^ #*/
-#define     IO_V2_XMC_DRAC      0x7810000c          /*# ‚d‚c‚n|‚c‚q‚`‚lƒAƒNƒZƒXƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^ #*/
-#define     IO_V2_XMC_SDACL1    0x78100010          /*# ‚r‚c‚q‚`‚lƒAƒNƒZƒXƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^‚P #*/
-#define     IO_V2_XMC_SDACL2    0x78100014          /*# ‚r‚c‚q‚`‚lƒAƒNƒZƒXƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^‚Q #*/
-#define     IO_V2_XMC_SDMD1     0x78100018          /*# ‚r‚c‚q‚`‚lƒ‚[ƒhƒŒƒWƒXƒ^‚P #*/
-#define     IO_V2_XMC_SDMD2     0x7810001c          /*# ‚r‚c‚q‚`‚lƒ‚[ƒhƒŒƒWƒXƒ^‚Q #*/
-#define     IO_V2_XMC_RFCNT     0x78100020          /*# ‚c‚q‚`‚lƒŠƒtƒŒƒbƒVƒ…ƒ^ƒCƒ}ƒJƒEƒ“ƒ^ƒŒƒWƒXƒ^ #*/
-#define     IO_V2_XMC_RFSH      0x78100024          /*# ‚c‚q‚`‚lƒŠƒtƒŒƒbƒVƒ…ƒTƒCƒNƒ‹ƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^ #*/
-#define     IO_V2_XMC_ROMAC     0x78100028          /*# ‚q‚n‚lƒAƒNƒZƒXƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^ #*/
-#define     IO_V2_XMC_ROMPC     0x7810002c          /*# ‚q‚n‚lƒy[ƒWƒ‚[ƒhƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^ #*/
-#define     IO_V2_XMC_SRMAC     0x78100030          /*# ‚r‚q‚`‚lƒAƒNƒZƒXƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^ #*/
-#define     IO_V2_XMC_SRMPC     0x78100034          /*# ‚r‚q‚`‚lƒy[ƒWƒ‚[ƒhƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^ #*/
-#define     IO_V2_XMC_IOAC1     0x78100038          /*# ‚h‚nƒAƒNƒZƒXƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^‚P #*/
-#define     IO_V2_XMC_IOAC2     0x7810003c          /*# ‚h‚nƒAƒNƒZƒXƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^‚Q #*/
-
-/*#########################################*/
-/*#           ‚c‚r‚oi‚n‚`‚jj            #*/
-/*#########################################*/
-#define     IO_PRAM             0x7e800000          /*# ‚n‚`‚j ‚o‚q‚`‚læ“ªƒAƒhƒŒƒX #*/
-
-#define     IO_CNT              0x7e800004          /*# ƒn[ƒhƒEƒFƒAƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^ #*/
-#define     IO_ST0              0x7e800008          /*# ƒn[ƒhƒEƒFƒAƒXƒe[ƒ^ƒXƒŒƒWƒXƒ^‚O #*/
-#define     IO_ST1              0x7e80000c          /*# ƒn[ƒhƒEƒFƒAƒXƒe[ƒ^ƒXƒŒƒWƒXƒ^‚P #*/
-#define     IO_WORD             0x7e800010          /*# ƒI[ƒ_”ƒŒƒWƒXƒ^ #*/
-#define     IO_ORDER            0x7e800014          /*# ƒI[ƒ_ƒŒƒWƒXƒ^ #*/
-#define     IO_EVENT            0x7e800018          /*# ƒCƒxƒ“ƒgƒŒƒWƒXƒ^ #*/
-#define     IO_V2_INTENA        0x7e800024          /*# ‚h‚m‚sƒCƒl[ƒuƒ‹ƒŒƒWƒXƒ^ #*/
-#define     IO_V2_INTCLR        0x7e800028          /*# ‚h‚m‚sƒCƒNƒŠƒAƒŒƒWƒXƒ^ #*/
-#define     IO_RTFIFO           0x7e80001c          /*# ‰¹ºƒf[ƒ^‚e‚h‚e‚n #*/
-#define     IO_OAK_RST          0x7e80fffc          /*# ƒŠƒZƒbƒg #*/
-
-/*#########################################*/
-/*#           ‚b‚`‚b‚g‚d                  #*/       //2000.09 V2.1’Ç‰Á
-/*#########################################*/
-#define     IO_V2_CACHE_CON     0x78200004          /*# ƒLƒƒƒbƒVƒ…ƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^ #*/
-#define     IO_V2_CACHE_CACHE   0x78200008          /*# ƒLƒƒƒbƒVƒƒƒuƒ‹ƒŒƒWƒXƒ^ #*/
-#define     IO_V2_CACHE_ABORT   0x78200010          /*# ƒAƒ{[ƒgƒAƒhƒŒƒXƒŒƒWƒXƒ^ #*/
-#define     IO_V2_CACHE_FLUSH   0x7820001c          /*# ƒtƒ‰ƒbƒVƒ…ƒŒƒWƒXƒ^ #*/
-
-/*########################################################*/
-/*#           ‚`‚o‚aƒfƒoƒCƒX                             #*/
-/*########################################################*/
-/*#########################################*/
-/*#           ‚q‚d‚r‚d‚s                  #*/
-/*#########################################*/
-#define     IO_WDT_CON          0xb0000000          /*# ƒEƒHƒbƒ`ƒhƒbƒOƒ^ƒCƒ}ƒRƒ“ƒgƒ[ƒ‹ #*/
-#define     IO_RST_REG          0xb0000004          /*# ƒŠƒZƒbƒg #*/
-#define     IO_WDT_CDL          0xb0000008          /*# ƒEƒHƒbƒ`ƒhƒbƒOƒ^ƒCƒ}ƒJƒEƒ“ƒ^‰ºˆÊ #*/
-#define     IO_WDT_CDU          0xb000000c          /*# ƒEƒHƒbƒ`ƒhƒbƒOƒ^ƒCƒ}ƒJƒEƒ“ƒ^ãˆÊ #*/
-
-/*#########################################*/
-/*#           “¯Šú§Œä                    #*/
-/*#########################################*/
-#define     IO_CST              0xb0001000          /*# count start reg #*/
-#define     IO_COF              0xb0001004          /*# count of reg #*/
-#define     IO_PHS              0xb0001008          /*# phase reg #*/
-#define     IO_COU              0xb000100c          /*# count reg #*/
-#define     IO_SFT              0xb0001010          /*# shift reg #*/
-#define     IO_SEL1             0xb0001014          /*# select1 reg #*/
-#define     IO_SEL2             0xb0001018          /*# select2 reg #*/
-
-/*#########################################*/
-/*#           “d˜b‹@‚h^‚n                #*/
-/*#########################################*/
-// ‚k‚t‚Å‚Í”Ä—pƒ|[ƒg‚Ì‚ÝŽg—p
-#define     IO_PORT0            0xb0002004          /*# ƒ|[ƒg‚O #*/
-#define     IO_PORT1            0xb0002008          /*# ƒ|[ƒg‚P #*/
-#define     IO_PORT2            0xb000200c          /*# ƒ|[ƒg‚Q #*/
-#define     IO_PORT3            0xb0002010          /*# ƒ|[ƒg‚R #*/
-#define     IO_PORT4            0xb0002014          /*# ƒ|[ƒg‚S #*/
-#define     IO_P4CON            0xb0002018          /*# ƒ|[ƒg‚SƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^ #*/
-
-/*#########################################*/
-/*#           ‚r‚h‚n                      #*/
-/*#########################################*/
-#define     IO_SIO_LC           0xb000400c          /*# ƒ‰ƒCƒ“ƒRƒ“ƒgƒ[ƒ‹ #*/
-#define     IO_SIO_MC           0xb0004010          /*# ƒ‚ƒfƒ€ƒRƒ“ƒgƒ[ƒ‹ #*/
-#define     IO_SIO_LST          0xb0004014          /*# ƒ‰ƒCƒ“ƒXƒe[ƒ^ƒX #*/
-#define     IO_SIO_MST          0xb0004018          /*# ƒ‚ƒfƒ€ƒXƒe[ƒ^ƒX #*/
-//2000.09 V2.1’Ç‰Áistartj
-#define     IO_V2_SIO_BUF       0xb8002000          /*# ‘—ŽóMƒoƒbƒtƒ@ƒŒƒWƒXƒ^ #*/
-#define     IO_V2_SIO_STA       0xb8002004          /*# ƒXƒe[ƒ^ƒXƒŒƒWƒXƒ^ #*/
-#define     IO_V2_SIO_CON       0xb8002008          /*# ƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^ #*/
-#define     IO_V2_SIO_BCN       0xb800200c          /*# ƒ{[ƒŒ[ƒgƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^ #*/
-#define     IO_V2_SIO_BTC       0xb8002010          /*# ƒ{[ƒŒ[ƒgƒ^ƒCƒ}ƒJƒEƒ“ƒ^ƒŒƒWƒXƒ^ #*/
-#define     IO_V2_SIO_BT        0xb8002014          /*# ƒ{[ƒŒ[ƒgƒ^ƒCƒ}ƒŒƒWƒXƒ^ #*/
-#define     IO_V2_SIO_TCN       0xb8002018          /*# ƒeƒXƒgƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^ #*/
-//2000.09 V2.1’Ç‰Áiendj
-
-/*#########################################*/
-/*#           ‚s‚h‚l‚d‚q‚P^‚Q^‚R        #*/
-/*#########################################*/
-//ˆ³kLU‘Î‰žBV1—pƒŒƒWƒXƒ^ƒRƒƒ“ƒgƒAƒEƒgB2003.08.25
-#define     IO_TMCON1           0xb8001000          /*# ƒ^ƒCƒ}ƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^‚P #*/
-#define     IO_TMEN1            0xb8001004          /*# ƒ^ƒCƒ}ƒCƒl[ƒuƒ‹ƒŒƒWƒXƒ^‚P #*/
-#define     IO_TMRLR1           0xb8001008          /*# ƒ^ƒCƒ}ƒŠƒ[ƒhƒŒƒWƒXƒ^‚P #*/
-#define     IO_TMC1             0xb800100c          /*# ƒ^ƒCƒ}ƒJƒEƒ“ƒ^‚P #*/
-#define     IO_TMOVFR1          0xb8001010          /*# ƒI[ƒo[ƒtƒ[ƒŒƒWƒXƒ^‚P #*/
-#define     IO_TMCON2           0xb0005000          /*# ƒ^ƒCƒ}ƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^‚Q #*/
-#define     IO_TMEN2            0xb0005004          /*# ƒ^ƒCƒ}ƒCƒl[ƒuƒ‹ƒŒƒWƒXƒ^‚Q #*/
-#define     IO_TMRLR2           0xb0005008          /*# ƒ^ƒCƒ}ƒŠƒ[ƒhƒŒƒWƒXƒ^‚Q #*/
-#define     IO_TMC2             0xb000500c          /*# ƒ^ƒCƒ}ƒJƒEƒ“ƒ^‚Q #*/
-#define     IO_TMOVFR2          0xb0005010          /*# ƒI[ƒo[ƒtƒ[ƒŒƒWƒXƒ^‚Q #*/
-//‚u‚Qƒn[ƒh—pi‚s‚h‚l‚d‚q‚P‚Í‹¤’ÊA‚s‚h‚l‚d‚q‚Q^‚R‚ÍŽÀÛ‚Í–¢Žg—pj//2000.09 V2.1’Ç‰Á
-//#define       IO_V2_TMCON2        0xb8001020          /*# ƒ^ƒCƒ}ƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^‚Q #*/
-//#define       IO_V2_TMEN2         0xb8001024          /*# ƒ^ƒCƒ}ƒCƒl[ƒuƒ‹ƒŒƒWƒXƒ^‚Q #*/
-//#define       IO_V2_TMRLR2        0xb8001028          /*# ƒ^ƒCƒ}ƒŠƒ[ƒhƒŒƒWƒXƒ^‚Q #*/
-//#define       IO_V2_TMC2          0xb800102c          /*# ƒ^ƒCƒ}ƒJƒEƒ“ƒ^‚Q #*/
-//#define       IO_V2_TMOVFR2       0xb8001030          /*# ƒI[ƒo[ƒtƒ[ƒŒƒWƒXƒ^‚Q #*/
-//#define       IO_V2_TMCON3        0xb8001040          /*# ƒ^ƒCƒ}ƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^‚R #*/
-//#define       IO_V2_TMEN3         0xb8001044          /*# ƒ^ƒCƒ}ƒCƒl[ƒuƒ‹ƒŒƒWƒXƒ^‚R #*/
-//#define       IO_V2_TMRLR3        0xb8001048          /*# ƒ^ƒCƒ}ƒŠƒ[ƒhƒŒƒWƒXƒ^‚R #*/
-//#define       IO_V2_TMC3          0xb800104c          /*# ƒ^ƒCƒ}ƒJƒEƒ“ƒ^‚R #*/
-//#define       IO_V2_TMOVFR3       0xb8001050          /*# ƒI[ƒo[ƒtƒ[ƒŒƒWƒXƒ^‚R #*/
-
-#define     IO_V2_TMCON1        0xb0005000          /*# ƒ^ƒCƒ}ƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^‚P #*/
-#define     IO_V2_TMEN1         0xb0005004          /*# ƒ^ƒCƒ}ƒCƒl[ƒuƒ‹ƒŒƒWƒXƒ^‚P #*/
-#define     IO_V2_TMRLR1        0xb0005008          /*# ƒ^ƒCƒ}ƒŠƒ[ƒhƒŒƒWƒXƒ^‚P #*/
-#define     IO_V2_TMC1          0xb000500c          /*# ƒ^ƒCƒ}ƒJƒEƒ“ƒ^‚P #*/
-#define     IO_V2_TMOVFR1       0xb0005010          /*# ƒI[ƒo[ƒtƒ[ƒŒƒWƒXƒ^‚P #*/
-#define     IO_V2_TMCON2        0xb0005020          /*# ƒ^ƒCƒ}ƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^‚Q #*/
-#define     IO_V2_TMEN2         0xb0005024          /*# ƒ^ƒCƒ}ƒCƒl[ƒuƒ‹ƒŒƒWƒXƒ^‚Q #*/
-#define     IO_V2_TMRLR2        0xb0005028          /*# ƒ^ƒCƒ}ƒŠƒ[ƒhƒŒƒWƒXƒ^‚Q #*/
-#define     IO_V2_TMC2          0xb000502c          /*# ƒ^ƒCƒ}ƒJƒEƒ“ƒ^‚Q #*/
-#define     IO_V2_TMOVFR2       0xb0005030          /*# ƒI[ƒo[ƒtƒ[ƒŒƒWƒXƒ^‚Q #*/
-#define     IO_V2_TMCON3        0xb0005040          /*# ƒ^ƒCƒ}ƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^‚R #*/
-#define     IO_V2_TMEN3         0xb0005044          /*# ƒ^ƒCƒ}ƒCƒl[ƒuƒ‹ƒŒƒWƒXƒ^‚R #*/
-#define     IO_V2_TMRLR3        0xb0005048          /*# ƒ^ƒCƒ}ƒŠƒ[ƒhƒŒƒWƒXƒ^‚R #*/
-#define     IO_V2_TMC3          0xb000504c          /*# ƒ^ƒCƒ}ƒJƒEƒ“ƒ^‚R #*/
-#define     IO_V2_TMOVFR3       0xb0005050          /*# ƒI[ƒo[ƒtƒ[ƒŒƒWƒXƒ^‚R #*/
-
-/*#########################################*/
-/*#           ‚»‚Ì‘¼                      #*/
-/*#########################################*/
-#define     IO_LSIVER           0xb0003000          /*# ‚k‚r‚hƒo[ƒWƒ‡ƒ“ƒŒƒWƒXƒ^ #*/    //2000.09 V2.1’Ç‰Á
-#define     IO_PINCNT           0xb0003004          /*# ‚k‚r‚h’[ŽqÝ’èƒŒƒWƒXƒ^ #*/
-#define     IO_CLK_PINCNT       0xb000300c          /*# ƒNƒƒbƒN’[ŽqÝ’èƒŒƒWƒXƒ^ #*/
-#define     IO_V2_INTRESET      0xb0003020          /*# Š„‚èž‚Ý—vˆöƒŒƒWƒXƒ^ #*/        //2000.10.31 V2.1DEBUG
-
-/*#########################################*/
-/*#           ‚q‚d‚l‚`‚o                  #*/
-/*#########################################*/
-#define     IO_REMAP            0xb8000020          /*# ƒŠƒ}ƒbƒv§ŒäƒAƒhƒŒƒX #*/
-
-/*##################################################################*/
-/*#           ƒÈ|‚k‚r‚hŠO•”ƒfƒoƒCƒX                               #*/
-/*##################################################################*/
-/*########################################################*/
-/*#           ŠO•”ƒfƒoƒCƒX                               #*/
-/*########################################################*/
-
-#define     IO_DRAM_BASE        0xc0000000          /*# ‚c‚q‚`‚læ“ªƒAƒhƒŒƒX #*/
-//ˆ³kLU‘Î‰žBDRAMƒGƒ“ƒh•ÏXB2003.08.25
-//#define       IO_DRAM_LIMIT       0xc0400000          /*# ‚c‚q‚`‚lI—¹ƒAƒhƒŒƒX #*/
-#define     IO_DRAM_LIMIT       0xc0a00000          /*# ‚c‚q‚`‚lI—¹ƒAƒhƒŒƒX #*/
-#define     IO_RE_DRAM_BASE     0x00000000          /*# ƒŠƒ}ƒbƒvŒã‚c‚q‚`‚læ“ªƒAƒhƒŒƒX #*/
-
-//ˆ³kLU‘Î‰žBDRAMƒGƒ“ƒh•ÏXB2003.08.25
-//#define       IO_RE_DRAM_LIMIT    0x00400000          /*# ƒŠƒ}ƒbƒvŒã‚c‚q‚`‚lI—¹ƒAƒhƒŒƒX #*/
-#define     IO_RE_DRAM_LIMIT    0x00a00000          /*# ƒŠƒ}ƒbƒvŒã‚c‚q‚`‚lI—¹ƒAƒhƒŒƒX #*/
-#define     IO_MACROM_ADR_V2    0xc803fffc          /*# ‚l‚`‚bƒAƒhƒŒƒX #*///2003.8•ÏX
-
-#define     IO_IPLROM_ADR       0xc8000000          /*# IPL-ROMƒAƒhƒŒƒX #*/ //2000.07 V2.1’Ç‰Á
-
-/*#########################################*/
-/*#           ‚e‚k‚`‚r‚g                  #*/       //2000.09 V2.1’Ç‰Á
-/*#########################################*/
-
-#define IO_FLS_BASE     0xc8000000
-#define IO_FLS_CMDBASE  (IO_FLS_BASE+0x00040000)//2003.8•ÏX
-
-#define IO_FLS_SR       (WORD *)(IO_FLS_CMDBASE+0x00000000)
-#define IO_FLS_CR       (WORD *)(IO_FLS_CMDBASE+0x0000fffe)
-
-#define IO_FLS_MAKER    (WORD *)(IO_FLS_CMDBASE+0x00000000)
-#define IO_FLS_CMDADRS1 (WORD *)(IO_FLS_CMDBASE+0x0000aaaa)
-#define IO_FLS_CMDADRS2 (WORD *)(IO_FLS_CMDBASE+0x00005554)
-
-//ˆ³kLU‘Î‰žBFLASHƒAƒhƒŒƒX•ÏXB2003.08.25
-#define IO_FLS_HOLDDATA (WORD *)(IO_FLS_BASE+0x00050000)    /*# •Û—¯‰¹ƒf[ƒ^ #*/
-//#define   IO_FLS_FPGADATA (WORD *)(IO_FLS_BASE+0x00090000)    /*# FPGAƒRƒ“ƒtƒBƒOƒf[ƒ^ #*/
-#define IO_FLS_FPGADATA (WORD *)(IO_FLS_BASE+0x000b0000+0x00060000) /*# FPGAƒRƒ“ƒtƒBƒOƒf[ƒ^ #*///2004.04 IP-CS
-
-
-
-/*#########################################*/
-/*#           ‚c‚o‚q‚`‚liƒ}ƒXƒ^‚k‚tj    #*/
-/*#########################################*/
-#define     IO_PDRAM_PP0        0xf0000000          /*# ƒCƒxƒ“ƒgiƒŠ[ƒhj #*/
-#define     IO_MDRAM_PP0        0xf0000000          /*# ƒI[ƒ_iƒ‰ƒCƒgj #*/
-#define     IO_PEREG_PP0        0xf0000100          /*# ‚o‚j‚fŽÀ‘•î•ñiƒŠ[ƒhj #*/
-#define     IO_PCLREG_PP0       0xf0000102          /*# ‚o‚j‚fƒNƒ‰ƒXiƒŠ[ƒhj #*/
-#define     IO_PPVREG_PP0       0xf0000104          /*# ‚o‚oƒo[ƒWƒ‡ƒ“iƒŠ[ƒhj #*/
-#define     IO_MRQREG_PP0       0xf0000106          /*# ƒI[ƒ_“Ço—v‹iƒ‰ƒCƒgj #*/
-#define     IO_PRQREG_PP0       0xf0000108          /*# ƒCƒxƒ“ƒg‘ž‹–‰ÂiƒŠ[ƒhj #*/
-#define     IO_RSTREG_PP0       0xf000010C          /*# ƒŠƒZƒbƒgiƒ‰ƒCƒgj #*/
-
-#define     IO_PDRAM_PP1        0xf0000200          /*# ƒCƒxƒ“ƒgiƒŠ[ƒhj #*/
-#define     IO_MDRAM_PP1        0xf0000200          /*# ƒI[ƒ_iƒ‰ƒCƒgj #*/
-#define     IO_PEREG_PP1        0xf0000300          /*# ‚o‚j‚fŽÀ‘•î•ñiƒŠ[ƒhj #*/
-#define     IO_PCLREG_PP1       0xf0000302          /*# ‚o‚j‚fƒNƒ‰ƒXiƒŠ[ƒhj #*/
-#define     IO_PPVREG_PP1       0xf0000304          /*# ‚o‚oƒo[ƒWƒ‡ƒ“iƒŠ[ƒhj #*/
-#define     IO_MRQREG_PP1       0xf0000306          /*# ƒI[ƒ_“Ço—v‹iƒ‰ƒCƒgj #*/
-#define     IO_PRQREG_PP1       0xf0000308          /*# ƒCƒxƒ“ƒg‘ž‹–‰ÂiƒŠ[ƒhj #*/
-#define     IO_RSTREG_PP1       0xf000030C          /*# ƒŠƒZƒbƒgiƒ‰ƒCƒgj #*/
-
-#define     IO_PDRAM_PP2        0xf0000400          /*# ƒCƒxƒ“ƒgiƒŠ[ƒhj #*/
-#define     IO_MDRAM_PP2        0xf0000400          /*# ƒI[ƒ_iƒ‰ƒCƒgj #*/
-#define     IO_PEREG_PP2        0xf0000500          /*# ‚o‚j‚fŽÀ‘•î•ñiƒŠ[ƒhj #*/
-#define     IO_PCLREG_PP2       0xf0000502          /*# ‚o‚j‚fƒNƒ‰ƒXiƒŠ[ƒhj #*/
-#define     IO_PPVREG_PP2       0xf0000504          /*# ‚o‚oƒo[ƒWƒ‡ƒ“iƒŠ[ƒhj #*/
-#define     IO_MRQREG_PP2       0xf0000506          /*# ƒI[ƒ_“Ço—v‹iƒ‰ƒCƒgj #*/
-#define     IO_PRQREG_PP2       0xf0000508          /*# ƒCƒxƒ“ƒg‘ž‹–‰ÂiƒŠ[ƒhj #*/
-#define     IO_RSTREG_PP2       0xf000050C          /*# ƒŠƒZƒbƒgiƒ‰ƒCƒgj #*/
-
-#define     IO_PDRAM_PP3        0xf0000600          /*# ƒCƒxƒ“ƒgiƒŠ[ƒhj #*/
-#define     IO_MDRAM_PP3        0xf0000600          /*# ƒI[ƒ_iƒ‰ƒCƒgj #*/
-#define     IO_PEREG_PP3        0xf0000700          /*# ‚o‚j‚fŽÀ‘•î•ñiƒŠ[ƒhj #*/
-#define     IO_PCLREG_PP3       0xf0000702          /*# ‚o‚j‚fƒNƒ‰ƒXiƒŠ[ƒhj #*/
-#define     IO_PPVREG_PP3       0xf0000704          /*# ‚o‚oƒo[ƒWƒ‡ƒ“iƒŠ[ƒhj #*/
-#define     IO_MRQREG_PP3       0xf0000706          /*# ƒI[ƒ_“Ço—v‹iƒ‰ƒCƒgj #*/
-#define     IO_PRQREG_PP3       0xf0000708          /*# ƒCƒxƒ“ƒg‘ž‹–‰ÂiƒŠ[ƒhj #*/
-#define     IO_RSTREG_PP3       0xf000070C          /*# ƒŠƒZƒbƒgiƒ‰ƒCƒgj #*/
-
-#define     IO_PDRAM_PP4        0xf0000800          /*# ƒCƒxƒ“ƒgiƒŠ[ƒhj #*/
-#define     IO_MDRAM_PP4        0xf0000800          /*# ƒI[ƒ_iƒ‰ƒCƒgj #*/
-#define     IO_PEREG_PP4        0xf0000900          /*# ‚o‚j‚fŽÀ‘•î•ñiƒŠ[ƒhj #*/
-#define     IO_PCLREG_PP4       0xf0000902          /*# ‚o‚j‚fƒNƒ‰ƒXiƒŠ[ƒhj #*/
-#define     IO_PPVREG_PP4       0xf0000904          /*# ‚o‚oƒo[ƒWƒ‡ƒ“iƒŠ[ƒhj #*/
-#define     IO_MRQREG_PP4       0xf0000906          /*# ƒI[ƒ_“Ço—v‹iƒ‰ƒCƒgj #*/
-#define     IO_PRQREG_PP4       0xf0000908          /*# ƒCƒxƒ“ƒg‘ž‹–‰ÂiƒŠ[ƒhj #*/
-#define     IO_RSTREG_PP4       0xf000090C          /*# ƒŠƒZƒbƒgiƒ‰ƒCƒgj #*/
-
-#define     IO_PDRAM_PP5        0xf0000a00          /*# ƒCƒxƒ“ƒgiƒŠ[ƒhj #*/
-#define     IO_MDRAM_PP5        0xf0000a00          /*# ƒI[ƒ_iƒ‰ƒCƒgj #*/
-#define     IO_PEREG_PP5        0xf0000b00          /*# ‚o‚j‚fŽÀ‘•î•ñiƒŠ[ƒhj #*/
-#define     IO_PCLREG_PP5       0xf0000b02          /*# ‚o‚j‚fƒNƒ‰ƒXiƒŠ[ƒhj #*/
-#define     IO_PPVREG_PP5       0xf0000b04          /*# ‚o‚oƒo[ƒWƒ‡ƒ“iƒŠ[ƒhj #*/
-#define     IO_MRQREG_PP5       0xf0000b06          /*# ƒI[ƒ_“Ço—v‹iƒ‰ƒCƒgj #*/
-#define     IO_PRQREG_PP5       0xf0000b08          /*# ƒCƒxƒ“ƒg‘ž‹–‰ÂiƒŠ[ƒhj #*/
-#define     IO_RSTREG_PP5       0xf0000b0C          /*# ƒŠƒZƒbƒgiƒ‰ƒCƒgj #*/
-
-#define     IO_PDRAM_PP6        0xf0000c00          /*# ƒCƒxƒ“ƒgiƒŠ[ƒhj #*/
-#define     IO_MDRAM_PP6        0xf0000c00          /*# ƒI[ƒ_iƒ‰ƒCƒgj #*/
-#define     IO_PEREG_PP6        0xf0000d00          /*# ‚o‚j‚fŽÀ‘•î•ñiƒŠ[ƒhj #*/
-#define     IO_PCLREG_PP6       0xf0000d02          /*# ‚o‚j‚fƒNƒ‰ƒXiƒŠ[ƒhj #*/
-#define     IO_PPVREG_PP6       0xf0000d04          /*# ‚o‚oƒo[ƒWƒ‡ƒ“iƒŠ[ƒhj #*/
-#define     IO_MRQREG_PP6       0xf0000d06          /*# ƒI[ƒ_“Ço—v‹iƒ‰ƒCƒgj #*/
-#define     IO_PRQREG_PP6       0xf0000d08          /*# ƒCƒxƒ“ƒg‘ž‹–‰ÂiƒŠ[ƒhj #*/
-#define     IO_RSTREG_PP6       0xf0000d0C          /*# ƒŠƒZƒbƒgiƒ‰ƒCƒgj #*/
-
-#define     IO_PDRAM_PP7        0xf0000e00          /*# ƒCƒxƒ“ƒgiƒŠ[ƒhj #*/
-#define     IO_MDRAM_PP7        0xf0000e00          /*# ƒI[ƒ_iƒ‰ƒCƒgj #*/
-#define     IO_PEREG_PP7        0xf0000f00          /*# ‚o‚j‚fŽÀ‘•î•ñiƒŠ[ƒhj #*/
-#define     IO_PCLREG_PP7       0xf0000f02          /*# ‚o‚j‚fƒNƒ‰ƒXiƒŠ[ƒhj #*/
-#define     IO_PPVREG_PP7       0xf0000f04          /*# ‚o‚oƒo[ƒWƒ‡ƒ“iƒŠ[ƒhj #*/
-#define     IO_MRQREG_PP7       0xf0000f06          /*# ƒI[ƒ_“Ço—v‹iƒ‰ƒCƒgj #*/
-#define     IO_PRQREG_PP7       0xf0000f08          /*# ƒCƒxƒ“ƒg‘ž‹–‰ÂiƒŠ[ƒhj #*/
-#define     IO_RSTREG_PP7       0xf0000f0C          /*# ƒŠƒZƒbƒgiƒ‰ƒCƒgj #*/
-
-//2001.02.20 V2.2DEBUGistartj
-#define     IO_PDRAM_PP8        0xf0001000          /*# ƒCƒxƒ“ƒgiƒŠ[ƒhj #*/
-#define     IO_MDRAM_PP8        0xf0001000          /*# ƒI[ƒ_iƒ‰ƒCƒgj #*/
-#define     IO_PEREG_PP8        0xf0001100          /*# ‚o‚j‚fŽÀ‘•î•ñiƒŠ[ƒhj #*/
-#define     IO_PCLREG_PP8       0xf0001102          /*# ‚o‚j‚fƒNƒ‰ƒXiƒŠ[ƒhj #*/
-#define     IO_PPVREG_PP8       0xf0001104          /*# ‚o‚oƒo[ƒWƒ‡ƒ“iƒŠ[ƒhj #*/
-#define     IO_MRQREG_PP8       0xf0001106          /*# ƒI[ƒ_“Ço—v‹iƒ‰ƒCƒgj #*/
-#define     IO_PRQREG_PP8       0xf0001108          /*# ƒCƒxƒ“ƒg‘ž‹–‰ÂiƒŠ[ƒhj #*/
-#define     IO_RSTREG_PP8       0xf000110C          /*# ƒŠƒZƒbƒgiƒ‰ƒCƒgj #*/
-//2001.02.20 V2.2DEBUGiendj
-
-//#define       IO_DMY_WRITE        0xf7f00000          /*# DPRAMƒAƒNƒZƒXƒ^ƒCƒ~ƒ“ƒO—pƒ_ƒ~[ƒAƒhƒŒƒX #*/ // 99.10.4
-//#define       IO_DMY_WRITE        0xc9000000          /*# DPRAMƒAƒNƒZƒXƒ^ƒCƒ~ƒ“ƒO—pƒ_ƒ~[ƒAƒhƒŒƒX #*/ // PRITƒwƒ‹ƒXNG‘Îô 99.10.4
-//#define       IO_DMY_WRITE        0xd0000000          /*# DPRAMƒAƒNƒZƒXƒ^ƒCƒ~ƒ“ƒO—pƒ_ƒ~[ƒAƒhƒŒƒX #*/ //2000.09 V2.1•ÏX
-#define     IO_DMY_WRITE        0xd00000a4          /*# DPRAMƒAƒNƒZƒXƒ^ƒCƒ~ƒ“ƒO—pƒ_ƒ~[ƒAƒhƒŒƒX #*/ //2004.04 IP-CS
-
-/*#########################################*/
-/*#           ‚»‚Ì‘¼iƒ}ƒXƒ^‚k‚tj        #*/
-/*#########################################*/
-#define     IO_ALM_INF          0xf0001800          /*# áŠQî•ñƒŒƒWƒXƒ^ #*/
-#define     IO_CLK_SEL          0xf0001800          /*# ‚b‚k‚jØ‘ÖƒŒƒWƒXƒ^ #*/
-#define     IO_LUNUM01          0xf0002000          /*# ‚k‚t”Ô†i‚PˆÊjƒŒƒWƒXƒ^ #*/
-#define     IO_LUNUM10          0xf0002800          /*# ‚k‚t”Ô†i‚P‚OˆÊjƒŒƒWƒXƒ^ #*/
-#define     IO_SW_INF           0xf0003000          /*# ‚r‚vî•ñƒŒƒWƒXƒ^ #*/
-#define     IO_BZ_CTRL          0xf0003000          /*# ƒuƒU[ƒRƒ“ƒgƒ[ƒ‹ƒŒƒWƒXƒ^ #*/
-#define     IO_RST_SLV          0xf0003800          /*# ƒŠƒZƒbƒgƒŒƒWƒXƒ^ out #*/            // 99.10.15
-#define     IO_MODE             0xf0003800          /*# ƒ‚[ƒhƒŒƒWƒXƒ^ in #*/               // 2000.06.14 V1.2 ’Ç‰Á
-#define     IO_WRT_PRO          0xf0004000          /*# ƒ‰ƒCƒgƒvƒƒeƒNƒgƒŒƒWƒXƒ^ out #*/    // 99.10.15
-#define     IO_VLAN_ID          0xf0004000          /*# ‚u‚k‚`‚m|‚h‚cƒŒƒWƒXƒ^ in #*/       // 2000.06.14 V1.2 ’Ç‰Á
-#define     IO_HARD_VER         0xf0004800          /*# ƒn[ƒhƒEƒFƒAƒo[ƒWƒ‡ƒ“ƒŒƒWƒXƒ^ #*/  // 2000.05.11 V1.2 ’Ç‰Á
-
-//‚æ‚­‚í‚©‚ç‚È‚¢ƒAƒhƒŒƒX
-#define     IO_SIOSEL           0xf0005800          /*# ‚r‚h‚nƒZƒŒƒNƒ^ƒŒƒWƒXƒ^ #*/          // 2000.09 V2.1’Ç‰Á
-//ˆ³kLU‘Î‰žBI/Oƒ}ƒbƒv•ÏXBˆÈ‰ºíœB2003.08.25
-//#define       IO_FROM_INI         0xf0006000          /*# FROMƒŒƒWƒXƒ^ #*/                    // 2000.09 V2.1’Ç‰Á
-
-
-#define     IO_LEDSEL       0xd000009c          /*# LED•\Ž¦Ø‘ÖƒŒƒWƒXƒ^ #*/ //IP-CS‘Î‰ž’Ç‰Á 2004.04
-#define     IO_RSTHLD       0xd00000a0          /*# ƒŠƒZƒbƒg•ÛŽƒŒƒWƒXƒ^ #*/    //IP-CS‘Î‰ž’Ç‰Á 2004.04
-
-//ƒrƒbƒgƒAƒTƒCƒ“
-#define     LU_LED_SEL          0x0001          /*# LU_LED•\Ž¦(1)/CS_LED•\Ž¦(0) #*/ //2004.04 IP-CS’Ç‰Á
-#define     RST_HLD         0x0001              /*# •ÛŽçƒ‚[ƒh‹N“®(1)/’Êí‹N“®(0)(‰Šú’l) #*///2004.04 IP-CS’Ç‰Á
-#define     IO_INITSW       0x0008          /*# •ÛŽçSW ON(1)/OFF(0)(’Êíƒ‚[ƒh) #*/     //2004.04 IP-CS’Ç‰Á
-
-
-
-/*# ƒ‚[ƒhƒŒƒWƒXƒ^ƒrƒbƒgƒAƒTƒCƒ“ #*/
-#define     IO_MODE_VLAN        0x0001              /*# VLANÝ’è #*/    //’l•ÏX•s‰Âƒn[ƒhŽd—l•ÏX•s‰Â
-#define     IO_MODE_REMOTE      0x0002              /*# ‰“ŠuÝ’è #*/
-#define     IO_MODE_AUTONEGO    0x0004              /*# AUTO-NEGOÝ’è #*/
-#define     IO_MODE_NEGOMODE    0x0018              /*# ‹­§ƒlƒSƒVƒG[ƒVƒ‡ƒ“ƒ‚[ƒhÝ’è #*/
-#define     IO_MODE_CCUID       0x0060              /*# CCUŽ¯•ÊŽqÝ’è #*/
-#define     IO_MODE_MNT         0x0080              /*# •ÛŽçƒ‚[ƒhÝ’è #*/
-
-/*# ƒ}ƒXƒNƒf[ƒ^ #*/
-//#define       LU_IAM_BIT          0x0002              /*# ‚h‚`‚l“‹Úî•ñ PORT4.1 #*/      //2001.02.13 V2.2DEBUG
+/*# ãƒžã‚¹ã‚¯ãƒ‡ãƒ¼ã‚¿ #*/
+//#define       LU_IAM_BIT          0x0002              /*# ï¼©ï¼¡ï¼­æ­è¼‰æƒ…å ± PORT4.1 #*/      //2001.02.13 V2.2DEBUG
 #ifdef      V2_1_DBG_ECHOEX
-#define     LU_ECHO_HWSEL       0x0000              /*# ‚q‚b|‚o‚j‚fŽÀ‘•(0)/–¢ŽÀ‘•(1)î•ñ ƒXƒŒ[ƒuPORT4.1#*/    //ƒfƒoƒbƒN—p
+#define     LU_ECHO_HWSEL       0x0000              /*# ï¼²ï¼£ï¼ï¼°ï¼«ï¼§å®Ÿè£…(0)/æœªå®Ÿè£…(1)æƒ…å ± ã‚¹ãƒ¬ãƒ¼ãƒ–PORT4.1#*/    //ãƒ‡ãƒãƒƒã‚¯ç”¨
 #else   //V2_1_DBG_ECHOEX
-#define     LU_ECHO_HWSEL       0x0002              /*# ‚q‚b|‚o‚j‚fŽÀ‘•(0)/–¢ŽÀ‘•(1)î•ñ ƒXƒŒ[ƒuPORT4.1#*/    //2000.12.08 V2.2’Ç‰Á
+#define     LU_ECHO_HWSEL       0x0002              /*# ï¼²ï¼£ï¼ï¼°ï¼«ï¼§å®Ÿè£…(0)/æœªå®Ÿè£…(1)æƒ…å ± ã‚¹ãƒ¬ãƒ¼ãƒ–PORT4.1#*/    //2000.12.08 V2.2è¿½åŠ 
 #endif  //V2_1_DBG_ECHOEX
-//#define       LU_JPUS_BIT         0x0040              /*# ‚k‚t‘Ží•Ê PORT4.2 #*/
-#define     LU_JPUS_BIT         0x0004              /*# ‚k‚t‘Ží•Ê PORT4.2 #*/              //2000.09.06 C³
-#define     LU_TYPE_MSK         0x0008              /*# ‚k‚tƒ}ƒXƒ^EƒXƒŒ[ƒu PORT4.3 #*/
+//#define       LU_JPUS_BIT         0x0040              /*# ï¼¬ï¼µå›½ç¨®åˆ¥ PORT4.2 #*/
+#define     LU_JPUS_BIT         0x0004              /*# ï¼¬ï¼µå›½ç¨®åˆ¥ PORT4.2 #*/              //2000.09.06 ä¿®æ­£
+#define     LU_TYPE_MSK         0x0008              /*# ï¼¬ï¼µãƒžã‚¹ã‚¿ãƒ»ã‚¹ãƒ¬ãƒ¼ãƒ– PORT4.3 #*/
 
-#define     LU_CHD_BIT          0x0020              /*# ƒ`ƒƒƒlƒ‹§Œä” PORT1.5 #*/
-#define     LU_PBREC_BIT        0x0010              /*# ‚o‚aŠÄŽ‹ŽžŠÔŽw’è PORT1.4 #*/
-//#define       LU_PKG_MSK          0x000f              /*# ƒXƒƒbƒg” PORT1.0_3 #*/
-#define     LU_PKG_MSK          0x0007              /*# ƒXƒƒbƒg” PORT1.0_3 #*///IP-CS 2004.04
-#define     LU_SLAVE_MASK       0x000f              /*# ƒXƒŒ[ƒu”Ô† PORT1.0_3 #*/
-#define     LU_CHD_MSK          0x0010              /*# ƒ`ƒƒƒlƒ‹§Œä” PORT1.4 #*/
+#define     LU_CHD_BIT          0x0020              /*# ãƒãƒ£ãƒãƒ«åˆ¶å¾¡æ•° PORT1.5 #*/
+#define     LU_PBREC_BIT        0x0010              /*# ï¼°ï¼¢ç›£è¦–æ™‚é–“æŒ‡å®š PORT1.4 #*/
+//#define       LU_PKG_MSK          0x000f              /*# ã‚¹ãƒ­ãƒƒãƒˆæ•° PORT1.0_3 #*/
+#define     LU_PKG_MSK          0x0007              /*# ã‚¹ãƒ­ãƒƒãƒˆæ•° PORT1.0_3 #*///IP-CS 2004.04
+#define     LU_SLAVE_MASK       0x000f              /*# ã‚¹ãƒ¬ãƒ¼ãƒ–ç•ªå· PORT1.0_3 #*/
+#define     LU_CHD_MSK          0x0010              /*# ãƒãƒ£ãƒãƒ«åˆ¶å¾¡æ•° PORT1.4 #*/
 
-#define     LU_UD_MSK           0x000f              /*# ‚k‚t”Ô†i‚P‚OˆÊj #*/
-#define     LU_LD_MSK           0x000f              /*# ‚k‚t”Ô†i‚PˆÊj #*/
+#define     LU_UD_MSK           0x000f              /*# ï¼¬ï¼µç•ªå·ï¼ˆï¼‘ï¼ä½ï¼‰ #*/
+#define     LU_LD_MSK           0x000f              /*# ï¼¬ï¼µç•ªå·ï¼ˆï¼‘ä½ï¼‰ #*/
 
-//ˆ³kLU‘Î‰žBI/Oƒ}ƒbƒv•ÏXBˆÈ‰ºíœB2003.08.25
-#define     IO_LSIVER_MASK      0x00000fff          /*# ƒÈƒo[ƒWƒ‡ƒ“ƒ}ƒXƒN #*/              //2000.09 V1.2’Ç‰Á
+//åœ§ç¸®LUå¯¾å¿œã€‚I/Oãƒžãƒƒãƒ—å¤‰æ›´ã€‚ä»¥ä¸‹å‰Šé™¤ã€‚2003.08.25
+#define     IO_LSIVER_MASK      0x00000fff          /*# Îºãƒãƒ¼ã‚¸ãƒ§ãƒ³ãƒžã‚¹ã‚¯ #*/              //2000.09 V1.2è¿½åŠ 
 
+/* COMMON ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰ */
+enum {
+	COM_ABORT_01= 0,	/* com_poolget ãƒ¡ãƒ¢ãƒªãƒ–ãƒ­ãƒƒã‚¯IDç•°å¸¸æ™‚ */
+	COM_ABORT_02,		/* com_poolput ãƒ¡ãƒ¢ãƒªãƒ–ãƒ­ãƒƒã‚¯IDç•°å¸¸æ™‚ */
+	COM_ABORT_03,		/* com_poolput ãƒ¡ãƒ¢ãƒªãƒ–ãƒ­ãƒƒã‚¯ã‚¢ãƒ‰ãƒ¬ã‚¹ç•°å¸¸æ™‚ */
+	COM_ABORT_04,		/* com_ecbinit mq_openç•°å¸¸æ™‚ */
+	COM_ABORT_05,		/* com_sndmsg ECBç•ªå·ç•°å¸¸æ™‚ */
+	COM_ABORT_06,		/* com_sndmsg mq_openç•°å¸¸æ™‚ */
+	COM_ABORT_07,		/* com_sndmsg mq_sendç•°å¸¸æ™‚ */
+	COM_ABORT_08,		/* com_rcvmsg ECBç•ªå·ç•°å¸¸æ™‚ */
+	COM_ABORT_09,		/* com_rcvmsg mq_openç•°å¸¸æ™‚ */
+	COM_ABORT_10,		/* com_rcvmsg mq_receiveç•°å¸¸æ™‚ */
+	COM_ABORT_11,		/* com_rcvmsg mq_receiveã‚¿ã‚¤ãƒ ã‚¢ã‚¦ãƒˆä»¥å¤–ã®ç•°å¸¸æ™‚ */
+	COM_ABORT_12,		/* com_queput ã‚­ãƒ¥ãƒ¼IDç•°å¸¸æ™‚ */
+	COM_ABORT_13,		/* com_queget ã‚­ãƒ¥ãƒ¼IDç•°å¸¸æ™‚ */
+	COM_ABORT_14,		/* com_quesns ã‚­ãƒ¥ãƒ¼IDç•°å¸¸æ™‚ */
+	COM_ABORT_15,		/* com_threadstart ã‚¹ãƒ¬ãƒƒãƒ‰IDç•°å¸¸æ™‚ */
+	COM_ABORT_16,		/* com_threadstart ã‚¹ãƒ¬ãƒƒãƒ‰çŠ¶æ…‹ç•°å¸¸æ™‚ */
+	COM_ABORT_17,		/* com_threadstart pthread_attr_initç•°å¸¸æ™‚ */
+	COM_ABORT_18,		/* com_threadstart pthread_attr_setdetachstateç•°å¸¸æ™‚ */
+	COM_ABORT_19,		/* com_threadstart pthread_attr_setinheritschedç•°å¸¸æ™‚ */
+	COM_ABORT_20,		/* com_threadstart pthread_attr_setschedpolicyç•°å¸¸æ™‚ */
+	COM_ABORT_21,		/* com_threadstart pthread_attr_setschedparamç•°å¸¸æ™‚ */
+	COM_ABORT_22,		/* com_threadstart pthread_createç•°å¸¸æ™‚ */
+	COM_ABORT_23,		/* com_threadstop ã‚¹ãƒ¬ãƒƒãƒ‰IDç•°å¸¸æ™‚ */
+	COM_ABORT_24,		/* com_threadstop ã‚¹ãƒ¬ãƒƒãƒ‰çŠ¶æ…‹ç•°å¸¸æ™‚ */
+	COM_ABORT_25,		/* com_threadstop pthread_cancelç•°å¸¸æ™‚ */
+	COM_ABORT_26,		/* dbg_print_set ã‚¹ãƒ¬ãƒƒãƒ‰IDç•°å¸¸æ™‚ */
+	COM_ABORT_27,		/* dbg_print ã‚¹ãƒ¬ãƒƒãƒ‰IDç•°å¸¸æ™‚ */
+	COM_ABORT_28		/* com_get_pool_status ãƒ¡ãƒ¢ãƒªãƒ–ãƒ­ãƒƒã‚¯IDç•°å¸¸æ™‚ */
+} COM_ERROR_CODE;
 
+/* ECBé–¢é€£ */
+#define LUMQ_MAXMSG     64  /* Maximum number of messages in queue */
+#define LUMQ_MSGSIZE    80  /* Maximum message size (in bytes) */
 
-/*#########################################*/
-/*#           ƒtƒ@ƒCƒ‹ŠÖ˜A                #*/
-/*#########################################*/
-#define     BOOT_DATA_SIZE      1024                /*# ‚h‚o‚kƒu[ƒgƒf[ƒ^—ÌˆæƒTƒCƒY #*/
-#define     LU_F_TYP_OFST       0x00000100          /*# ƒtƒ@ƒCƒ‹Ž¯•Êî•ñƒIƒtƒZƒbƒg #*/
-#define     LU_F_END_OFST       0x00000110          /*# ƒtƒ@ƒCƒ‹I—¹î•ñƒIƒtƒZƒbƒg #*/
-#define     LU_F_EXE_OFST       0x00000118          /*# ƒtƒ@ƒCƒ‹ŽÀs”Ô’nƒIƒtƒZƒbƒgi•ÏX•s‰Âj #*/
-#define     LU_FILE_SIZE        0x00100000          /*# Å‘åƒ_ƒEƒ“ƒ[ƒh‚k‚tƒtƒ@ƒCƒ‹ƒTƒCƒYi‚P‚l‚Ü‚Åj #*/
-#define     LU_OAK_SIZE         0x00008000          /*# ‚n‚`‚jƒtƒ@ƒCƒ‹ƒTƒCƒY #*/                    //2000.08 V2.1’Ç‰Á
-//#define       LU_V3OAK_SIZE       0x00080000          /*# ŠO•t‚¯‚n‚`‚jƒtƒ@ƒCƒ‹ƒTƒCƒY #*/              //2003.08’Ç‰Á
-#define     LU_V3OAK_SIZE       0x00078000          /*# ŠO•t‚¯‚n‚`‚jƒtƒ@ƒCƒ‹ƒTƒCƒY #*/              //2004.05 IP-CS •ÏX
-                                                    /*# ƒ_ƒEƒ“ƒ[ƒh‚k‚tƒtƒ@ƒCƒ‹ƒTƒCƒYiLU+OAKj #*///2000.07 V2.1•œŠˆ  //2000.09 V2.1•ÏX
-#define     LU_DL_SIZE          (0x00060000+0x00020000+LU_OAK_SIZE+LU_V3OAK_SIZE)//2004.05 IP-CS •ÏX
+/* ãƒ‡ãƒãƒƒã‚°ãƒ—ãƒªãƒ³ãƒˆé–¢é€£ */
+#define LOGDST_CNS    1 /* Output to console */
+#define LOGDST_SYSLOG 2 /* Output to syslog */
 
-//ˆ³kLU‘Î‰žBƒŠƒ“ƒNƒtƒ@ƒCƒ‹•ÏX‚É‚ ‚í‚¹‚Ä•Û—¯‰¹‚Ìæ“ªƒAƒhƒŒƒX•ÏXB2003.08.25
-//#define       LU_CLR_LIMIT        0x00330000          /*# ‚OƒNƒŠƒA‘ÎÛƒƒ‚ƒŠƒŠƒ~ƒbƒgiƒŠƒ“ƒNƒtƒ@ƒCƒ‹‚Æˆê’v‚³‚¹‚éIj #*/  // 2001.08.07
-#define     LU_CLR_LIMIT        0x00830000          /*# ‚OƒNƒŠƒA‘ÎÛƒƒ‚ƒŠƒŠƒ~ƒbƒgiƒŠƒ“ƒNƒtƒ@ƒCƒ‹‚Æˆê’v‚³‚¹‚éIj #*/  // 2001.08.07
-
-#define     LU_V2_CPUSTACK_SIZE 0x00002000          /*# ‚b‚o‚tŽg—pƒXƒ^ƒbƒNƒTƒCƒY #*/                //2001.02.19 V2.2DEBUG
-
-#ifdef      MAKE_IPL
-
-#ifdef      MAKE_IPL_ROM
-#define     LU_FILE_TOP         IO_DRAM_BASE        /*# ƒtƒ@ƒCƒ‹ƒ_ƒEƒ“ƒ[ƒhæ“ªƒAƒhƒŒƒX #*/
-#else
-#define     LU_FILE_TOP         0xc0350000          /*# ‚h‚b‚dƒfƒoƒbƒOŽžƒAƒhƒŒƒX #*/
-#endif      // MAKE_IPL
-
-#else       // MAKE_IPL_ROM
-#define     LU_FILE_TOP         IO_RE_DRAM_BASE     /*# ƒtƒ@ƒCƒ‹æ“ªƒAƒhƒŒƒX #*/
-#endif      // MAKE_IPL_ROM
-
-#define     LU_FILE_TYPE        (LU_FILE_TOP + LU_F_TYP_OFST)   /*# ƒtƒ@ƒCƒ‹Ž¯•Êî•ñƒAƒhƒŒƒX #*/
-#define     LU_FILE_END         (LU_FILE_TOP + LU_F_END_OFST)   /*# ƒtƒ@ƒCƒ‹I—¹î•ñƒAƒhƒŒƒX #*/
-#define     LU_FILE_EXE         (LU_FILE_TOP + LU_F_EXE_OFST)   /*# ƒtƒ@ƒCƒ‹ŽÀs”Ô’nî•ñƒAƒhƒŒƒXi•ÏX•s‰Âj #*/
-
-#define LU_VER_ADDR         0x180                               /*# ‚h‚o‚kƒo[ƒWƒ‡ƒ“Ši”[—ÌˆæƒAƒhƒŒƒX #*/    //2000.07 V2.1’Ç‰Á
-#define LU_DATE_ADDR        0x190                               /*# “ú•tŠi”[—ÌˆæƒAƒhƒŒƒX #*/                //2001.01.29 V2.2’Ç‰Á
-#define IPL_VER_ADDR        (LU_VER_ADDR+IO_IPLROM_ADR)         /*# ‚h‚o‚kƒo[ƒWƒ‡ƒ“Ši”[ŽÀƒAƒhƒŒƒX #*/      //2000.07 V2.1’Ç‰Á
-#define ONL_VER_ADDR        (LU_VER_ADDR+IO_DRAM_BASE)          /*# ƒIƒ“ƒ‰ƒCƒ“ƒo[ƒWƒ‡ƒ“Ši”[ŽÀƒAƒhƒŒƒX #*/  //2000.07 V2.1’Ç‰Á
-
-// “à•”‚q‚`‚l
-#ifdef  WDT_STOP
-//#define       WDT_DMY_ADR         0x10001fa0          // ƒEƒHƒbƒ`ƒhƒbƒOƒ_ƒ~[ƒAƒNƒZƒXiƒfƒoƒbƒO—pj
-//#define       WDT_DMY_ADR         0x10001f60          // ƒEƒHƒbƒ`ƒhƒbƒOƒ_ƒ~[ƒAƒNƒZƒXiƒfƒoƒbƒO—pj   //2000.09 V2.1•ÏX
-//#define       WDT_DMY_ADR_V2      0x00101f60          // ƒEƒHƒbƒ`ƒhƒbƒOƒ_ƒ~[ƒAƒNƒZƒXiƒfƒoƒbƒO—pj   //2000.09 V2.1’Ç‰Á
-#define     WDT_DMY_ADR         0xd0000000          // ƒEƒHƒbƒ`ƒhƒbƒOƒ_ƒ~[ƒAƒNƒZƒXiƒfƒoƒbƒO—pj   //2000.09 V2.1•ÏX
-#define     WDT_DMY_ADR_V2      0xd0000000          // ƒEƒHƒbƒ`ƒhƒbƒOƒ_ƒ~[ƒAƒNƒZƒXiƒfƒoƒbƒO—pj   //2000.09 V2.1’Ç‰Á
-#endif
-//#define       LU_EXEC_DATA        0x10001fb0          /*# ‚k‚t‹N“®î•ñƒAƒhƒŒƒXi64bytesj #*/
-#define     LU_EXEC_DATA        0x10001f70          /*# ‚k‚t‹N“®î•ñƒAƒhƒŒƒXi128bytesj #*/        //2000.09 V2.1•ÏX
-#define     LU_EXEC_DATA_V2     0x00101f70          /*# ‚k‚t‹N“®î•ñƒAƒhƒŒƒXi128bytesj #*/        //2000.09 V2.1’Ç‰Á
-// HêŽŽŒ±—p
-#define     TP_DRAM_CHK         0x10001ff0          /*# HêŽŽŒ±DRAMƒ`ƒFƒbƒNŒ‹‰ÊƒAƒhƒŒƒX #*/        //2000.09 V2.1•ÏX
-#define     TP_DRAM_CHK_V2      0x00101ff0          /*# HêŽŽŒ±DRAMƒ`ƒFƒbƒNŒ‹‰ÊƒAƒhƒŒƒX #*/        //2000.09 V2.1’Ç‰Á
-
-
-/*        Copyright (C) 1999 Oki Electric Industry Co.,Ltd.        */
 

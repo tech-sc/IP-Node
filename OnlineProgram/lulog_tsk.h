@@ -14,6 +14,13 @@
 #define _ATTR_SYM		static
 #endif // DEBUG
 
+#ifndef I_APLLOG
+#define I_APLLOG				0xf3
+#endif
+#ifndef I_LOGWRITE
+#define I_LOGWRITE			0xf4
+#endif
+
 /* アプリログ要求メッセージ型 */
 #define APLLOGDATA_LEN		248
 typedef struct APLLOG_MSG {
@@ -43,8 +50,8 @@ _ATTR_SYM void lulog_init(void);
 _ATTR_SYM BYTE lulog_Loggin(INNER_MSG *msg_p);
 _ATTR_SYM BYTE lulog_LogWrite(void);
 _ATTR_SYM BYTE lulog_LogWiteFile(FILE *fp);
-void lulog_LogWiteFile(WORD task_id, WORD line, WORD len, BYTE *data_p);
-#define com_LogWiteFile		lulog_LogWiteFile
+void lulog_AplLog(WORD task_id, WORD line, WORD len, BYTE *data_p);
+#define com_AplLog		lulog_AplLog
 #endif /* _LULOG_TSK_H_ */
 
 /* This is free software, licensed under the GNU General Public License v2. */

@@ -6,6 +6,10 @@
 /******************************************************************************/
 
 /*** システムヘッダの取り込み ***/
+#include <sys/types.h>	/* open() */
+#include <sys/stat.h>		/* open() */
+#include <fcntl.h>			/* open() */
+#include <unistd.h>		/* close() */
 #include <stdio.h>
 #include <pthread.h>
 #include <sys/mman.h>	/* mmap() */
@@ -53,6 +57,7 @@ static pthread_mutex_t  mem_mutex;
 BYTE com_memInit( void )
 {
 	pthread_mutex_init(&mem_mutex, NULL);
+	return OK;
 }
 
 /******************************************************************************/
@@ -67,13 +72,13 @@ BYTE com_memInit( void )
 /*            lenは、mmap()の制限内のデータ数である事						  */
 /* その他	  －															  */
 /******************************************************************************/
-BYTE com_memRead( off_t phy_addr, uin16_t width, uin16_t len, void *buff_p )
+BYTE com_memRead( off_t phy_addr, uint16_t width, uint16_t len, void *buff_p )
 {
 	BYTE	result = NG;
 	int		fd = 0;
 	void	*map_base = NULL;
 	ACC_PTR_t	virt_addr = {};
-	ACC_PTR_t	data_addr = {.byte_p = buff_p;};
+	ACC_PTR_t	data_addr = {.byte_p = buff_p};
 
 	if ((width == BYTE_WIDTH) || (width == WORD_WIDTH) || (width == DWORD_WIDTH))
 	{
@@ -128,13 +133,13 @@ BYTE com_memRead( off_t phy_addr, uin16_t width, uin16_t len, void *buff_p )
 /*            lenは、mmap()の制限内のデータ数である事						  */
 /* その他	  －															  */
 /******************************************************************************/
-BYTE com_memWrite( off_t phy_addr, uin16_t width, uin16_t len, void *buff_p )
+BYTE com_memWrite( off_t phy_addr, uint16_t width, uint16_t len, void *buff_p )
 {
 	BYTE	result = NG;
 	int		fd = 0;
 	void	*map_base = NULL;
 	ACC_PTR_t	virt_addr = {};
-	ACC_PTR_t	data_addr = {.byte_p = buff_p;};
+	ACC_PTR_t	data_addr = {.byte_p = buff_p};
 
 	if ((width == BYTE_WIDTH) || (width == WORD_WIDTH) || (width == DWORD_WIDTH))
 	{
@@ -190,13 +195,13 @@ BYTE com_memWrite( off_t phy_addr, uin16_t width, uin16_t len, void *buff_p )
 /*            lenは、mmap()の制限内のデータ数である事						  */
 /* その他	  －															  */
 /******************************************************************************/
-BYTE com_memUpdate( off_t phy_addr, uin16_t width, uin32_t mask, uin32_t val, void *prev_p )
+BYTE com_memUpdate( off_t phy_addr, uint16_t width, uint32_t mask, uint32_t val, void *prev_p )
 {
 	BYTE	result = NG;
 	int		fd = 0;
 	void	*map_base = NULL;
 	ACC_PTR_t	virt_addr = {};
-	ACC_PTR_t	prev_addr = {.byte_p = prev_p;};
+	ACC_PTR_t	prev_addr = {.byte_p = prev_p};
 
 	if ((width == BYTE_WIDTH) || (width == WORD_WIDTH) || (width == DWORD_WIDTH))
 	{
@@ -211,15 +216,15 @@ BYTE com_memUpdate( off_t phy_addr, uin16_t width, uin32_t mask, uin32_t val, vo
 				switch (width)
 				{
 				  case BYTE_WIDTH:
-					*data_addr.byte_p = *virt_addr.byte_p;
+					*prev_addr.byte_p = *virt_addr.byte_p;
 					*virt_addr.byte_p = (*virt_addr.byte_p & (uint8_t)mask) | (uint8_t)val;
 					break;
 				  case WORD_WIDTH:
-					*data_addr.word_p = *virt_addr.word_p;
+					*prev_addr.word_p = *virt_addr.word_p;
 					*virt_addr.word_p = (*virt_addr.word_p & (uint16_t)mask) | (uint16_t)val;
 					break;
 				  case DWORD_WIDTH:
-					*data_addr.dword_p = *virt_addr.dword_p;
+					*prev_addr.dword_p = *virt_addr.dword_p;
 					*virt_addr.dword_p = (*virt_addr.dword_p & mask) | val;
 					break;
 				  default:	//ありえない
@@ -278,7 +283,7 @@ BYTE com_FpgaRegWrite( off_t phy_addr, uint8_t val )
 /******************************************************************************/
 BYTE com_FpgaLED( uint8_t mask, uint8_t val, uint8_t *prev_p )
 {
-	return com_memUpdate( FPGA_LED, BYTE_WIDTH, (uin32_t)mask, (uin32_t)val, prev_p );
+	return com_memUpdate( FPGA_LED, BYTE_WIDTH, (uint32_t)mask, (uint32_t)val, prev_p );
 }
 
 /******************************************************************************/
@@ -311,7 +316,7 @@ BYTE com_GpioRegRead( off_t phy_addr, uint32_t mask, uint32_t *buff_p )
 /* その他	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-BYTE BYTE com_GpioRegUpdate( off_t phy_addr, uint32_t mask, uint32_t bit )
+BYTE com_GpioRegUpdate( off_t phy_addr, uint32_t mask, uint32_t bit )
 {
 	return com_memUpdate( phy_addr, DWORD_WIDTH, mask, bit, NULL );
 }
@@ -321,11 +326,12 @@ BYTE BYTE com_GpioRegUpdate( off_t phy_addr, uint32_t mask, uint32_t bit )
 /* 関数名	  BootLoaderプログラムバージョン情報取得						  */
 /* 機能概要	  バージョン情報を文字列(例：1.00)＋null終端付きで返す			  */
 /* パラメータ ver : (out)	取得したバージョン情報を格納する領域			  */
+/*			  ver_sz : (in) バージョン情報を格納する領域のサイズ			  */
 /* リターン	  取得したバージョン情報の文字数（null終端含むまない）			  */
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-BYTE com_IPLVerGet( char *ver )
+BYTE com_IPLVerGet( char *ver, BYTE ver_sz )
 {
 	BYTE	result	= 0;
 	int		rd_sz	= 0;
@@ -333,8 +339,13 @@ BYTE com_IPLVerGet( char *ver )
 	char	*str	= NULL;
 	char	buff[BUFF_SZ];
 
+	if (ver_sz < IPL_VER_LEN)
+	{
+		return NG;
+	}
+
 	fp = fopen(IPL_MTD, "rb");
-	if (fp != NULL)
+	while (fp != NULL)
 	{
 		rd_sz = fread(buff, sizeof(char), BUFF_SZ, fp);
 		if (rd_sz < 0)
@@ -358,6 +369,7 @@ BYTE com_IPLVerGet( char *ver )
 		}
 		*ver = '\0';
 		fclose(fp);
+		break;
 	}
 	return result;
 }

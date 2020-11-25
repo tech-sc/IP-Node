@@ -44,6 +44,7 @@
 	#define LOG_PUTDISC		LOGDST_SYSLOG		/* 運用時ログ出力先 */
 #endif /* end DEBUG */
 
+#define FOREVER					0				/* 時間指定なし */
 
 /*** 自ファイル内でのみ使用する#define 関数マクロ ***/
 /*** 自ファイル内でのみ使用するtypedef 定義 ***/
@@ -94,7 +95,6 @@ static const char *mkstr_errno(int err)
 	  CASE_STR(EINVAL);
 	  CASE_STR(ENFILE);
 	  CASE_STR(ENOMEM);
-	  CASE_STR(ENOSPC);
 	  default:
 		sprintf(errno_str, "misc(%d)",err);
 		return errno_str;
@@ -109,7 +109,7 @@ static const char *mkstr_errno(int err)
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-#define CASE_STR(a)	case a:	 return #a
+//#define CASE_STR(a)	case a:	 return #a
 static const char *mkstr_taskid(WORD taskid)
 {
 	switch(taskid)
@@ -144,7 +144,7 @@ void lulog_thread(void *arg)
 {
 	INNER_MSG	*msg_p = NULL;
 
-	lulog_init()
+	lulog_init();
 	while (1)
 	{
 		msg_p = (INNER_MSG*)com_rcvmsg(LULOG_ECB, FOREVER);
@@ -155,7 +155,7 @@ void lulog_thread(void *arg)
 			lulog_Loggin(msg_p);
 			break;
 		  case I_LOGWRITE:
-			lulog_LogWrite(msg_p);
+			lulog_LogWrite();
 			break;
 		  default:
 			break;
@@ -198,7 +198,7 @@ _ATTR_SYM void lulog_init(void)
 _ATTR_SYM BYTE lulog_Loggin(INNER_MSG *msg_p)
 {
 	BYTE		result = NG;
-	APLLOG_MSG	*sub_p = msg_p->msg_header.link;
+	APLLOG_MSG	*sub_p = (APLLOG_MSG*)msg_p->msg_header.link;
 
 	if (sub_p != NULL)
 	{
@@ -207,8 +207,8 @@ _ATTR_SYM BYTE lulog_Loggin(INNER_MSG *msg_p)
 			lulog.LogWriteIndex = 0;
 		}
 		memcpy( &lulog_LogArea[lulog.LogWriteIndex], sub_p, sizeof(APLLOG_MSG) );
-		LogCount ++;
-		LogWriteIndex ++;
+		lulog.LogCount ++;
+		lulog.LogWriteIndex ++;
 		result = OK;
 	}
 	return result;
@@ -237,7 +237,11 @@ _ATTR_SYM BYTE lulog_LogWrite(void)
 		if (stat(tmp_buff, &fl_stat) != 0)
 		{
 			fp = fopen(tmp_buff, "wt");
-			if (fp != NULL)
+			if (fp == NULL)
+			{
+				dbg_print(LULOG_ID, LOG_ERR, "/tmp/alogXXXX.log fopen() Error:%s", mkstr_errno(errno));
+			}
+			else
 			{
 				result = lulog_LogWiteFile(fp);
 				fclose(fp);
@@ -285,6 +289,7 @@ _ATTR_SYM BYTE lulog_LogWiteFile(FILE *fp)
 		}
 		if (fputc('\n', fp) == EOF)
 		{
+			dbg_print(LULOG_ID, LOG_ERR, "/tmp/alogXXXX.log fputc() Error:%s", mkstr_errno(errno));
 			result = NG;
 			break;
 		}
@@ -310,7 +315,7 @@ _ATTR_SYM BYTE lulog_LogWiteFile(FILE *fp)
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
-void lulog_LogWiteFile(WORD task_id, WORD line, WORD len, BYTE *data_p)
+void lulog_AplLog(WORD task_id, WORD line, WORD len, BYTE *data_p)
 {
 	INNER_MSG	*msg_p = (INNER_MSG*)com_poolget(POOL0);
 	APLLOG_MSG	*sub_p = (APLLOG_MSG*)com_poolget(POOL1);
@@ -321,7 +326,7 @@ void lulog_LogWiteFile(WORD task_id, WORD line, WORD len, BYTE *data_p)
 		gettimeofday(&timeval, NULL);
 
 		sub_p->time = timeval.tv_sec * 1000;
-		sub_p->time += static_cast<DWORD>(timeval.tv_usec / 1000);
+		sub_p->time += (DWORD)(timeval.tv_usec / 1000);
 		sub_p->task_id = task_id;
 		sub_p->line = line;
 		memcpy(sub_p->data, data_p, len);
@@ -337,11 +342,11 @@ void lulog_LogWiteFile(WORD task_id, WORD line, WORD len, BYTE *data_p)
 	{
 		if (msg_p != NULL)
 		{
-			com_poolput(POOL0, msg_p);
+			com_poolput(POOL0, (BYTE*)msg_p);
 		}
 		if (sub_p != NULL)
 		{
-			com_poolput(POOL1, sub_p);
+			com_poolput(POOL1, (BYTE*)sub_p);
 		}
 	}
 }

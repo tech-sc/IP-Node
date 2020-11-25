@@ -26,6 +26,8 @@
 #endif
 
 #include "com_mem.h"
+#include "lulog_tsk.h"
+#include "supp_tsk.h"
 
 #ifdef DEBUG
 #define _ATTR_SYM
@@ -91,7 +93,6 @@ static const char *mkstr_errno(int err)
 	  CASE_STR(EINVAL);
 	  CASE_STR(ENFILE);
 	  CASE_STR(ENOMEM);
-	  CASE_STR(ENOSPC);
 	  default:
 		sprintf(str_buff, "misc(%d)",err);
 		return str_buff;

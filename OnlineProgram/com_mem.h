@@ -23,7 +23,7 @@ extern BYTE com_memUpdate( off_t phy_addr, uint16_t width, uint32_t mask, uint32
 
 
 /* FPGAレジスタ */
-#define FPGA_MEM_BASE			0x1C000000
+#define FPGA_BASE				0x1C000000
 #define FPGA_HWVER3				(FPGA_BASE+0x30)
 #define FPGA_HWVER2				(FPGA_BASE+0x31)
 #define FPGA_HWVER1				(FPGA_BASE+0x32)

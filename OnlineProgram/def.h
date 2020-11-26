@@ -385,7 +385,7 @@ enum{
 /*#                                                                         #*/
 /*###########################################################################*/
 /*# タスクID(タスクアタッチ用,その他タスク識別用) #*/
-enum {
+typedef enum {
 		MON_ID = 0,				/*# WDT管理スレッド #*/
 		TMR_ID,					/*# タイマ管理スレッド  #*/
 		CSCTL_ID,				/*# CS管理スレッド #*/
@@ -413,7 +413,7 @@ enum {
 } COM_TASK_ID;
 
 /* タスク状態 */
-enum {
+typedef enum {
 	TASK_INACTIVE= 0,	/* 非起動中 */
 	TASK_ACTIVE			/* 起動中 */
 } COM_TASK_STATUS;
@@ -421,7 +421,7 @@ enum {
 
 
 /*# タスクECB(SND_MSG用) #*/
-enum {
+typedef enum {
 	SUP_ECB = 0,   /* モニタタスク用 */
 	LUMNG_ECB ,   /* LU管理タスク用 */
 	DOEP_ECB ,    /* DOEP制御用 */
@@ -824,7 +824,7 @@ enum
 /*#                           共通関数用デファイン                          #*/
 /*#                                                                         #*/
 /*###########################################################################*/
-enum {
+typedef enum {
 		POOL0 = 0x00,		/*# 一般メッセージ用        #*//*# DOEPにてUSER-QUE使用 #*//* 旧CDLC部では、CD_MPID_TSK_MSGと定義 */
 		POOL1,				/*# 二次メッセージ用        #*//*# LU管理にてUSER-QUE使用 #*/
 		POOL2,				 /*# DSP制御データ用     #*//*# DSPにてUSER-QUE使用 #*/
@@ -883,7 +883,7 @@ enum {
 
     /*# ユーザキューID #*/
 #if 1 /* IPCS V4 Change */
-enum {
+typedef enum {
 	DOEP_QUEID = 0,		/*# DOEP用キューID #*/
 	LUMNG_DPQID,		/*# LU管理用キューID #*/
 	DSPMNG_QUEID,		/*# DSP制御データ用 #*/
@@ -1022,7 +1022,7 @@ enum {
 #define     IO_LSIVER_MASK      0x00000fff          /*# κバージョンマスク #*/              //2000.09 V1.2追加
 
 /* COMMON エラーコード */
-enum {
+typedef enum {
 	COM_ABORT_01= 0,	/* com_poolget メモリブロックID異常時 */
 	COM_ABORT_02,		/* com_poolput メモリブロックID異常時 */
 	COM_ABORT_03,		/* com_poolput メモリブロックアドレス異常時 */

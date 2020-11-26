@@ -23,7 +23,7 @@ extern "C" {
 #include "str.h"
 #include "tmr_def.h"
 #endif
-//#include "com_mem.h"
+#include "com_mem.h"
 #include "tftp_tsk.h"
 #include "stub.h"
 }

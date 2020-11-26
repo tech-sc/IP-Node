@@ -871,9 +871,9 @@ Status tftp_in(char *dgram, u2 dst_port, u2 src_port, u4 len)
 
 		strncpy(tftp_cb.flname, (data + 2), 256);
 		tftp_cb.flname[255] = '\0';
-		strncpy(tftp_cb.mode, (data + 2 + strlen(tftp_cb.flname), 6);
+		strncpy(tftp_cb.mode, (data + 2 + strlen(tftp_cb.flname)), 6);
 		tftp_cb.mode[5] = '\0';
-		if (0 == strcmp(tftp_cb.mode, "octed") {
+		if (0 == strcmp(tftp_cb.mode, "octed")) {
 			return SBL_SUCCESS;
 		}
 		/* mode=netasciiは対応しない */

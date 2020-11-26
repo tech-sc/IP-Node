@@ -28,31 +28,35 @@
 *******************************************************************************/
 
 /*******************************************************************************
- * FILE PURPOSE:    Header for main.c
+ * FILE PURPOSE:    TFTP header file.
  *******************************************************************************
- * FILE NAME:       main.h
+ * FILE NAME:       tftp.h
  *
- * DESCRIPTION:     Header for main.c
+ * DESCRIPTION:     TFTP header file.
  *
  * (C) Copyright 2003, Texas Instruments, Inc
  ******************************************************************************/
 
-#ifndef MAIN_H_
-#define MAIN_H_
+#ifndef _TFTP_H
+#define _TFTP_H
 
-void ResetMMS(void);
-void DispStr(char *val);
+#define TFTP_SVR_PORT     69
+#define TFTP_CLIENT_PORT  2000
 
-enum
-{
-	CRASH_NONE = 0,
-	CRASH_KERNEL,
-	CRASH_FS
-};
+typedef struct tftp_pkt {
+    u2     opcode;
+	char   rrq[1];
+} tftp_pkt;
 
-#if defined(TNETV1051_BOARD)
-UINT8 get_soc_variant(void);
-#endif 
+Status tftp_req(char *getfile, u2 src_port, u2 dst_port );
+Status tftp_send_ack(u2 block_no, u2 src_port, u2 dst_port);
+Status tftp_get_file(char *getfile, char *dstfile, u2 dst_port);
+Status tftp_in(char *dgram, u2 dst_port, u2 src_port, u4 len);
+int tftp(int argc, char *argv[]);
 
-/* #include "shell.h" */
-#endif /* MAIN_H_ */
+/* IPCS-V4 PG ADD-STA */
+Status tftpd_put_file(char *getfile, char *dstfile, u2 dst_port);
+int tftpd(int argc, char *argv[]);
+/* IPCS-V4 PG ADD-END */
+
+#endif /* _TFTP_H */

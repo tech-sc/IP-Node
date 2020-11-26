@@ -273,6 +273,7 @@ char *getMacAddr(void)
 {
 	char		*retv	= NULL;
 	FFS_FILE	*p_file = NULL;
+	int			len = 0;
 
 	p_file = fopen("mtd4", "rb");
 	if (NULL != p_file)

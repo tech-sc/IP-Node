@@ -6,9 +6,7 @@
 /******************************************************************************/
 #ifndef _UF7200s2_H_
 #define _UF7200s2_H_
-#include "hw.h"			/* SDK提供ヘッダファイル */
-
-#define IPL_VER			"IPL_VERSION"
+#include "psbl/hw.h"			/* SDK提供ヘッダファイル */
 
 /* GPIO controller */		/* TBD:BASEアドレスのMSB3bitが変わるかも（メーカ問合せ中） */
 #if 0 /* 以下内容で inc/psbl/hw.h に定義済み */

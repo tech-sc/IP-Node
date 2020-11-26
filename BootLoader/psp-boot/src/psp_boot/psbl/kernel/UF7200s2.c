@@ -6,11 +6,11 @@
 /******************************************************************************/
 
 /*** システムヘッダの取り込み ***/
-#include <stdio.h>
-#include <stdint.h>
+#include <psbl/stdio.h>
+//#include <psbl/stdint.h>
 
 /*** ユーザ作成ヘッダの取り込み ***/
-#include "sysconf.h"								/* SDK提供 */
+#include <psbl/sysconf.h>								/* SDK提供 */
 #include "UF7200s2.h"
 
 extern void t_clear(void);							/* SDK提供:実体はmips.S */

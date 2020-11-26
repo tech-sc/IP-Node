@@ -18,15 +18,30 @@
 #include "def.h"
 #include "com_mem.h"
 
+#ifdef DEBUG
+#define _ATTR_SYM
+#else  // !DEBUG
+#define _ATTR_SYM		static
+#endif // DEBUG
+
+
 /*** 自ファイル内でのみ使用する#define マクロ ***/
+#ifdef DEBUG
+	#define LOG_LEVEL		LOG_DEBUG			/* テスト時ログレベル */
+	#define LOG_PUTDISC		LOGDST_CNS			/* テスト時ログ出力先 */
+#else /* not DEBUG */
+	#define LOG_LEVEL		LOG_WARNING			/* 運用時ログレベル */
+	#define LOG_PUTDISC		LOGDST_SYSLOG		/* 運用時ログ出力先 */
+#endif /* end DEBUG */
 
 #define MAP_SIZE		4096UL
 #define MAP_MASK		(MAP_SIZE - 1)
 
 #define	IPL_MTD			"/dev/mtd3"
-#define IPL_VER			"IPL_VERSION"
+#define IPL_VER_STR		"IPL_VERSION"
 #define IPL_VER_LEN		11
 #define BUFF_SZ			1024
+#define SPI_BUFF_SZ		512
 
 /*** 自ファイル内でのみ使用する#define 関数マクロ ***/
 /*** 自ファイル内でのみ使用するtypedef 定義 ***/
@@ -47,6 +62,32 @@ static pthread_mutex_t  mem_mutex;
 
 
 /******************************************************************************/
+/* 関数名	  errno文字列変換												  */
+/* 機能概要	  引数のerrnoを文字化する										  */
+/* パラメータ err : (in)	変換するerrno									  */
+/* リターン	  変換した文字列												  */
+/* 注意事項	  －															  */
+/* その他	  －															  */
+/******************************************************************************/
+#define CASE_STR(a)	case a:	 return #a
+_ATTR_SYM const char *mkstr_errno(int err)
+{
+	switch(err)
+	{
+	  CASE_STR(EACCES);
+	  CASE_STR(ENOEXEC);
+	  CASE_STR(ENOMEM);
+	  CASE_STR(E2BIG);
+	  CASE_STR(EMFILE);
+	  CASE_STR(ENFILE);
+	  CASE_STR(ENODEV);
+	  default:
+		sprintf(str_buff, "misc(%d)",err);
+		return str_buff;
+	}
+}
+
+/******************************************************************************/
 /* 関数名	  メモリアクセス初期設定										  */
 /* 機能概要	  メモリアクセスAPIのための初期設定								  */
 /* パラメータ なし															  */
@@ -57,6 +98,7 @@ static pthread_mutex_t  mem_mutex;
 BYTE com_memInit( void )
 {
 	pthread_mutex_init(&mem_mutex, NULL);
+	dbg_print_set(COM_ID, LOG_LEVEL, LOG_PUTDISC);
 	return OK;
 }
 
@@ -352,7 +394,7 @@ BYTE com_IPLVerGet( char *ver, BYTE ver_sz )
 		{
 			break;
 		}
-		str = (char*)seq_search((BYTE*)buff, BUFF_SZ, IPL_VER, IPL_VER_LEN);
+		str = (char*)seq_search((BYTE*)buff, BUFF_SZ, IPL_VER_STR, IPL_VER_LEN);
 		if (str == NULL)
 		{
 			break;
@@ -370,6 +412,101 @@ BYTE com_IPLVerGet( char *ver, BYTE ver_sz )
 		*ver = '\0';
 		fclose(fp);
 		break;
+	}
+	return result;
+}
+
+/******************************************************************************/
+/* 関数名	  SPI-FLASHの読出し												  */
+/* 機能概要	  SPI-FLASHからデータをリードする								  */
+/* パラメータ addr : (in)		SPI-FLASHのオフセットアドレス				  */
+/*            size : (in)		データ長(1単位WORD)			[				  */
+/*            data_p : (out)	読み出す領域								  */
+/* リターン	  OK/NG															  */
+/* 注意事項	  －															  */
+/* その他	  －															  */
+/* その他	  －															  */
+/******************************************************************************/
+BYTE com_SpiflashRead(DWORD addr, WORD size, WORD *data_p)
+{
+	int		result	= OK;
+	int		retv	= 0;
+	int		rd_sz	= 0;
+	FILE	*fp	= NULL;
+	DWORD	tmp_addr = 0;
+	WORD	sz1 = 0, sz2 = 0;
+	DWORD	seg_addr = addr / SPI_BUFF_SZ;
+	char	buff[SPI_BUFF_SZ];
+
+	/* SPI-ROMゲート開放 */
+	if (com_GpioRegUpdate(GPIO_OUT0_REG, SPI_GATE_MASK, ~SPI_GATE_CLOSE) != OK)
+	{
+		dbg_print(COM_ID, LOG_ERR, "SPI Gate open Error:%s", mkstr_errno(errno));
+		return NG;
+	}
+
+	fp = fopen("/dev/spi-flash", "rb");
+	if (fp == NULL)
+	{
+		dbg_print(COM_ID, LOG_ERR, "SPI-FLASH fopen() Error:%s", mkstr_errno(errno));
+		result = NG;
+	}
+
+	while (result == OK)
+	{
+		seg_add *= SPI_BUFF_SZ;
+		while (tmp_addr != seg_add)
+		{
+			rd_sz = fread(buff, SPI_BUFF_SZ, 1, fp);
+			if (rd_sz < 0)
+			{
+				dbg_print(COM_ID, LOG_ERR, "SPI-FLASH fread(1) Error:%s", mkstr_errno(errno));
+				result = NG;
+				break;
+			}
+			tmp_addr += SPI_BUFF_SZ;
+		}
+
+		if( result == OK )
+		{
+			rd_sz = fread(buff, SPI_BUFF_SZ, 1, fp);
+			if (rd_sz < 0)
+			{
+				dbg_print(COM_ID, LOG_ERR, "SPI-FLASH fread(2) Error:%s", mkstr_errno(errno));
+				result = NG;
+				break;
+			}
+			sz1 = (WORD)(SPI_BUFF_SZ - addr - seg_add);
+			if (sz1 < size)
+			{
+				memcpy(data_p, &buff[addr - tmp_addr], sz1);
+				rd_sz = fread(buff, SPI_BUFF_SZ, 1, fp);
+				if (rd_sz < 0)
+				{
+					dbg_print(COM_ID, LOG_ERR, "SPI-FLASH fread(3) Error:%s", mkstr_errno(errno));
+					result = NG;
+					break;
+				}
+				sz2 = size - sz1;
+				memcpy(&data_p[sz1], &buff[0], sz2);
+			}
+			else
+			{
+				memcpy(data_p, &buff[addr - tmp_addr], size);
+			}
+			result = OK;
+		}
+	}
+
+	if (fp != NULL)
+	{
+		fclose(fp);
+	}
+
+	if (com_GpioRegUpdate(GPIO_OUT0_REG, SPI_GATE_MASK, SPI_GATE_CLOSE) != OK)
+	{
+		dbg_print(COM_ID, LOG_ERR, "SPI Gate close Error:%s", mkstr_errno(errno));
+		return NG;
 	}
 	return result;
 }

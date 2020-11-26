@@ -83,7 +83,7 @@ extern BYTE com_GpioRegUpdate( off_t phy_addr, uint32_t mask, uint32_t bit );
 /* IPLパージョン取得 API */
 extern BYTE com_IPLVerGet( char *ver, BYTE ver_sz );
 
-extern int com_SpiflashRead(WORD addr, WORD size, WORD *data_p);
+extern BYTE com_SpiflashRead(DWORD addr, WORD size, WORD *data_p);
 
 extern BYTE *seq_search(BYTE *buff, size_t siz, const char *target, size_t len);
 

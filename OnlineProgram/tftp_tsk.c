@@ -44,7 +44,7 @@
 	#define LOG_LEVEL		LOG_DEBUG			/* テスト時ログレベル */
 	#define LOG_PUTDISC		LOGDST_CNS			/* テスト時ログ出力先 */
 #else /* not DEBUG */
-	#define LOG_LEVEL		LOG_ERR				/* 運用時ログレベル */
+	#define LOG_LEVEL		LOG_WARNING			/* 運用時ログレベル */
 	#define LOG_PUTDISC		LOGDST_SYSLOG		/* 運用時ログ出力先 */
 #endif /* end DEBUG */
 
@@ -1199,8 +1199,8 @@ _ATTR_SYM int wt_FpgaFileWrite(FILE *rd_fp)
 				}
 			}
 		}
+		fclose(fp);
 	}
-	fclose(fp);
 
 	if (com_GpioRegUpdate(GPIO_OUT0_REG, SPI_GATE_MASK, SPI_GATE_CLOSE) != OK)
 	{

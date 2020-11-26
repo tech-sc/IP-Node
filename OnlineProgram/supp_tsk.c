@@ -17,7 +17,6 @@
 
 /*** ユーザ作成ヘッダの取り込み ***/
 #include "def.h"
-#define TEMP_HEADER
 #ifdef TEMP_HEADER
 #include "temp_header.h"
 #else

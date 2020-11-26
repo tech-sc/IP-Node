@@ -8,7 +8,6 @@
 #include <unistd.h>
 
 #include "def.h"
-#define TEMP_HEADER
 #ifdef TEMP_HEADER
 #include "temp_header.h"
 #include "temp_tmr_def.h"
@@ -57,7 +56,7 @@ BYTE mnt_config_dat(char *path, BYTE write) {return OK;}
 //BYTE com_GpioRegRead( off_t phy_addr, uint32_t mask, uint32_t *buff_p ) {return OK;}
 //BYTE com_GpioRegUpdate( off_t phy_addr, uint32_t mask, uint32_t bit ) {return OK;}
 
-int com_SpiflashRead(WORD addr, WORD size, WORD *p) {return OK;}
+//BYTE com_SpiflashRead(DWORD addr, WORD size, WORD *p) {return OK;}
 
 /* This is free software, licensed under the GNU General Public License v2. */
 /* See /LICENSE for more information. */

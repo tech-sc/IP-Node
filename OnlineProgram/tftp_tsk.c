@@ -19,7 +19,6 @@
 
 /*** ユーザ作成ヘッダの取り込み ***/
 #include "def.h"
-#define TEMP_HEADER
 #ifdef TEMP_HEADER
 #include "temp_header.h"
 #include "temp_tmr_def.h"
@@ -225,7 +224,7 @@ STATE_TABLE_t	*RootStateTable[MAX_STATE_NO] = {
 /* その他	  －															  */
 /******************************************************************************/
 #define CASE_STR(a)	case a:	 return #a
-_ATTR_SYM const char *mkstr_errno(int err)
+static const char *mkstr_errno(int err)
 {
 	switch(err)
 	{

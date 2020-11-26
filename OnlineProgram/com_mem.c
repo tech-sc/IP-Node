@@ -11,11 +11,20 @@
 #include <fcntl.h>			/* open() */
 #include <unistd.h>		/* close() */
 #include <stdio.h>
+#include <string.h>
+#include <errno.h>
 #include <pthread.h>
 #include <sys/mman.h>	/* mmap() */
 
 /*** ユーザ作成ヘッダの取り込み ***/
 #include "def.h"
+#ifdef TEMP_HEADER
+#include "temp_header.h"
+#include "temp_tmr_def.h"
+#else
+#include "str.h"
+#include "tmr_def.h"
+#endif
 #include "com_mem.h"
 
 #ifdef DEBUG
@@ -58,6 +67,9 @@ typedef union {
 /* API排他フラグ */
 static pthread_mutex_t  mem_mutex;
 
+/* errno文字列生成バッファ */
+_ATTR_SYM	char				str_buff[16];
+
 /*** static 関数宣言 ***/
 
 
@@ -70,7 +82,7 @@ static pthread_mutex_t  mem_mutex;
 /* その他	  －															  */
 /******************************************************************************/
 #define CASE_STR(a)	case a:	 return #a
-_ATTR_SYM const char *mkstr_errno(int err)
+static const char *mkstr_errno(int err)
 {
 	switch(err)
 	{
@@ -430,7 +442,6 @@ BYTE com_IPLVerGet( char *ver, BYTE ver_sz )
 BYTE com_SpiflashRead(DWORD addr, WORD size, WORD *data_p)
 {
 	int		result	= OK;
-	int		retv	= 0;
 	int		rd_sz	= 0;
 	FILE	*fp	= NULL;
 	DWORD	tmp_addr = 0;
@@ -454,8 +465,8 @@ BYTE com_SpiflashRead(DWORD addr, WORD size, WORD *data_p)
 
 	while (result == OK)
 	{
-		seg_add *= SPI_BUFF_SZ;
-		while (tmp_addr != seg_add)
+		seg_addr *= SPI_BUFF_SZ;
+		while (tmp_addr != seg_addr)
 		{
 			rd_sz = fread(buff, SPI_BUFF_SZ, 1, fp);
 			if (rd_sz < 0)
@@ -476,7 +487,7 @@ BYTE com_SpiflashRead(DWORD addr, WORD size, WORD *data_p)
 				result = NG;
 				break;
 			}
-			sz1 = (WORD)(SPI_BUFF_SZ - addr - seg_add);
+			sz1 = (WORD)(SPI_BUFF_SZ - addr - seg_addr);
 			if (sz1 < size)
 			{
 				memcpy(data_p, &buff[addr - tmp_addr], sz1);

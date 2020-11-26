@@ -32,9 +32,9 @@ LIBS := -lpthread -lcrypto
 
 #CC = gcc
 CC = $(TOOLCHAIN)/bin/gcc
-CFLAGS = -Wall -O2 -DDEBUG -MMD -MP $(INCDIR)
+CFLAGS = -Wall -O2 -DDEBUG -DTEMP_HEADER -MMD -MP $(INCDIR)
 CXX = $(TOOLCHAIN)/bin/g++
-CXXFLAGS = -Wall -O2 -DDEBUG -MMD -MP $(INCDIR)
+CXXFLAGS = -Wall -O2 -DDEBUG -DTEMP_HEADER -MMD -MP $(INCDIR)
 LDFLAGS = $(LIBDIR)
 ARFLAGS = crsv
 

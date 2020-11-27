@@ -68,7 +68,7 @@ typedef union {
 static pthread_mutex_t  mem_mutex;
 
 /* errno文字列生成バッファ */
-_ATTR_SYM	char				str_buff[16];
+static char				errno_str[16];
 
 /*** static 関数宣言 ***/
 
@@ -87,15 +87,21 @@ static const char *mkstr_errno(int err)
 	switch(err)
 	{
 	  CASE_STR(EACCES);
-	  CASE_STR(ENOEXEC);
-	  CASE_STR(ENOMEM);
-	  CASE_STR(E2BIG);
-	  CASE_STR(EMFILE);
+	  CASE_STR(EDQUOT);
+	  CASE_STR(EEXIST);
+	  CASE_STR(ENAMETOOLONG);
+	  CASE_STR(ENOENT);
+	  CASE_STR(ENOSPC);
+	  CASE_STR(ENOTDIR);
+	  CASE_STR(EROFS);
+	  CASE_STR(EFAULT);
+	  CASE_STR(EINTR);
+	  CASE_STR(EINVAL);
 	  CASE_STR(ENFILE);
-	  CASE_STR(ENODEV);
+	  CASE_STR(ENOMEM);
 	  default:
-		sprintf(str_buff, "misc(%d)",err);
-		return str_buff;
+		sprintf(errno_str, "misc(%d)",err);
+		return errno_str;
 	}
 }
 

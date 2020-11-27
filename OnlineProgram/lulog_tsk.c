@@ -82,6 +82,8 @@ static const char *mkstr_errno(int err)
 	switch(err)
 	{
 	  CASE_STR(EACCES);
+	  CASE_STR(ENOEXEC);
+	  CASE_STR(E2BIG);
 	  CASE_STR(EDQUOT);
 	  CASE_STR(EEXIST);
 	  CASE_STR(ENAMETOOLONG);

@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
-//#include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>			/* execlp(), stat() */
 #include <openssl/md5.h>	/* MD5_Init() */
@@ -98,6 +97,15 @@ typedef enum TFTP_STATE_e {
 
 /*** 自ファイル内でのみ使用するstruct/union タグ定義 ***/
 /*** ファイル内で共有するstatic 変数宣言 ***/
+/* errno文字列生成バッファ */
+static char				errno_str[16];
+
+/* event_id文字列生成バッファ */
+static char				eventid_str[16];
+
+/* state_no文字列生成バッファ */
+static char				stateno_str[16];
+
 /* 状態番号 */
 _ATTR_SYM	TFTP_STATE_e		downld_state_no;
 /* タイマ登録ID(1～254) */
@@ -107,9 +115,6 @@ _ATTR_SYM	uint16_t			downld_same_cnt;
 
 /* TFTP起動前のLED状態 */
 _ATTR_SYM	uint8_t				prev_LED;
-
-/* errno文字列生成バッファ */
-_ATTR_SYM	char				str_buff[16];
 
 /* ダウンロード種別 */
 _ATTR_SYM	uint16_t			downld_type;
@@ -230,11 +235,66 @@ static const char *mkstr_errno(int err)
 	{
 	  CASE_STR(EACCES);
 	  CASE_STR(ENOEXEC);
-	  CASE_STR(ENOMEM);
 	  CASE_STR(E2BIG);
+	  CASE_STR(EDQUOT);
+	  CASE_STR(EEXIST);
+	  CASE_STR(ENAMETOOLONG);
+	  CASE_STR(ENOENT);
+	  CASE_STR(ENOSPC);
+	  CASE_STR(ENOTDIR);
+	  CASE_STR(EROFS);
+	  CASE_STR(EFAULT);
+	  CASE_STR(EINTR);
+	  CASE_STR(EINVAL);
+	  CASE_STR(ENFILE);
+	  CASE_STR(ENOMEM);
 	  default:
-		sprintf(str_buff, "misc(%d)",err);
-		return str_buff;
+		sprintf(errno_str, "misc(%d)",err);
+		return errno_str;
+	}
+}
+
+/******************************************************************************/
+/* 関数名	  event_id文字列変換											  */
+/* 機能概要	  引数のevent_idを文字化する									  */
+/* パラメータ event_id : (in)	変換するevent_id							  */
+/* リターン	  変換した文字列												  */
+/* 注意事項	  －															  */
+/* その他	  －															  */
+/******************************************************************************/
+static const char *mkstr_eventid(BYTE event_id)
+{
+	switch(event_id)
+	{
+	  CASE_STR(I_SERVER_REQ);
+	  CASE_STR(I_WRITE_RESP);
+	  CASE_STR(O_PGDOWNLOAD);
+	  CASE_STR(O_HORYDOWN);
+	  CASE_STR(TIM_OUT);
+	  default:
+		sprintf(eventid_str, "misc(%d)",event_id);
+		return eventid_str;
+	}
+}
+
+/******************************************************************************/
+/* 関数名	  state_no文字列変換											  */
+/* 機能概要	  引数のstate_noを文字化する									  */
+/* パラメータ state_no : (in)	変換するstate_no							  */
+/* リターン	  変換した文字列												  */
+/* 注意事項	  －															  */
+/* その他	  －															  */
+/******************************************************************************/
+static const char *mkstr_stateno(TFTP_STATE_e state_no)
+{
+	switch(event_id)
+	{
+	  CASE_STR(STATE_IDLE);
+	  CASE_STR(STATE_SERVER_DL);
+	  CASE_STR(STATE_CLIENT_DL);
+	  default:
+		sprintf(stateno_str, "misc(%d)",state_no);
+		return stateno_str;
 	}
 }
 
@@ -332,6 +392,7 @@ void downld_thread(void *arg)
 	downld_init();
 	/* writerスレッド起動 */
 	com_threadstart(WRT_ID, NULL);
+
 	while (1)
 	{
 		msg_p = (INNER_MSG*)com_rcvmsg(TFTP_ECB, FOREVER);
@@ -375,20 +436,25 @@ _ATTR_SYM void downld_init(void)
 /******************************************************************************/
 _ATTR_SYM void downld_SttMng(INNER_MSG *msg_p)
 {
+	bool			conf = false;
 	STATE_TABLE_t	*p_tbl	 = NULL;
 	BYTE			event_id = 0;
 
 	if (downld_state_no >= MAX_STATE_NO)
 	{
+		dbg_print(DWL_ID, LOG_ERR, "downld_SttMng MAX_STATE_NO");
 		return;		/* Bug */
 	}
 
 	if (msg_p->msg_header.div == TIM_OUT)
 	{
 		event_id = TIM_OUT;
-	} else {
+	}
+	else
+	{
 		event_id = msg_p->msg_header.kind;
 	}
+	dbg_print(DWL_ID, LOG_INFO, "downld_SttMng rcv Event:%s", mkstr_eventid(event_id));
 
 	p_tbl = RootStateTable[downld_state_no];
 	while (p_tbl->event_proc != NULL)
@@ -396,9 +462,15 @@ _ATTR_SYM void downld_SttMng(INNER_MSG *msg_p)
 		if (p_tbl->event_id == event_id)
 		{
 			(*p_tbl->event_proc)(msg_p);
+			conf = true;
 			break;
 		}
 		p_tbl++;
+	}
+
+	if( conf == false)
+	{
+		dbg_print(DWL_ID, LOG_WARNING, "downld_SttMng State[%s] mismatch Event", mkstr_stateno(downld_state_no));
 	}
 }
 
@@ -414,6 +486,8 @@ _ATTR_SYM void downld_SttMng(INNER_MSG *msg_p)
 _ATTR_SYM BYTE dl_IdleStt_SvrReq(INNER_MSG *msg_p)
 {
 	int		retv = 0;
+
+	dbg_print(DWL_ID, LOG_INFO, "dl_IdleStt_SvrReq() called");
 
 	retv = execlp("atftpd", "--daemon", "--pidfile", "/tmp/tftpd-pid.txt", "/tmp", NULL);
 	if (retv == -1 )
@@ -443,9 +517,12 @@ _ATTR_SYM BYTE dl_IdleStt_SvrReq(INNER_MSG *msg_p)
 /******************************************************************************/
 _ATTR_SYM BYTE dl_IdleStt_Cl1Req(INNER_MSG *msg_p)
 {
+	dbg_print(DWL_ID, LOG_INFO, "dl_IdleStt_Cl1Req() called");
+
 	downld_type = PROG_DL;
 	if (tftp(msg_p) != OK)
 	{
+		dbg_print(DWL_ID, LOG_INFO, "sndmsg(LUMNG_ECB,I_PGDLCMP,TFTP_RES_SERVER)");
 		dl_sndmsg(LUMNG_ECB, I_PGDLCMP, TFTP_RES_SERVER);
 	}
 	return OK;
@@ -462,9 +539,12 @@ _ATTR_SYM BYTE dl_IdleStt_Cl1Req(INNER_MSG *msg_p)
 /******************************************************************************/
 _ATTR_SYM BYTE dl_IdleStt_Cl2Req(INNER_MSG *msg_p)
 {
+	dbg_print(DWL_ID, LOG_INFO, "dl_IdleStt_Cl2Req() called");
+
 	downld_type = WAVE_DL;
 	if (tftp(msg_p) != OK)
 	{
+		dbg_print(DWL_ID, LOG_INFO, "sndmsg(LUMNG_ECB,E_HORYDLEND,TFTP_RES_SERVER)");
 		dl_sndmsg(LUMNG_ECB, E_HORYDLEND, TFTP_RES_SERVER);
 	}
 	return OK;
@@ -481,6 +561,9 @@ _ATTR_SYM BYTE dl_IdleStt_Cl2Req(INNER_MSG *msg_p)
 /******************************************************************************/
 _ATTR_SYM BYTE dl_SvrStt_SvrReq(INNER_MSG *msg_p)
 {
+	dbg_print(DWL_ID, LOG_INFO, "dl_SvrStt_SvrReq() called");
+
+	dbg_print(DWL_ID, LOG_INFO, "sndmsg(LUMNG_ECB,I_PGDLCMP,TFTP_RES_STATE)");
 	dl_sndmsg(LUMNG_ECB, I_PGDLCMP, TFTP_RES_STATE);
 	return OK;
 }
@@ -496,6 +579,8 @@ _ATTR_SYM BYTE dl_SvrStt_SvrReq(INNER_MSG *msg_p)
 /******************************************************************************/
 _ATTR_SYM BYTE dl_SvrStt_Tmo(INNER_MSG *msg_p)
 {
+	dbg_print(DWL_ID, LOG_INFO, "dl_SvrStt_Tmo() called");
+
 	if (dl_tmpfile_chk() != false)
 	{
 		/* ダウンロードファイルサイズが同一(変化なし) */
@@ -506,6 +591,7 @@ _ATTR_SYM BYTE dl_SvrStt_Tmo(INNER_MSG *msg_p)
 			tmr_stop(msg_p->msg_header.kind);	
 			tmr_delete(msg_p->msg_header.kind);
 
+			dbg_print(DWL_ID, LOG_INFO, "sndmsg(WRITER_ECB,I_WRITE_REQ,0)");
 			dl_sndmsg(WRITER_ECB, I_WRITE_REQ, 0);
 			downld_same_cnt = 0;				/* カウンタクリア */
 		}
@@ -529,6 +615,9 @@ _ATTR_SYM BYTE dl_SvrStt_Tmo(INNER_MSG *msg_p)
 /******************************************************************************/
 _ATTR_SYM BYTE dl_SvrStt_Cl1Req(INNER_MSG *msg_p)
 {
+	dbg_print(DWL_ID, LOG_INFO, "dl_SvrStt_Cl1Req() called");
+
+	dbg_print(DWL_ID, LOG_INFO, "sndmsg(LUMNG_ECB,I_PGDLCMP,TFTP_RES_STATE)");
 	dl_sndmsg(LUMNG_ECB, I_PGDLCMP, TFTP_RES_STATE);
 	return OK;
 }
@@ -544,6 +633,9 @@ _ATTR_SYM BYTE dl_SvrStt_Cl1Req(INNER_MSG *msg_p)
 /******************************************************************************/
 _ATTR_SYM BYTE dl_SvrStt_Cl2Req(INNER_MSG *msg_p)
 {
+	dbg_print(DWL_ID, LOG_INFO, "dl_SvrStt_Cl2Req() called");
+
+	dbg_print(DWL_ID, LOG_INFO, "sndmsg(LUMNG_ECB,E_HORYDLEND,TFTP_RES_STATE)");
 	dl_sndmsg(LUMNG_ECB, E_HORYDLEND, TFTP_RES_STATE);
 	return OK;
 }
@@ -559,6 +651,9 @@ _ATTR_SYM BYTE dl_SvrStt_Cl2Req(INNER_MSG *msg_p)
 /******************************************************************************/
 _ATTR_SYM BYTE dl_SvrStt_WriteResp(INNER_MSG *msg_p)
 {
+	dbg_print(DWL_ID, LOG_INFO, "dl_SvrStt_WriteResp() called");
+
+	dbg_print(DWL_ID, LOG_INFO, "sndmsg(LUMNG_ECB,I_PGDLCMP,%d)", (uint32_t)msg_p->msg_header.no);
 	dl_sndmsg(LUMNG_ECB, I_PGDLCMP, msg_p->msg_header.no);
 	downld_state_no = STATE_IDLE;
 	return OK;
@@ -575,6 +670,9 @@ _ATTR_SYM BYTE dl_SvrStt_WriteResp(INNER_MSG *msg_p)
 /******************************************************************************/
 _ATTR_SYM BYTE dl_ClStt_SvrReq(INNER_MSG *msg_p)
 {
+	dbg_print(DWL_ID, LOG_INFO, "dl_ClStt_SvrReq() called");
+
+	dbg_print(DWL_ID, LOG_INFO, "sndmsg(LUMNG_ECB,I_PGDLCMP,TFTP_RES_STATE)");
 	dl_sndmsg(LUMNG_ECB, I_PGDLCMP, TFTP_RES_STATE);
 	return OK;
 }
@@ -590,6 +688,9 @@ _ATTR_SYM BYTE dl_ClStt_SvrReq(INNER_MSG *msg_p)
 /******************************************************************************/
 _ATTR_SYM BYTE dl_ClStt_Cl1Req(INNER_MSG *msg_p)
 {
+	dbg_print(DWL_ID, LOG_INFO, "dl_ClStt_Cl1Req() called");
+
+	dbg_print(DWL_ID, LOG_INFO, "sndmsg(LUMNG_ECB,I_PGDLCMP,TFTP_RES_STATE)");
 	dl_sndmsg(LUMNG_ECB, I_PGDLCMP, TFTP_RES_STATE);
 	return OK;
 }
@@ -605,6 +706,9 @@ _ATTR_SYM BYTE dl_ClStt_Cl1Req(INNER_MSG *msg_p)
 /******************************************************************************/
 _ATTR_SYM BYTE dl_ClStt_Cl2Req(INNER_MSG *msg_p)
 {
+	dbg_print(DWL_ID, LOG_INFO, "dl_ClStt_Cl2Req() called");
+
+	dbg_print(DWL_ID, LOG_INFO, "sndmsg(LUMNG_ECB,E_HORYDLEND,TFTP_RES_STATE)");
 	dl_sndmsg(LUMNG_ECB, E_HORYDLEND, TFTP_RES_STATE);
 	return OK;
 }
@@ -620,12 +724,16 @@ _ATTR_SYM BYTE dl_ClStt_Cl2Req(INNER_MSG *msg_p)
 /******************************************************************************/
 _ATTR_SYM BYTE dl_ClStt_WriteResp(INNER_MSG *msg_p)
 {
+	dbg_print(DWL_ID, LOG_INFO, "dl_ClStt_WriteResp() called");
+
 	if (downld_type == PROG_DL)
 	{
+		dbg_print(DWL_ID, LOG_INFO, "sndmsg(LUMNG_ECB,I_PGDLCMP,%d)", (uint32_t)msg_p->msg_header.no);
 		dl_sndmsg(LUMNG_ECB, I_PGDLCMP, msg_p->msg_header.no);
 	}
 	else
 	{
+		dbg_print(DWL_ID, LOG_INFO, "sndmsg(LUMNG_ECB,E_HORYDLEND,%d)", (uint32_t)msg_p->msg_header.no);
 		dl_sndmsg(LUMNG_ECB, E_HORYDLEND, msg_p->msg_header.no);
 	}
 	downld_state_no = STATE_IDLE;
@@ -704,45 +812,64 @@ void writer_thread(void *arg)
 	{
 		msg_p = (INNER_MSG*)com_rcvmsg(WRITER_ECB, FOREVER);
 
-		fl_list_p = uncomp_files;
-		while (fl_list_p->fl_name != NULL)
+		if (msg_p->msg_header.kind != I_WRITE_REQ)
 		{
-			if (stat(fl_list_p->fl_name, &fl_stat) == 0)
+			dbg_print(WRT_ID, LOG_WARNING, "writer_thread rcv unknown Event:%d", msg_p->msg_header.kind);
+			result = NG;
+		}
+		else
+		{
+			dbg_print(WRT_ID, LOG_WARNING, "writer_thread rcv Event:I_WRITE_REQ");
+
+			fl_list_p = uncomp_files;
+			while (fl_list_p->fl_name != NULL)
 			{
-				switch (fl_list_p->exist)
+				if (stat(fl_list_p->fl_name, &fl_stat) == 0)
 				{
-				  case FILEINFO_NO:
-					retv = (int)writer_FileInfoFile();
-					if (retv != OK)
+					switch (fl_list_p->exist)
 					{
-						result = (BYTE)retv;
+					  case FILEINFO_NO:
+						dbg_print(WRT_ID, LOG_INFO, "writer_thread FILEINFO_NO");
+						retv = (int)writer_FileInfoFile();
+						if (retv != OK)
+						{
+							dbg_print(WRT_ID, LOG_WARNING, "writer_thread file:%s Error", fl_list_p->fl_name);
+							result = (BYTE)retv;
+						}
+						execlp("rm", "-f", TMP_FOLDER FILEINFO_FILE, NULL);
+						execlp("rm", "-f", TMP_FOLDER TAR_FILE, NULL);
+						break;
+					  case CONFIGFILE_NO:
+						dbg_print(WRT_ID, LOG_INFO, "writer_thread CONFIGFILE_NO");
+						if( mnt_config_dat(fl_list_p->fl_name, 1) != OK)
+						{
+							dbg_print(WRT_ID, LOG_WARNING, "writer_thread file:%s Error", fl_list_p->fl_name);
+							result = NG;
+						}
+						break;
+					  case WAVEFILE_NO:
+						dbg_print(WRT_ID, LOG_INFO, "writer_thread WAVEFILE_NO");
+						if (wave_file_write(fl_list_p->fl_name) != OK)
+						{
+							dbg_print(WRT_ID, LOG_WARNING, "writer_thread file:%s Error", fl_list_p->fl_name);
+							result = NG;
+						}
+						break;
+					default:
+						dbg_print(WRT_ID, LOG_INFO, "writer_thread CADATAFILE_NO or LUSTARTFILE_NO");
+						dbg_print(WRT_ID, LOG_INFO, "writer_thread file:%s", fl_list_p->fl_name);
+						if (execlp("mv", fl_list_p->fl_name, SAVE_FOLDER, NULL) != 0)
+						{
+							dbg_print(WRT_ID, LOG_WARNING, "writer_thread file:%s Error", fl_list_p->fl_name);
+							result = NG;
+						}
+						break;
 					}
-					execlp("rm", "-f", TMP_FOLDER FILEINFO_FILE, NULL);
-					execlp("rm", "-f", TMP_FOLDER TAR_FILE, NULL);
-					break;
-				  case CONFIGFILE_NO:
-					if( mnt_config_dat(fl_list_p->fl_name, 1) != OK)
-					{
-						result = NG;
-					}
-					break;
-				  case WAVEFILE_NO:
-					if (wave_file_write(fl_list_p->fl_name) != OK)
-					{
-						result = NG;
-					}
-					break;
-				default:
-					if (execlp("mv", fl_list_p->fl_name, SAVE_FOLDER, NULL) != 0)
-					{
-						result = NG;
-					}
-					break;
 				}
 			}
 		}
+		dbg_print(DWL_ID, LOG_INFO, "sndmsg(TFTP_ECB,I_WRITE_RESP,%d)", (uint32_t)result);
 		dl_sndmsg(TFTP_ECB, I_WRITE_RESP, result);
-
 		com_poolput(POOL0, (BYTE*)msg_p);
 	}
 }
@@ -767,17 +894,26 @@ _ATTR_SYM int writer_FileInfoFile(void)
 	char	buff[256];
 
 	fp = fopen(TMP_FOLDER FILEINFO_FILE, "rt");
-	if (fp != NULL)
+	if (fp == NULL)
+	{
+		dbg_print(WRT_ID, LOG_ERR, "writer_FileInfoFile fopen() Error:%s", mkstr_errno(errno));
+	}
+	else
 	{
 		while (feof(fp) == 0)
 		{
-			if (fgets(buff, sizeof(buff[256]), fp) != NULL)
+			if (fgets(buff, sizeof(buff[256]), fp) == NULL)
+			{
+				dbg_print(WRT_ID, LOG_ERR, "writer_FileInfoFile fgets() Error:%s", mkstr_errno(errno));
+			}
+			else
 			{
 				next_p = strtok(buff, ",");
 				/* 書込み対象のプログラムファイルだけを解凍する */
 				retv = execlp("tar", "-xf", TMP_FOLDER TAR_FILE, buff, NULL);
 				if (retv != 0)
 				{
+					dbg_print(WRT_ID, LOG_ERR, "writer_FileInfoFile execlp(tar) Error:%s", mkstr_errno(errno));
 					return TFTP_RES_FL_NOTFOUND;
 				}
 
@@ -836,19 +972,23 @@ _ATTR_SYM int writer_OnlineProg(char *fileinfo)
 	next_p = strtok(fileinfo, ",");			/* next_pは日付を指す */
 	if (next_p == NULL)
 	{
+		dbg_print(WRT_ID, LOG_ERR, "writer_OnlineProg strtok(1) Error");
 		return TFTP_RES_MISC;
 	}
 
 	fp = fopen(TMP_FOLDER ONL_PROG, "rb");
 	if (fp == NULL)
 	{
+		dbg_print(WRT_ID, LOG_ERR, "writer_OnlineProg fopen() Error:%s", mkstr_errno(errno));
 		return TFTP_RES_FL_NOTFOUND;
 	}
+
 	while(1)
 	{
 		/* MD5計算開始 */
 		if (MD5_Init(&ctx) == 0)
 		{
+			dbg_print(WRT_ID, LOG_ERR, "writer_OnlineProg MD5_Init() Error");
 			result = TFTP_RES_CRC;
 			break;
 		}
@@ -856,11 +996,16 @@ _ATTR_SYM int writer_OnlineProg(char *fileinfo)
 		result = TFTP_RES_OK;
 		while (feof(fp) == 0)
 		{
-			retv = fread(buff, sizeof(buff[512]), 1, fp);
-			if (retv > 0)
+			retv = fread(buff, 1, sizeof(buff[512]), fp);
+			if (retv < 0)
+			{
+				dbg_print(WRT_ID, LOG_ERR, "writer_OnlineProg fread() Error:%s", mkstr_errno(errno));
+			}
+			else if (retv > 0)
 			{
 				if (MD5_Update(&ctx, buff, retv) == 0)
 				{
+					dbg_print(WRT_ID, LOG_ERR, "writer_OnlineProg MD5_Update() Error");
 					result = TFTP_RES_CRC;
 					break;
 				}
@@ -868,6 +1013,7 @@ _ATTR_SYM int writer_OnlineProg(char *fileinfo)
 		}
 		if (MD5_Final(buff, &ctx) == 0)			/* buffにハッシュ値(16byte)が格納される */
 		{
+			dbg_print(WRT_ID, LOG_ERR, "writer_OnlineProg MD5_Final() Error");
 			result = TFTP_RES_CRC;
 		}
 		if (result != TFTP_RES_OK)
@@ -879,18 +1025,25 @@ _ATTR_SYM int writer_OnlineProg(char *fileinfo)
 		next_p = strtok(next_p, ",");			/* next_pはサイズを指す */
 		if (next_p == NULL)
 		{
+			dbg_print(WRT_ID, LOG_ERR, "writer_OnlineProg strtok(2) Error");
 			result = TFTP_RES_MISC;
 			break;
 		}
 		next_p = strtok(next_p, ",");			/* next_pはMD5ハッシュ値を指す */
 		if (next_p == NULL)
 		{
+			dbg_print(WRT_ID, LOG_ERR, "writer_OnlineProg strtok(3) Error");
 			result = TFTP_RES_MISC;
 			break;
 		}
 		str2hex(next_p, hash, sizeof(hash[16]));
 		if (memcmp(hash, buff, 16) != 0)
 		{
+			dbg_print(WRT_ID, LOG_ERR, "writer_OnlineProg mismatch MD5 Error:");
+			dbg_print(WRT_ID, LOG_ERR, "  hash=%08lX %08lX %08lX %08lX",
+				*(DWORD*)&hash[0], *(DWORD*)&hash[4], *(DWORD*)&hash[8], *(DWORD*)&hash[12]);
+			dbg_print(WRT_ID, LOG_ERR, "  ctx =%08lX %08lX %08lX %08lX",
+				*(DWORD*)&buff[0], *(DWORD*)&buff[4], *(DWORD*)&buff[8], *(DWORD*)&buff[12]);
 			result = TFTP_RES_CRC;
 			break;
 		}
@@ -937,19 +1090,23 @@ _ATTR_SYM int writer_BootProg(char *fileinfo)
 	next_p = strtok(fileinfo, ",");			/* next_pは日付を指す */
 	if (next_p == NULL)
 	{
+		dbg_print(WRT_ID, LOG_ERR, "writer_BootProg strtok(1) Error");
 		return TFTP_RES_MISC;
 	}
 
 	fp = fopen(TMP_FOLDER IPL_PROG, "rb");
 	if (fp == NULL)
 	{
+		dbg_print(WRT_ID, LOG_ERR, "writer_BootProg fopen() Error:%s", mkstr_errno(errno));
 		return TFTP_RES_FL_NOTFOUND;
 	}
+
 	while(1)
 	{
 		/* MD5計算開始 */
 		if (MD5_Init(&ctx) == 0)
 		{
+			dbg_print(WRT_ID, LOG_ERR, "writer_BootProg MD5_Init() Error");
 			result = TFTP_RES_CRC;
 			break;
 		}
@@ -957,11 +1114,16 @@ _ATTR_SYM int writer_BootProg(char *fileinfo)
 		result = TFTP_RES_OK;
 		while (feof(fp) == 0)
 		{
-			retv = fread(buff, sizeof(buff[512]), 1, fp);
-			if (retv > 0)
+			retv = fread(buff, 1, sizeof(buff[512]), fp);
+			if (retv < 0)
+			{
+				dbg_print(WRT_ID, LOG_ERR, "writer_BootProg fread() Error:%s", mkstr_errno(errno));
+			}
+			else if (retv > 0)
 			{
 				if (MD5_Update(&ctx, buff, retv) == 0)
 				{
+					dbg_print(WRT_ID, LOG_ERR, "writer_BootProg MD5_Update() Error");
 					result = TFTP_RES_CRC;
 					break;
 				}
@@ -969,6 +1131,7 @@ _ATTR_SYM int writer_BootProg(char *fileinfo)
 		}
 		if (MD5_Final(buff, &ctx) == 0)			/* buffにハッシュ値(16byte)が格納される */
 		{
+			dbg_print(WRT_ID, LOG_ERR, "writer_BootProg MD5_Final() Error");
 			result = TFTP_RES_CRC;
 		}
 		if (result != TFTP_RES_OK)
@@ -980,18 +1143,25 @@ _ATTR_SYM int writer_BootProg(char *fileinfo)
 		next_p = strtok(next_p, ",");			/* next_pはサイズを指す */
 		if (next_p == NULL)
 		{
+			dbg_print(WRT_ID, LOG_ERR, "writer_BootProg strtok(2) Error");
 			result = TFTP_RES_MISC;
 			break;
 		}
 		next_p = strtok(next_p, ",");			/* next_pはMD5ハッシュ値を指す */
 		if (next_p == NULL)
 		{
+			dbg_print(WRT_ID, LOG_ERR, "writer_BootProg strtok(3) Error");
 			result = TFTP_RES_MISC;
 			break;
 		}
 		str2hex(next_p, hash, sizeof(hash[16]));
 		if (memcmp(hash, buff, 16) != 0)
 		{
+			dbg_print(WRT_ID, LOG_ERR, "writer_BootProg mismatch MD5 Error:");
+			dbg_print(WRT_ID, LOG_ERR, "  hash=%08lX %08lX %08lX %08lX",
+				*(DWORD*)&hash[0], *(DWORD*)&hash[4], *(DWORD*)&hash[8], *(DWORD*)&hash[12]);
+			dbg_print(WRT_ID, LOG_ERR, "  ctx =%08lX %08lX %08lX %08lX",
+				*(DWORD*)&buff[0], *(DWORD*)&buff[4], *(DWORD*)&buff[8], *(DWORD*)&buff[12]);
 			result = TFTP_RES_CRC;
 			break;
 		}
@@ -1040,16 +1210,19 @@ _ATTR_SYM int writer_FpgaProg(void)
 	/* FPGAプログラムサイズを基にSPI-FLASHからヘッダ情報辺りをリードして、版数を取得する */
 	if (stat(TMP_FOLDER FPGA_PROG, &fl_stat) != 0)
 	{
+		dbg_print(WRT_ID, LOG_ERR, "writer_FpgaProg stat() Error:%s", mkstr_errno(errno));
 		return TFTP_RES_FL_NOTFOUND;
 	}
 	fl_stat.st_size -= sizeof(buff[512]);
 	if (com_SpiflashRead(fl_stat.st_size, sizeof(buff[512])/sizeof(WORD), (WORD*)&buff[0]) == -1)
 	{
+		dbg_print(WRT_ID, LOG_ERR, "writer_FpgaProg com_SpiflashRead() Error");
 		return TFTP_RES_FL_NOTFOUND;
 	}
 	p = seq_search(buff, 512, FPGA_FOOTER_STR, strlen(FPGA_FOOTER_STR));
 	if (p == NULL)
 	{
+		dbg_print(WRT_ID, LOG_ERR, "writer_FpgaProg seq_search() Error");
 		return TFTP_RES_MISC;
 	}
 	ver = p[FPGA_FOOTER_SIZE -1];
@@ -1058,16 +1231,22 @@ _ATTR_SYM int writer_FpgaProg(void)
 	fp = fopen(TMP_FOLDER FPGA_PROG, "rb");
 	if (fp == NULL)
 	{
+		dbg_print(WRT_ID, LOG_ERR, "writer_FpgaProg fopen() Error:%s", mkstr_errno(errno));
 		return TFTP_RES_FL_NOTFOUND;
 	}
+
 	while(1)
 	{
 		sum    = 0;
 		result = TFTP_RES_OK;
 		while (feof(fp) == 0)
 		{
-			rd_siz = fread(buff, sizeof(buff[512]), 1, fp);
-			if (rd_siz > 0)
+			rd_siz = fread(buff, 1, sizeof(buff[512]), fp);
+			if (rd_siz < 0)
+			{
+				dbg_print(WRT_ID, LOG_ERR, "writer_FpgaProg fread() Error:%s", mkstr_errno(errno));
+			}
+			else if (rd_siz > 0)
 			{
 				p = buff;
 				for (i=0; i < rd_siz; i++)
@@ -1081,6 +1260,7 @@ _ATTR_SYM int writer_FpgaProg(void)
 		/* チェックサム判定 */
 		if (sum != 0)
 		{
+			dbg_print(WRT_ID, LOG_ERR, "writer_FpgaProg sum=%02X Error", (uint32_t)sum);
 			result = TFTP_RES_CRC;
 			break;
 		}
@@ -1118,33 +1298,40 @@ _ATTR_SYM int wt_ProgFileWrite(char *wt_dev, FILE *rd_fp)
 
 	if (fseek(rd_fp, 10, SEEK_SET) != 0)
 	{
+		dbg_print(WRT_ID, LOG_ERR, "wt_ProgFileWrite fseek() Error:%s", mkstr_errno(errno));
 		return NG;
 	}
 
 	fp = fopen(wt_dev, "wb");
-	if (fp != NULL)
+	if (fp == NULL)
+	{
+		dbg_print(WRT_ID, LOG_ERR, "wt_ProgFileWrite fopen() Error:%s", mkstr_errno(errno));
+	}
+	else
 	{
 		while (feof(rd_fp) == 0)
 		{
 			result = OK;
-			rd_sz = fread(buff, sizeof(buff[512]), 1, rd_fp);
+			rd_sz = fread(buff, 1, sizeof(buff[512]), rd_fp);
 			if (rd_sz < 0)
 			{
+				dbg_print(WRT_ID, LOG_ERR, "wt_ProgFileWrite fread() Error:%s", mkstr_errno(errno));
 				result = NG;
 				break;
 			}
 			else if (rd_sz > 0)
 			{
-				retv = fwrite(buff, rd_sz, 1, fp);
+				retv = fwrite(buff, 1, rd_sz, fp);
 				if (retv != rd_sz)
 				{
+					dbg_print(WRT_ID, LOG_ERR, "wt_ProgFileWrite fwrite() Error:%s", mkstr_errno(errno));
 					result = NG;
 					break;
 				}
 			}
 		}
+		fclose(fp);
 	}
-	fclose(fp);
 	return result;
 }
 
@@ -1167,32 +1354,40 @@ _ATTR_SYM int wt_FpgaFileWrite(FILE *rd_fp)
 	/* SPI-ROMゲート開放 */
 	if (com_GpioRegUpdate(GPIO_OUT0_REG, SPI_GATE_MASK, ~SPI_GATE_CLOSE) != OK)
 	{
+		dbg_print(WRT_ID, LOG_ERR, "wt_FpgaFileWrite com_GpioRegUpdate(OPEN) Error");
 		return NG;
 	}
 
 	/* 書き込むプログラムファイルを先頭にシークする */
 	if (fseek(rd_fp, 0, SEEK_SET) != 0)
 	{
+		dbg_print(WRT_ID, LOG_ERR, "wt_FpgaFileWrite fseek() Error:%s", mkstr_errno(errno));
 		return NG;
 	}
 
 	fp = fopen("/dev/spi-flash", "wb");
-	if (fp != NULL)
+	if (fp == NULL)
+	{
+		dbg_print(WRT_ID, LOG_ERR, "wt_FpgaFileWrite fopen() Error:%s", mkstr_errno(errno));
+	}
+	else
 	{
 		while (feof(rd_fp) == 0)
 		{
 			result = OK;
-			rd_sz = fread(buff, sizeof(buff[512]), 1, rd_fp);
+			rd_sz = fread(buff, 1, sizeof(buff[512]), rd_fp);
 			if (rd_sz < 0)
 			{
+				dbg_print(WRT_ID, LOG_ERR, "wt_FpgaFileWrite fread() Error:%s", mkstr_errno(errno));
 				result = NG;
 				break;
 			}
 			else if (rd_sz > 0)
 			{
-				retv = fwrite(buff, rd_sz, 1, fp);
+				retv = fwrite(buff, 1, rd_sz, fp);
 				if (retv != rd_sz)
 				{
+					dbg_print(WRT_ID, LOG_ERR, "wt_FpgaFileWrite fwrite() Error:%s", mkstr_errno(errno));
 					result = NG;
 					break;
 				}
@@ -1203,6 +1398,7 @@ _ATTR_SYM int wt_FpgaFileWrite(FILE *rd_fp)
 
 	if (com_GpioRegUpdate(GPIO_OUT0_REG, SPI_GATE_MASK, SPI_GATE_CLOSE) != OK)
 	{
+		dbg_print(WRT_ID, LOG_ERR, "wt_FpgaFileWrite com_GpioRegUpdate(CLOSE) Error");
 		return NG;
 	}
 	return result;
@@ -1235,28 +1431,33 @@ _ATTR_SYM BYTE tftp(INNER_MSG *msg_p)
 	len = strnlen(fl_name, 128+1);
 	if ((len == 128+1)||(len == 0))
 	{
+		dbg_print(WRT_ID, LOG_ERR, "tftp strnlen()=%d Error", len);
 		return NG;
 	}
 
 	dl_mode = fl_name + len +1;
 	len = strnlen(dl_mode, 6+1);
-	if (strcmp(dl_mode, "octed") != 0)
+	if (strcmp(dl_mode, "octed", ) != 0)
 	{
+		dbg_print(WRT_ID, LOG_ERR, "tftp mode!="octed" Error");
 		return NG;
 	}
 
 	ip_addr = (BYTE*)dl_mode + len +1 +1;		/* IP_TYPEは不要なので無視 */
 	if (inet_ntop(AF_INET, ip_addr, ipaddr_str, sizeof(ipaddr_str[16])) == NULL)
 	{
+		dbg_print(WRT_ID, LOG_ERR, "tftp inet_ntop() Error:%s", mkstr_errno(errno));
 		return NG;
 	}
 
 	retv = execlp("atftp", "-g -r", fl_name, ipaddr_str, NULL);
 	if (retv != 0)
 	{
+		dbg_print(WRT_ID, LOG_ERR, "tftp execlp(atftp) Error:%s", mkstr_errno(errno));
 		return NG;
 	}
 
+	dbg_print(DWL_ID, LOG_INFO, "sndmsg(WRITER_ECB,I_WRITE_REQ,0)");
 	dl_sndmsg(WRITER_ECB, I_WRITE_REQ, 0);
 	return OK;
 }
@@ -1279,12 +1480,14 @@ BYTE tftp_get(char *fl_name, BYTE *ip_addr)
 
 	if (inet_ntop(AF_INET, ip_addr, ipaddr_str, sizeof(ipaddr_str[16])) == NULL)
 	{
+		dbg_print(WRT_ID, LOG_ERR, "tftp_get inet_ntop() Error:%s", mkstr_errno(errno));
 		return NG;
 	}
 
 	retv = execlp("atftp", "-g -r", fl_name, ipaddr_str, NULL);
 	if (retv != 0)
 	{
+		dbg_print(WRT_ID, LOG_ERR, "tftp_get execlp(atftp) Error:%s", mkstr_errno(errno));
 		return NG;
 	}
 	return OK;

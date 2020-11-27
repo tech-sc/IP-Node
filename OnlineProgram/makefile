@@ -44,7 +44,7 @@ all: $(TARGET)
 
 $(TARGET): $(OBJS)
 	$(AR) $(ARFLAGS) $(PROGLIB) $^
-	$(CXX) -o $@ $^ $(LDFLAGS) $(LIBS)
+#	$(CXX) -o $@ $^ $(LDFLAGS) $(LIBS)
 
 # ssembly
 $(OBJDIR)/%.s.o:%.s
@@ -64,6 +64,7 @@ $(OBJDIR)/%.cpp.o:%.cpp
 
 clean:
 	rm -rf $(OBJDIR)
+	rm $(PROGLIB)
 
 rebuild:
 	make clean && make

@@ -9,9 +9,9 @@
 #include <sys/types.h>	/* stat() */
 #include <sys/stat.h>		/* stat() */
 #include <stdio.h>
-#include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include <errno.h>
 
 /*** ユーザ作成ヘッダの取り込み ***/
 #include "def.h"

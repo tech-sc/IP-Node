@@ -62,7 +62,7 @@
 /*** ファイル内で共有するstatic 変数宣言 ***/
 static	char				tmp_buff[16];
 /* errno文字列生成バッファ */
-static	char				str_buff[16];
+static	char				errno_str_buff[16];
 
 /*** static 関数宣言 ***/
 
@@ -93,8 +93,8 @@ static const char *mkstr_errno(int err)
 	  CASE_STR(ENFILE);
 	  CASE_STR(ENOMEM);
 	  default:
-		sprintf(str_buff, "misc(%d)",err);
-		return str_buff;
+		sprintf(errno_str_buff, "misc(%d)",err);
+		return errno_str_buff;
 	}
 }
 
@@ -211,6 +211,9 @@ _ATTR_SYM BYTE supp_AplLogReq(char *str_p)
 
 	if (strncmp(str_p, FIFO_REQ_STR, FIFO_REQ_LEN) != 0)
 	{
+		memset(errno_str_buff, 0, sizeof(errno_str_buff));
+		strncpy(errno_str_buff, str_p, FIFO_REQ_LEN);
+		dbg_print(SUP_ID, LOG_WARNING, "fifo unknown ReqString:%s", errno_str_buff);
 		return NG;
 	}
 

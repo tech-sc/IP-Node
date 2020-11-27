@@ -287,7 +287,7 @@ static const char *mkstr_eventid(BYTE event_id)
 /******************************************************************************/
 static const char *mkstr_stateno(TFTP_STATE_e state_no)
 {
-	switch(event_id)
+	switch(state_no)
 	{
 	  CASE_STR(STATE_IDLE);
 	  CASE_STR(STATE_SERVER_DL);
@@ -965,8 +965,9 @@ _ATTR_SYM int writer_OnlineProg(char *fileinfo)
 	FILE	*fp		= NULL;
 	char	*next_p	= NULL;
 	MD5_CTX	ctx		= {};
+	BYTE	hash[16] = {};
+	BYTE	ctx_hash[16] = {};
 	BYTE	buff[512];
-	BYTE	hash[16];
 
 	/* バージョン比較 */
 	next_p = strtok(fileinfo, ",");			/* next_pは日付を指す */
@@ -1011,7 +1012,7 @@ _ATTR_SYM int writer_OnlineProg(char *fileinfo)
 				}
 			}
 		}
-		if (MD5_Final(buff, &ctx) == 0)			/* buffにハッシュ値(16byte)が格納される */
+		if (MD5_Final(ctx_hash, &ctx) == 0)			/* ctx_hashにハッシュ値(16byte)が格納される */
 		{
 			dbg_print(WRT_ID, LOG_ERR, "writer_OnlineProg MD5_Final() Error");
 			result = TFTP_RES_CRC;
@@ -1037,13 +1038,17 @@ _ATTR_SYM int writer_OnlineProg(char *fileinfo)
 			break;
 		}
 		str2hex(next_p, hash, sizeof(hash[16]));
-		if (memcmp(hash, buff, 16) != 0)
+		if (memcmp(hash, ctx_hash, 16) != 0)
 		{
 			dbg_print(WRT_ID, LOG_ERR, "writer_OnlineProg mismatch MD5 Error:");
-			dbg_print(WRT_ID, LOG_ERR, "  hash=%08lX %08lX %08lX %08lX",
-				*(DWORD*)&hash[0], *(DWORD*)&hash[4], *(DWORD*)&hash[8], *(DWORD*)&hash[12]);
-			dbg_print(WRT_ID, LOG_ERR, "  ctx =%08lX %08lX %08lX %08lX",
-				*(DWORD*)&buff[0], *(DWORD*)&buff[4], *(DWORD*)&buff[8], *(DWORD*)&buff[12]);
+			sprintf((char*)buff, "  hash=%02X%02X %02X%02X %02X%02X %02X%02X %02X%02X %02X%02X %02X%02X %02X%02X",
+				hash[0], hash[1], hash[2], hash[3], hash[4], hash[5], hash[6], hash[7],
+				hash[8], hash[9], hash[10], hash[11], hash[12], hash[13], hash[14], hash[15]);
+			dbg_print(WRT_ID, LOG_ERR, "%s", buff);
+			sprintf((char*)buff, "  ctx_hash=%02X%02X %02X%02X %02X%02X %02X%02X %02X%02X %02X%02X %02X%02X %02X%02X",
+				ctx_hash[0], ctx_hash[1], ctx_hash[2], ctx_hash[3], ctx_hash[4], ctx_hash[5], ctx_hash[6], ctx_hash[7],
+				ctx_hash[8], ctx_hash[9], ctx_hash[10], ctx_hash[11], ctx_hash[12], ctx_hash[13], ctx_hash[14], ctx_hash[15]);
+			dbg_print(WRT_ID, LOG_ERR, "%s", buff);
 			result = TFTP_RES_CRC;
 			break;
 		}
@@ -1083,8 +1088,9 @@ _ATTR_SYM int writer_BootProg(char *fileinfo)
 	FILE	*fp		= NULL;
 	char	*next_p	= NULL;
 	MD5_CTX	ctx		= {};
+	BYTE	hash[16] = {};
+	BYTE	ctx_hash[16] = {};
 	BYTE	buff[512];
-	BYTE	hash[16];
 
 	/* バージョン比較 */
 	next_p = strtok(fileinfo, ",");			/* next_pは日付を指す */
@@ -1129,7 +1135,7 @@ _ATTR_SYM int writer_BootProg(char *fileinfo)
 				}
 			}
 		}
-		if (MD5_Final(buff, &ctx) == 0)			/* buffにハッシュ値(16byte)が格納される */
+		if (MD5_Final(ctx_hash, &ctx) == 0)			/* ctx_hashにハッシュ値(16byte)が格納される */
 		{
 			dbg_print(WRT_ID, LOG_ERR, "writer_BootProg MD5_Final() Error");
 			result = TFTP_RES_CRC;
@@ -1155,13 +1161,17 @@ _ATTR_SYM int writer_BootProg(char *fileinfo)
 			break;
 		}
 		str2hex(next_p, hash, sizeof(hash[16]));
-		if (memcmp(hash, buff, 16) != 0)
+		if (memcmp(hash, ctx_hash, 16) != 0)
 		{
 			dbg_print(WRT_ID, LOG_ERR, "writer_BootProg mismatch MD5 Error:");
-			dbg_print(WRT_ID, LOG_ERR, "  hash=%08lX %08lX %08lX %08lX",
-				*(DWORD*)&hash[0], *(DWORD*)&hash[4], *(DWORD*)&hash[8], *(DWORD*)&hash[12]);
-			dbg_print(WRT_ID, LOG_ERR, "  ctx =%08lX %08lX %08lX %08lX",
-				*(DWORD*)&buff[0], *(DWORD*)&buff[4], *(DWORD*)&buff[8], *(DWORD*)&buff[12]);
+			sprintf((char*)buff, "  hash=%02X%02X %02X%02X %02X%02X %02X%02X %02X%02X %02X%02X %02X%02X %02X%02X",
+				hash[0], hash[1], hash[2], hash[3], hash[4], hash[5], hash[6], hash[7],
+				hash[8], hash[9], hash[10], hash[11], hash[12], hash[13], hash[14], hash[15]);
+			dbg_print(WRT_ID, LOG_ERR, "%s", buff);
+			sprintf((char*)buff, "  ctx_hash=%02X%02X %02X%02X %02X%02X %02X%02X %02X%02X %02X%02X %02X%02X %02X%02X",
+				ctx_hash[0], ctx_hash[1], ctx_hash[2], ctx_hash[3], ctx_hash[4], ctx_hash[5], ctx_hash[6], ctx_hash[7],
+				ctx_hash[8], ctx_hash[9], ctx_hash[10], ctx_hash[11], ctx_hash[12], ctx_hash[13], ctx_hash[14], ctx_hash[15]);
+			dbg_print(WRT_ID, LOG_ERR, "%s", buff);
 			result = TFTP_RES_CRC;
 			break;
 		}
@@ -1437,9 +1447,9 @@ _ATTR_SYM BYTE tftp(INNER_MSG *msg_p)
 
 	dl_mode = fl_name + len +1;
 	len = strnlen(dl_mode, 6+1);
-	if (strcmp(dl_mode, "octed", ) != 0)
+	if (strcmp(dl_mode, "octed") != 0)
 	{
-		dbg_print(WRT_ID, LOG_ERR, "tftp mode!="octed" Error");
+		dbg_print(WRT_ID, LOG_ERR, "tftp mode!=octed Error");
 		return NG;
 	}
 

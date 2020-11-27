@@ -151,12 +151,15 @@ void lulog_thread(void *arg)
 		switch(msg_p->msg_header.kind)
 		{
 		  case I_APLLOG:
+			dbg_print(LULOG_ID, LOG_INFO, "rcvmsg I_APLLOG:%s", mkstr_taskid(msg_p->msg_header.id));
 			lulog_Loggin(msg_p);
 			break;
 		  case I_LOGWRITE:
+			dbg_print(LULOG_ID, LOG_INFO, "rcvmsg I_LOGWRITE:%s", mkstr_taskid(msg_p->msg_header.id));
 			lulog_LogWrite();
 			break;
 		  default:
+			dbg_print(LULOG_ID, LOG_WARNING, "rcvmsg unknown kind:%s", mkstr_taskid(msg_p->msg_header.id));
 			break;
 		}
 

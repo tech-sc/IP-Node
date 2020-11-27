@@ -140,10 +140,18 @@ BYTE com_memRead( off_t phy_addr, uint16_t width, uint16_t len, void *buff_p )
 		{
 			pthread_mutex_lock(&mem_mutex);
 			fd = open("/dev/mem", O_RDONLY | O_SYNC);
-			if (fd != -1)
+			if (fd < 0)
+			{
+				dbg_print(COM_ID, LOG_ERR, "com_memRead open() Error:%s", mkstr_errno(errno));
+			}
+			else
 			{
 				map_base = mmap(0, MAP_SIZE, PROT_READ, MAP_SHARED, fd, phy_addr & ~MAP_MASK);
-				if (map_base != MAP_FAILED)
+				if (map_base == MAP_FAILED)
+				{
+					dbg_print(COM_ID, LOG_ERR, "com_memRead mmap() Error:%s", mkstr_errno(errno));
+				}
+				else
 				{
 					virt_addr.byte_p = map_base + (phy_addr & MAP_MASK);
 					while (len > 0)
@@ -201,10 +209,18 @@ BYTE com_memWrite( off_t phy_addr, uint16_t width, uint16_t len, void *buff_p )
 		{
 			pthread_mutex_lock(&mem_mutex);
 			fd = open("/dev/mem", O_RDWR | O_SYNC);
-			if (fd != -1)
+			if (fd < 0)
+			{
+				dbg_print(COM_ID, LOG_ERR, "com_memWrite open() Error:%s", mkstr_errno(errno));
+			}
+			else
 			{
 				map_base = mmap(0, MAP_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, phy_addr & ~MAP_MASK);
-				if (map_base != MAP_FAILED)
+				if (map_base == MAP_FAILED)
+				{
+					dbg_print(COM_ID, LOG_ERR, "com_memWrite mmap() Error:%s", mkstr_errno(errno));
+				}
+				else
 				{
 					virt_addr.byte_p = map_base + (phy_addr & MAP_MASK);
 					while (len > 0)
@@ -261,10 +277,18 @@ BYTE com_memUpdate( off_t phy_addr, uint16_t width, uint32_t mask, uint32_t val,
 	{
 		pthread_mutex_lock(&mem_mutex);
 		fd = open("/dev/mem", O_RDWR | O_SYNC);
-		if (fd != -1)
+		if (fd < 0)
+		{
+			dbg_print(COM_ID, LOG_ERR, "com_memUpdate open() Error:%s", mkstr_errno(errno));
+		}
+		else
 		{
 			map_base = mmap(0, MAP_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, phy_addr & ~MAP_MASK);
-			if (map_base != MAP_FAILED)
+			if (map_base == MAP_FAILED)
+			{
+				dbg_print(COM_ID, LOG_ERR, "com_memUpdate mmap() Error:%s", mkstr_errno(errno));
+			}
+			else
 			{
 				virt_addr.byte_p = map_base + (phy_addr & MAP_MASK);
 				switch (width)
@@ -399,16 +423,24 @@ BYTE com_IPLVerGet( char *ver, BYTE ver_sz )
 	}
 
 	fp = fopen(IPL_MTD, "rb");
+	if (fp == NULL)
+	{
+		dbg_print(COM_ID, LOG_ERR, "com_IPLVerGet fopen() Error:%s", mkstr_errno(errno));
+		result = NG;
+	}
+
 	while (fp != NULL)
 	{
 		rd_sz = fread(buff, sizeof(char), BUFF_SZ, fp);
 		if (rd_sz < 0)
 		{
+			dbg_print(COM_ID, LOG_ERR, "com_IPLVerGet fread() Error:%s", mkstr_errno(errno));
 			break;
 		}
 		str = (char*)seq_search((BYTE*)buff, BUFF_SZ, IPL_VER_STR, IPL_VER_LEN);
 		if (str == NULL)
 		{
+			dbg_print(COM_ID, LOG_WARNING, "com_IPLVerGet seq_search() Error:IPL_VERSION NotFound");
 			break;
 		}
 		while ((*str == ' ') && (str < &buff[BUFF_SZ]))

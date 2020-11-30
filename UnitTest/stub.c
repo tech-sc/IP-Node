@@ -30,8 +30,12 @@ uint8_t			sndmsg_ecb;
 BYTE			*sndmsg_ptr;
 uint8_t			rcvmsg_ecb;
 WORD			rcvmsg_tim;
+
 BYTE			threadstart_id;
 void			*threadstart_ptr;
+BYTE			print_set_id;
+BYTE			print_set_lv;
+BYTE			print_set_out;
 
 BYTE *com_poolget(BYTE id) {poolget_id=id; return &pool_area[id][0];}
 void com_poolput(BYTE id, BYTE *p) {poolput_id=id; poolput_ptr=p;}
@@ -39,8 +43,8 @@ void com_sndmsg(BYTE id, BYTE *p) {sndmsg_ecb=id; sndmsg_ptr=p;}
 BYTE *com_rcvmsg(BYTE id, WORD tm) {rcvmsg_ecb=id; rcvmsg_tim=tm; return &msg_area[0][0];}
 
 void com_threadstart(BYTE id, void *p) {threadstart_id=id; threadstart_ptr=p;}
-void dbg_print_set(BYTE i,BYTE v,BYTE z) {}
-void dbg_print(BYTE i,BYTE v,char *p,...) {}
+void dbg_print_set(BYTE id,BYTE lv,BYTE out) {print_set_id=id; print_set_lv=lv; print_set_out=out;}
+void dbg_print(BYTE i,BYTE v,char *p,...) {printf("ID=%d, ErrLV=%d\n",i,v); printf(p,...);}
 
 BYTE tmr_stop(BYTE id) {return OK;}
 BYTE tmr_start(BYTE id, WORD cnt) {return OK;}

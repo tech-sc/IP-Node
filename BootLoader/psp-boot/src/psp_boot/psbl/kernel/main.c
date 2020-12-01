@@ -832,7 +832,7 @@ aries_sdb_led_on(11);
 	SoC_GPIOSetting();
 	sys_printf("\nSoC_EMIFSetting\n");
 	SoC_EMIFSetting();
-	sys_printf("\finish UF7200s2 setting\n");
+	sys_printf("\nfinish UF7200s2 setting\n");
 	/* IPCS_V4 PG ADD-END:UF7200step2コード追加 */
 
 	initMacPorts();

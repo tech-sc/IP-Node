@@ -524,6 +524,7 @@ Status tftp_get_file(char *getfile, char *dstfile, u2 dst_port)
   return SBL_EFAILURE;
 }
 
+/* IPCS_V4 PG ADD-STA */
 Status tftpd_put_file(char *getfile, char *dstfile, u2 dst_port)
 {
   Status        ret;
@@ -834,6 +835,7 @@ Status tftpd_put_file(char *getfile, char *dstfile, u2 dst_port)
   sys_printf( "\nTFTP Timed out\n" ); 
   return SBL_EFAILURE;
 }
+/* IPCS_V4 PG ADD-END */
 
 Status tftp_in(char *dgram, u2 dst_port, u2 src_port, u4 len)
 {
@@ -1332,6 +1334,7 @@ int tftp(int argc, char *argv[])
      return -1;
 }
 
+/* IPCS_V4 PG ADD-STA */
 int tftpd(int argc, char *argv[])
 {
   u4		 ii, pp;
@@ -1642,7 +1645,7 @@ int tftpd(int argc, char *argv[])
      if( strcmp( dstfile, "/dev/ram" ) == 0 )
      {
         int size;
-        size = tftpd_put_file( getfile, dstfile, dst_port );
+        size = tftpd_put_file( getfile, dstfile, dst_port );	/* IPCS_V4 PG ADD */
 #ifdef AVALANCHE        
         if( size <= 0 )
         {
@@ -1651,7 +1654,7 @@ int tftpd(int argc, char *argv[])
 #endif
         return size;   
      }
-     ret = tftpd_put_file( getfile, dstfile, dst_port );    
+     ret = tftpd_put_file( getfile, dstfile, dst_port );    	/* IPCS_V4 PG ADD */
 #ifdef NAND_SBL
 	  page_diff = (write_to_flash_size  / (global_nand_info.page_size) - write_to_flash_size /(global_nand_info.page_size+global_nand_info.spare_area));
 	  write_to_flash_size = write_to_flash_size - page_diff * global_nand_info.page_size;
@@ -1685,7 +1688,6 @@ int tftpd(int argc, char *argv[])
      return ret;
 
      tftp_options:
-     tftp_usage( );
      return -1;
 }
-
+/* IPCS_V4 PG ADD-END */

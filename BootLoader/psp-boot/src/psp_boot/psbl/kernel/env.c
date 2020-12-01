@@ -703,7 +703,7 @@ int IsReadOnlyVar( const char* env_nm )
 {
   if( (strcmp("CPUFREQ", env_nm) == 0) ||
       ( strcmp("SYSFREQ", env_nm) == 0 ) || (strcmp("BUILD_OPS", env_nm) == 0)
-      || (strcmp("MIPSFREQ", env_nm) == 0) || (strcmp(IPL_VER, env_nm) == 0))	/* IPCS_V4 PG ADD */
+      || (strcmp("MIPSFREQ", env_nm) == 0) || (strcmp("IPL_VERSION", env_nm) == 0))	/* IPCS_V4 PG ADD */
     return 1;
 
   return 0;

@@ -802,12 +802,12 @@ aries_sdb_led_on(11);
 	/* IPCS_V4 PG ADD-STA:UF7200step2コード追加 */
 	initMtdBlocks();
 
-	*p1 = getMacAddr();
-	*p2 = sys_getenv(HWA_0);
+	p1 = getMacAddr();
+	p2 = sys_getenv("HWA_0");
 	if ((NULL != p1) && (NULL != p2)) {
 		if (strncmp(p1, p2, 17) != 0) {
 			sys_printf("\nset MAC address\n");
-			sys_setenv(HWA_0, p1);
+			sys_setenv("HWA_0", p1);
 		}
 	}else if (NULL == p1) {
 	    sys_printf("\nMAC address not found at mtd4.\n");
@@ -815,22 +815,22 @@ aries_sdb_led_on(11);
 	    sys_printf("\nHWA_0 config not found.\n");
 	}
 
-	*p1 = sys_getenv(IPL_VERSION);
+	p1 = sys_getenv("IPL_VERSION");
 	if (NULL == p1) {
 		sys_printf("\nset IPL version\n");
-		sys_setenv(IPL_VERSION, IPL_VER_STR);
+		sys_setenv("IPL_VERSION", IPL_VER_STR);
 	}else{
 		if (0 != strncmp(p1, IPL_VER_STR, 4)) {
 			sys_printf("\nrenew IPL version\n");
-			sys_setenv(IPL_VERSION, IPL_VER_STR);
+			sys_setenv("IPL_VERSION", IPL_VER_STR);
 		}
 	}
 
 	sys_printf("\nSoC_CPUSetting\n");
 	SoC_CPUSetting();
-	sys_printf("\SoC_GPIOSetting\n");
+	sys_printf("\nSoC_GPIOSetting\n");
 	SoC_GPIOSetting();
-	sys_printf("\SoC_EMIFSetting\n");
+	sys_printf("\nSoC_EMIFSetting\n");
 	SoC_EMIFSetting();
 	sys_printf("\finish UF7200s2 setting\n");
 	/* IPCS_V4 PG ADD-END:UF7200step2コード追加 */

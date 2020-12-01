@@ -15,7 +15,6 @@
 
 extern "C" {
 #include "def.h"
-#define TEMP_HEADER
 #ifdef TEMP_HEADER
 #include "temp_header.h"
 #include "temp_tmr_def.h"

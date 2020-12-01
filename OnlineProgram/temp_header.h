@@ -1,3 +1,5 @@
+#include<stdio.h>
+
 typedef struct  T_MSG_HEADER{           /*# 内部メッセージヘッダ #*/
     DWORD       sys;                    /*# システムデータ（ＯＳ用） #*/
     BYTE        id;                     /*# 送信元タスクＩＤ #*/
@@ -45,7 +47,7 @@ extern void com_sndmsg(BYTE ecb, BYTE *g);
 extern BYTE *com_rcvmsg(BYTE ecb, WORD tim);
 extern void com_threadstart(BYTE id, void *p);
 extern void dbg_print_set(BYTE i,BYTE v,BYTE z);
-extern void dbg_print(BYTE i,BYTE v,char *p,...);
+extern void dbg_print(BYTE i,BYTE v, ...);
 
 extern BYTE mnt_config_dat(char *path, BYTE write);
 

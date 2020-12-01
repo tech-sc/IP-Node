@@ -19,6 +19,7 @@ export LD_LIBRARY_PATH=/usr/local/src/openssl-1.0.2f
 SRCDIR := .
 OBJDIR := build
 TARGET := $(OBJDIR)/$(PROGNAME)
+DBGOPT := -DDEBUG -DTEMP_HEADER
 
 TOOLCHAIN := /usr
 OPENSSL := /usr/local/src/openssl-1.0.2f
@@ -35,9 +36,9 @@ LIBS := -lpthread -lcrypto -lgtest -lgtest_main -l$(APPLIB)
 
 #CC = gcc
 CC = $(TOOLCHAIN)/bin/gcc
-CFLAGS = -Wall -O2 -DDEBUG -MMD -MP $(INCDIR)
+CFLAGS = -Wall -O2 $(DBGOPT) -MMD -MP $(INCDIR)
 CXX = $(TOOLCHAIN)/bin/g++
-CXXFLAGS = -Wall -O2 -DDEBUG -MMD -MP $(INCDIR)
+CXXFLAGS = -Wall -O2 $(DBGOPT) -MMD -MP $(INCDIR)
 LDFLAGS = $(LIBDIR)
 ARFLAGS = crsv
 

@@ -4,6 +4,7 @@
 /* 概要		  デバッグ用スタブのソースファイル								  */
 /*								Copyright 2020 Oki Electric Industry Co.,Ltd. */
 /******************************************************************************/
+#include <stdio.h>
 #include <stdint.h>
 #include <unistd.h>
 
@@ -44,7 +45,7 @@ BYTE *com_rcvmsg(BYTE id, WORD tm) {rcvmsg_ecb=id; rcvmsg_tim=tm; return &msg_ar
 
 void com_threadstart(BYTE id, void *p) {threadstart_id=id; threadstart_ptr=p;}
 void dbg_print_set(BYTE id,BYTE lv,BYTE out) {print_set_id=id; print_set_lv=lv; print_set_out=out;}
-void dbg_print(BYTE i,BYTE v,char *p,...) {printf("ID=%d, ErrLV=%d\n",i,v); printf(p,...);}
+void dbg_print(BYTE i,BYTE v, ...) {printf("ID=%d, ErrLV=%d\n", i,v);}
 
 BYTE tmr_stop(BYTE id) {return OK;}
 BYTE tmr_start(BYTE id, WORD cnt) {return OK;}

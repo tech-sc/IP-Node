@@ -20,7 +20,6 @@
 
 extern "C" {
 #include "def.h"
-#define TEMP_HEADER
 #ifdef TEMP_HEADER
 #include "temp_header.h"
 #include "temp_tmr_def.h"
@@ -46,6 +45,7 @@ extern "C" {
 /* テストクラス																  */
 /******************************************************************************/
 #define PFN_MASK_SIZE 8
+#define ADDR_MASK		0x7fffffffffffffUL
 
 class ComMemLv01 : public ::testing::Test {
 protected:
@@ -92,13 +92,14 @@ protected:
 	        return 0;
 	    }
 
-	    if ((page & 0x7fffffffffffffULL) == 0){
+	    if ((page & ADDR_MASK) == 0){
 	        printf("pfn == 0\n");
 	        printf("page = %016lX\n", page);
+	        printf("mask = %016lX\n", ADDR_MASK);
 	        return 0;
 	    }
 
-	    physaddr = ((page & 0x7fffffffffffffULL) * page_size)
+	    physaddr = ((page & ADDR_MASK) * page_size)
 	        + ((unsigned long)virtaddr % page_size);
 
 	    return physaddr;
@@ -116,13 +117,15 @@ TEST_F(ComMemLv01, com_memInit)
 
 TEST_F(ComMemLv01, com_memRead)
 {
+	// PC-VMだと物理アドレスがわからない
 	DWORD	data=0;
-	DWORD	*virt_ptr=NULL, *phy_ptr=NULL;
+	void	*virt_ptr=NULL;
+	uint64_t	phy_ptr=0;
 
 	virt_ptr = malloc(256);
 	memcpy(virt_ptr, "1234567890", 10);
 
-	phy_ptr = (DWORD*)virt2phy(virt_ptr);
+	phy_ptr = virt2phy(virt_ptr);
 
 	EXPECT_EQ(OK, com_memRead(phy_ptr, DWORD_WIDTH, 1, &data));
 	printf("data=%lX\n", data);

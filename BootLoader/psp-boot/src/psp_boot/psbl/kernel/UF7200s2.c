@@ -114,7 +114,7 @@ void Delay_mSec(unsigned int tim)
 /******************************************************************************/
 __inline void GPIO_LedBlink()
 {
-	RegWrite(GPIO_LED, RegRead(GPIO_LED) & ~GPIO_LED_OFF);	
+	RegWrite(GPIO_LED, RegRead(GPIO_LED) & ~GPIO_LED_OFF);
 	while(1)
 	{
 		Delay_mSec(200);
@@ -134,6 +134,11 @@ __inline void FPGA_BlueLedBlink(void)
 {
 	RegWrite(FPGA_LED, LED_BLINK | LED_CTRL_LU | LED_BLUE);
 	while(1);
+}
+
+__inline void FPGA_BlueLedBlinkOnly(void)
+{
+	RegWrite(FPGA_LED, LED_BLINK | LED_CTRL_LU | LED_BLUE);
 }
 
 /******************************************************************************/
@@ -241,9 +246,6 @@ void FPGAConfigChk(void)
 		}
 		Delay_mSec(30);
 	}
-
-	/* 青LED点灯 */
-	RegWrite(FPGA_LED, LED_ON | LED_CTRL_LU | LED_BLUE);
 }
 
 /******************************************************************************/
@@ -289,10 +291,14 @@ void DDR_SimpleMemChk(void)
 	DDRWrite(DDR_TAIL_ADDR, 0xaaaa);
 
 	if (DDRRead(DDR_TOP_ADDR) != 0x5555) {
-		FPGA_BlueLedBlink();
+		FPGA_BlueLedBlinkOnly();
+		/* 検査結果LED点滅してリターンしない */
+		GPIO_LedBlink();
 	}
 	if (DDRRead(DDR_TAIL_ADDR) != 0xaaaa) {
-		FPGA_BlueLedBlink();
+		FPGA_BlueLedBlinkOnly();
+		/* 検査結果LED点滅してリターンしない */
+		GPIO_LedBlink();
 	}
 
 	DDRWrite(DDR_TOP_ADDR+0x0002, 0x0001);
@@ -317,56 +323,91 @@ void DDR_SimpleMemChk(void)
 
 
 	if (DDRRead(DDR_TOP_ADDR+0x0002) != 0x0001) {
-		FPGA_BlueLedBlink();
+		FPGA_BlueLedBlinkOnly();
+		/* 検査結果LED点滅してリターンしない */
+		GPIO_LedBlink();
 	}
 	if (DDRRead(DDR_TOP_ADDR+0x0004) != 0x0002) {
-		FPGA_BlueLedBlink();
+		FPGA_BlueLedBlinkOnly();
+		/* 検査結果LED点滅してリターンしない */
+		GPIO_LedBlink();
 	}
 	if (DDRRead(DDR_TOP_ADDR+0x0006) != 0x0004) {
-		FPGA_BlueLedBlink();
+		FPGA_BlueLedBlinkOnly();
+		/* 検査結果LED点滅してリターンしない */
+		GPIO_LedBlink();
 	}
 	if (DDRRead(DDR_TOP_ADDR+0x0010) != 0x0008) {
-		FPGA_BlueLedBlink();
+		FPGA_BlueLedBlinkOnly();
+		/* 検査結果LED点滅してリターンしない */
+		GPIO_LedBlink();
 	}
 
 	if (DDRRead(DDR_TOP_ADDR+0x0040) != 0x0010) {
-		FPGA_BlueLedBlink();
+		FPGA_BlueLedBlinkOnly();
+		/* 検査結果LED点滅してリターンしない */
+		GPIO_LedBlink();
 	}
 	if (DDRRead(DDR_TOP_ADDR+0x0100) != 0x0020) {
-		FPGA_BlueLedBlink();
+		FPGA_BlueLedBlinkOnly();
+		/* 検査結果LED点滅してリターンしない */
+		GPIO_LedBlink();
 	}
 	if (DDRRead(DDR_TOP_ADDR+0x0400) != 0x0040) {
-		FPGA_BlueLedBlink();
+		FPGA_BlueLedBlinkOnly();
+		/* 検査結果LED点滅してリターンしない */
+		GPIO_LedBlink();
 	}
 	if (DDRRead(DDR_TOP_ADDR+0x1000) != 0x0080) {
-		FPGA_BlueLedBlink();
+		FPGA_BlueLedBlinkOnly();
+		/* 検査結果LED点滅してリターンしない */
+		GPIO_LedBlink();
 	}
 
 	if (DDRRead(DDR_TOP_ADDR+0x2000) != 0x0100) {
-		FPGA_BlueLedBlink();
+		FPGA_BlueLedBlinkOnly();
+		/* 検査結果LED点滅してリターンしない */
+		GPIO_LedBlink();
 	}
 	if (DDRRead(DDR_TOP_ADDR+0x8000) != 0x0200) {
-		FPGA_BlueLedBlink();
+		FPGA_BlueLedBlinkOnly();
+		/* 検査結果LED点滅してリターンしない */
+		GPIO_LedBlink();
 	}
 	if (DDRRead(DDR_TOP_ADDR+0x20000) != 0x0400) {
-		FPGA_BlueLedBlink();
+		FPGA_BlueLedBlinkOnly();
+		/* 検査結果LED点滅してリターンしない */
+		GPIO_LedBlink();
 	}
 	if (DDRRead(DDR_TOP_ADDR+0x80000) != 0x0800) {
-		FPGA_BlueLedBlink();
+		FPGA_BlueLedBlinkOnly();
+		/* 検査結果LED点滅してリターンしない */
+		GPIO_LedBlink();
 	}
 
 	if (DDRRead(DDR_TOP_ADDR+0x200000) != 0x1000) {
-		FPGA_BlueLedBlink();
+		FPGA_BlueLedBlinkOnly();
+		/* 検査結果LED点滅してリターンしない */
+		GPIO_LedBlink();
 	}
 	if (DDRRead(DDR_TOP_ADDR+0x800000) != 0x2000) {
-		FPGA_BlueLedBlink();
+		FPGA_BlueLedBlinkOnly();
+		/* 検査結果LED点滅してリターンしない */
+		GPIO_LedBlink();
 	}
 	if (DDRRead(DDR_TOP_ADDR+0x1000000) != 0x4000) {
-		FPGA_BlueLedBlink();
+		FPGA_BlueLedBlinkOnly();
+		/* 検査結果LED点滅してリターンしない */
+		GPIO_LedBlink();
 	}
 	if (DDRRead(DDR_TOP_ADDR+0x2000000) != 0x8000) {
-		FPGA_BlueLedBlink();
+		FPGA_BlueLedBlinkOnly();
+		/* 検査結果LED点滅してリターンしない */
+		GPIO_LedBlink();
 	}
+
+	/* 検査結果LED点灯 */
+	RegWrite(GPIO_LED, RegRead(GPIO_LED) & ~GPIO_LED_OFF);
 }
 
 
@@ -387,7 +428,9 @@ void DDR_DetailMemChk(void)
 	{
 		DDRWrite(p, 0x5555);
 		if (DDRRead(p) != 0x5555) {
-			FPGA_BlueLedBlink();
+			FPGA_BlueLedBlinkOnly();
+			/* 検査結果LED点滅してリターンしない */
+			GPIO_LedBlink();
 		}
 		p++;
 	}
@@ -397,10 +440,15 @@ void DDR_DetailMemChk(void)
 	{
 		DDRWrite(p, 0xaaaa);
 		if (DDRRead(p) != 0xaaaa) {
-			FPGA_BlueLedBlink();
+			FPGA_BlueLedBlinkOnly();
+			/* 検査結果LED点滅してリターンしない */
+			GPIO_LedBlink();
 		}
 		p++;
 	}
+
+	/* 検査結果LED点灯 */
+	RegWrite(GPIO_LED, RegRead(GPIO_LED) & ~GPIO_LED_OFF);
 }
 
 /******************************************************************************/
@@ -413,14 +461,18 @@ void DDR_DetailMemChk(void)
 /******************************************************************************/
 void DDR_MemChk(void)
 {
+	/* 青LED点灯 */
+	RegWrite(FPGA_LED, LED_ON | LED_CTRL_LU | LED_BLUE);
+
 	if ((RegRead(GPIO_DDRCHK_MODE) & DDRCHK_NORMAL) == DDRCHK_NORMAL)
 	{	/* 通常モード */
 		DDR_SimpleMemChk();
 	}
 	else
 	{	/* 検査モード */
-		RegWrite(GPIO_LED, RegRead(GPIO_LED) & ~GPIO_LED_OFF);		/* LED-ON */
 		DDR_DetailMemChk();
+		/* 詳細検査時は検査結果OKでもリターンしない */
+		while(1);
 	}
 }
 

@@ -412,7 +412,6 @@ typedef enum {
 		LAN2DSP_ID,				/*# lan2dsp #*/
 		CYCCTL_ID,				/*# sys_ctl #*/
 		SPROCTL_ID,				/*# spro_ctl #*/
-		LPBCTL_ID,				/*# lpb_ctl #*/
 		FPGAR_ID,				/*# fpga_read #*/
 		WRT_ID,					/*# writer #*/
 		FPGAW_ID,				/*# fpga_write #*/
@@ -610,6 +609,7 @@ typedef enum {
 #define     O_TST_MEM_RD    0xfb        /*# 工場試験用 メモリリード #*/
 #define     O_TST_MEM_WT    0xfc        /*# 工場試験用 メモリライト #*/
 #define     O_TST_DSP_CK    0xfd        /*# 工場試験用 ＤＳＰメモリチェック #*/ // 2001.05.22 追加
+#define     O_TST_SPI_RD    0xfe        /*# 工場試験用 SPIバージョンリード #*/ /* IPCS_V4 ADD */
 #define     O_TEST_ORD_TEND 0xff        /*# 工場試験用識別終了 #*/          //2000.07 V2.1追加
 
 #define     O_FLASHTOOL     0x2F        /*# フラッシュツール要求 #*/        //2000.12.04 V2.1FLASH_TOOL
@@ -690,6 +690,7 @@ typedef enum {
 #define     E_TST_MEM_RD    0xfb        /*# 工場試験用 メモリリード #*/
 #define     E_TST_MEM_WT    0xfc        /*# 工場試験用 メモリライト #*/
 #define     E_TST_DSP_CK    0xfd        /*# 工場試験用 ＤＳＰメモリチェック #*/ // 2001.05.22 追加
+#define     E_TST_SPI_RD    0xfe        /*# 工場試験用 SPIバージョンリード #*/ /* IPCS_V4 ADD */
 // 工場試験用
 
 #define     E_PKGEVENT      0x80        /*# 既存PKGイベント #*/

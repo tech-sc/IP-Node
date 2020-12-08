@@ -24,24 +24,23 @@
 /* thread prototype */
 void lu_mon_thread(void *arg);
 void tmr_thread(void *arg);
-void cs_ctl(void *arg);
+void cs_ctl_thread(void *arg);
 void mda_thread(void *arg);
 void lumng_thread(void *arg);
 void doep_r_thread(void *arg);
 void doep_s_thread(void *arg);
-void downld(void *arg);
+void downld_thread(void *arg);
 void mnt_thread(void *arg);
-void lu_log(void *arg);
-void support(void *arg);
+void lulog_thread(void *arg);
+void support_thread(void *arg);
 void dspevt(void *arg);
 void dsp2lan(void *arg);
 void lan2dsp(void *arg);
-void cyc_ctl(void *arg);
-void spro_ctl(void *arg);
-void lpb_ctl(void *arg);
-void fpga_read(void *arg);
-void writer(void *arg);
-void fpga_write(void *arg);
+void cyc_ctl_thread(void *arg);
+void spro_ctl_thread(void *arg);
+void fpga_read_thread(void *arg);
+void writer_thread(void *arg);
+void fpga_write_thread(void *arg);
 /* IPCS_V4 <PD><ADD-END> */
 char ipcs_lu_ver[8] = {"040000"};/* IPCS_V4 <PD><ADD> */
 /*# LU共通参照エリア #*/
@@ -382,11 +381,11 @@ LU_START lu_start;
 
 /* タスク属性 */
 XS_TASK_ATTR task_attr[COM_TASK_MAX_N] = 
-   {{ON, 3, 95, 0, lu_mon_thread}, {ON, 3, 95, 0, tmr_thread},   {ON, 1, 95, 0, &cs_ctl},          {ON, 1, 95, 0, mda_thread},
-   {ON, 3, 95, 0, lumng_thread},   {ON, 3, 95, 0, doep_r_thread},{ON, 3, 95, 0, doep_s_thread},   {ON, 3, 95, 0, downld},
-   {ON, 2, 95, 0, mnt_thread},     {ON, 3, 95, 0, lu_log},       {ON, 3, 95, 0, support},         {OFF, 1, 95, 0, dspevt},
-   {OFF, 1, 95, 0, dsp2lan},       {OFF, 1, 95, 0, dsp2lan},     {OFF, 1, 95, 0, cyc_ctl},        {OFF, 1, 95, 0, spro_ctl},
-   {OFF, 1, 95, 0, lpb_ctl},       {OFF, 1, 95, 0, fpga_read},   {OFF, 1, 95, 0, writer}, {OFF, 1, 95, 0, fpga_write}};
+   {{ON, 3, 95, 0, lu_mon_thread}, {ON, 3, 95, 0, tmr_thread},   {ON, 1, 95, 0, &cs_ctl_thread},          {ON, 1, 95, 0, mda_thread},
+   {ON, 3, 95, 0, lumng_thread},   {OFF, 3, 95, 0, doep_r_thread},{ON, 3, 95, 0, doep_s_thread},   {ON, 3, 95, 0, downld_thread},
+   {ON, 2, 95, 0, mnt_thread},     {ON, 3, 95, 0, lulog_thread},       {ON, 3, 95, 0, support_thread},         {OFF, 1, 95, 0, dspevt},
+   {OFF, 1, 95, 0, dsp2lan},       {OFF, 1, 95, 0, dsp2lan},     {OFF, 1, 95, 0, cyc_ctl_thread},        {OFF, 1, 95, 0, spro_ctl_thread},
+   {OFF, 1, 95, 0, fpga_read_thread},   {OFF, 1, 95, 0, writer_thread}, {OFF, 1, 95, 0, fpga_write_thread}};
 /* タスク状態 */
 XS_TASK_STATUS task_status[COM_TASK_MAX_N];
 

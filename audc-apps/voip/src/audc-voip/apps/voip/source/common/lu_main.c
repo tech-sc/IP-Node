@@ -25,6 +25,7 @@
 #include "str_start.h"
 #include "com_mem.h"
 #include "lu_main.h"
+#include "mnt_def.h"
 
 /*** 自ファイル内でのみ使用する#define マクロ ***/
 

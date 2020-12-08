@@ -357,6 +357,8 @@ install_orchid_ata:
 	cp -f $(PWD)/drivers/ac49x_mpi/ac49x_mpi.ko $(INSTALL_DIR)/
 	cp -f $(PWD)/drivers/le88/le88.ko $(INSTALL_DIR)/
 	cp -f $(PWD)/apps/voip/Release/lu_proc $(INSTALL_DIR)/
+	cp -f $(PWD)/drivers/fpga_sio/fpga_sio.ko $(INSTALL_DIR)/
+	cp -f $(PWD)/drivers/watchdog/watchdog.ko $(INSTALL_DIR)/
 
 install_450hd:
 	cp -f $(PWD)/drivers/ac49x_dsp/ac49x_dsp.ko $(INSTALL_DIR)/

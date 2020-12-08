@@ -43,9 +43,7 @@
 	#define LOG_PUTDISC		LOGDST_SYSLOG		/* 運用時ログ出力先 */
 #endif /* end DEBUG */
 
-#define LULOG_FLNAME		"/lu_log/alog%08ld.%06ldsec.log"	/* lu_logファイル名 */
-#define LULOG_FLNAME_LEN	48									/* lu_logファイル名のバッファサイズ */
-#define FOREVER				0				/* 時間指定なし */
+#define FOREVER					0				/* 時間指定なし */
 
 /*** 自ファイル内でのみ使用する#define 関数マクロ ***/
 /*** 自ファイル内でのみ使用するtypedef 定義 ***/
@@ -59,6 +57,9 @@ _ATTR_SYM	lulog_t			lulog;
 /* ログ領域 */
 #define LOG_AREA_NUM		128
 _ATTR_SYM	APLLOG_MSG		lulog_LogArea[LOG_AREA_NUM];
+
+/* 内部処理バッファ */
+static	char				tmp_buff[256];
 
 /* errno文字列生成バッファ */
 static	char				errno_str[16];
@@ -236,20 +237,19 @@ _ATTR_SYM BYTE lulog_LogWrite(void)
 	BYTE		result = NG;
 	int			loop = 0;
 	FILE		*fp = NULL;
-	struct timeval	timeval;
+	struct timeval		timeval;
 	struct stat		fl_stat;
-	char			fl_name[LULOG_FLNAME_LEN];
 
 	gettimeofday(&timeval, NULL);
 	while(loop < 5)
 	{
-		sprintf(fl_name, LULOG_FLNAME, timeval.tv_sec, timeval.tv_usec);
-		if (stat(fl_name, &fl_stat) != 0)
+		sprintf(tmp_buff, "/tmp/alog%08ld.%06ldsec.log", timeval.tv_sec, timeval.tv_usec);
+		if (stat(tmp_buff, &fl_stat) != 0)
 		{
-			fp = fopen(fl_name, "wt");
+			fp = fopen(tmp_buff, "wt");
 			if (fp == NULL)
 			{
-				dbg_print(LULOG_ID, LOG_ERR, "%s fopen() Error:%s", fl_name, mkstr_errno(errno));
+				dbg_print(LULOG_ID, LOG_ERR, "/tmp/alogXXXX.log fopen() Error:%s", mkstr_errno(errno));
 			}
 			else
 			{
@@ -299,7 +299,7 @@ _ATTR_SYM BYTE lulog_LogWiteFile(FILE *fp)
 		}
 		if (fputc('\n', fp) == EOF)
 		{
-			dbg_print(LULOG_ID, LOG_ERR, "alogXXXX.log fputc() Error:%s", mkstr_errno(errno));
+			dbg_print(LULOG_ID, LOG_ERR, "/tmp/alogXXXX.log fputc() Error:%s", mkstr_errno(errno));
 			result = NG;
 			break;
 		}

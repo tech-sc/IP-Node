@@ -405,9 +405,6 @@ void DDR_SimpleMemChk(void)
 		/* 検査結果LED点滅してリターンしない */
 		GPIO_LedBlink();
 	}
-
-	/* 検査結果LED点灯 */
-	RegWrite(GPIO_LED, RegRead(GPIO_LED) & ~GPIO_LED_OFF);
 }
 
 

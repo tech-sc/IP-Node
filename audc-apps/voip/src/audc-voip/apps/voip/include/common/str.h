@@ -306,6 +306,44 @@ typedef struct  T_INNER_MSG{        /*# 内部メッセージフォーマット 
         }user_data;
 }INNER_MSG;
 
+
+/* IPCS_V4 PG ADD-STA */
+/* 簡易OSより */
+typedef struct
+        {
+        WORD        seq ;                                      /*# 登録番号 #*/
+        WORD        tim ;                      /*# 実行開始時間(遅延管理用) #*/
+        BYTE        dpid ;                             /*# 送信先プロセスID #*/
+        BYTE        spid ;                             /*# 送信元プロセスID #*/
+        WORD        msgid ;                              /*# メッセージ種別 #*/
+        BYTE        prio ;                                     /*# 優先順位 #*/
+        }           MSGHD ;                            /*# メッセージヘッダ #*/
+typedef struct                               /*# μITRON4.0と異なるので注意 #*/
+        {
+        void       *adr ;                                  /*# 先頭アドレス #*/
+        WORD        blkcnt ;                         /*# 全メモリブロック数 #*/
+        WORD        blksz ;            /*# メモリブロックのサイズ(バイト数) #*/
+        WORD        fblkcnt ;                      /*# 空きメモリブロック数 #*/
+        WORD        mincnt ;   /*# 過去最小空きメモリブロック数(固定長のみ) #*/
+//        FLOAT       delta ;                            /*# 使用率の変化傾向 #*/
+        BYTE        kind ;                             /*# メモリプール種別 #*/
+        } T_RMPL ;          /*# 可変長/固定長メモリプール状態のパケット情報 #*/
+typedef struct
+        {
+        BYTE        inf1 ;                                    /*# 付加情報1 #*/
+        BYTE        inf2 ;                                    /*# 付加情報2 #*/
+        WORD        inf3 ;                                    /*# 付加情報3 #*/
+        void       *inf4 ;                                    /*# 付加情報4 #*/
+        } T_ATAP ;                       /*# アプリケーションタイマ付加情報 #*/
+typedef struct
+        {
+        MSGHD       msg ;                                /*# Message Header #*/
+        WORD        timid ;                    /*# アプリケーションタイマID #*/
+        T_ATAP      atap ;                                     /*# 付加情報 #*/
+        }           APTMSG ;    /*# アプリケーションタイマT.Oメッセージ構成 #*/
+/* IPCS_V4 PG ADD-END */
+
+
 /*########  ＬＵオーダ  ##############################*/
 
 typedef struct  T_LUORD_DOWNLOAD{       /*# ダウンロード #*/

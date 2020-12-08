@@ -12,6 +12,8 @@ extern void downld_thread( void *arg );
 extern void writer_thread( void *arg );
 
 extern BYTE tftp_get(char *fl_name, BYTE *ip_addr);
+extern void tftp_wavdl_end(void);
+
 
 #ifdef DEBUG
 #ifndef TFTP_RES_OK

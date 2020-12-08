@@ -25,6 +25,9 @@
 #include "str.h"
 #include "prot.h"
 #include "tmr_def.h"
+#include "str_comdt.h"		//com_data
+#include "str_boot.h"		//com_data
+#include "h323_def.h"		//com_data
 #endif
 
 #include "mnt_def.h"
@@ -734,8 +737,10 @@ _ATTR_SYM BYTE dl_ClStt_WriteResp(INNER_MSG *msg_p)
 	}
 	else
 	{
-		dbg_print(DWL_ID, LOG_INFO, "sndmsg(LUMNG_ECB,E_HORYDLEND,%d)", (uint32_t)msg_p->msg_header.no);
-		dl_sndmsg(LUMNG_ECB, E_HORYDLEND, msg_p->msg_header.no);
+		dbg_print(DWL_ID, LOG_INFO, "sndmsg(DOEP_ECB,E_HORYDLEND,0)");
+		tftp_wavdl_end();
+		//dbg_print(DWL_ID, LOG_INFO, "sndmsg(LUMNG_ECB,E_HORYDLEND,%d)", (uint32_t)msg_p->msg_header.no);
+		//dl_sndmsg(LUMNG_ECB, E_HORYDLEND, msg_p->msg_header.no);
 	}
 	downld_state_no = STATE_IDLE;
 	return OK;
@@ -1502,6 +1507,67 @@ BYTE tftp_get(char *fl_name, BYTE *ip_addr)
 		return NG;
 	}
 	return OK;
+}
+
+/*###########################################################################*/
+/*#                                                                         #*/
+/*# モジュール名 : tftp_wavdl_end                                           #*/
+/*#                                                                         #*/
+/*#     日本語名 : TFTP保留音ダウンロード完了処理                           #*/
+/*#     参照番号 : -                                                        #*/
+/*#     単位区分 : -                                                        #*/
+/*#     概    要 : TFTPでの保留音ダウンロード完了通知をおこなう。           #*/
+/*#                PID          -                                           #*/
+/*#                Priorty      -                                           #*/
+/*#                Queue Kind   -                                           #*/
+/*#     入    力 : -                                                        #*/
+/*#     出    力 : -                                                        #*/
+/*#     リターン : -                                                        #*/
+/*#                                                                         #*/
+/*#     作    成 : 00/07/-- - ＳＡ                                          #*/
+/*#     更    新 : --/--/-- -            )                                  #*/
+/*#                                                                         #*/
+/*###########################################################################*/
+void tftp_wavdl_end(void)
+{
+	INNER_MSG		*snd_ptr;
+	LUEVT_HORYDLEND	*ud_ptr;
+
+	snd_ptr = ( INNER_MSG *)com_poolget( POOL0 );		/*# メモリ確保 #*/
+	if(snd_ptr == ( INNER_MSG *)0xffffffff)				/*# プール取得OK？ #*/
+	{
+		return;
+	}
+	ud_ptr = ( LUEVT_HORYDLEND *)com_poolget( POOL1 );	/*# メモリ確保 #*/
+	if(ud_ptr == ( LUEVT_HORYDLEND *)0xffffffff){		/*# プール取得OK？ #*/
+		com_poolput( POOL0 ,(BYTE *)snd_ptr );
+		return;
+	}
+
+	/*# ダウンロード完了通知作成 #*/
+	/*# LUヘッダ部 #*/
+	ud_ptr -> lu_header.slv_no = com_data.slv_number;			/*# SLV番号セット #*/
+	ud_ptr -> lu_header.type = 0;								/*# 送信先/送信元種別セット #*/
+	ud_ptr -> lu_header.pkg_no = 0;								/*# PKG番号セット #*/
+	
+	/*# イベントデータ部 #*/
+	ud_ptr -> bc = 3;											/*# バイトカウンタセット#*/
+	ud_ptr -> code = E_HORYDLEND;								/*# LUオンライン通知セット #*/
+																/*# メッセージヘッダ部作成 #*/
+	/*# メッセージヘッダ部 #*/
+	snd_ptr -> msg_header.id   = DWL_ID;						/*# 送信元ID(TFTP)セット #*/
+	snd_ptr -> msg_header.div  = LU_EVT;						/*# メッセージ区分セット #*/
+	snd_ptr -> msg_header.kind = E_HORYDLEND;					/*# メッセージ種別セット #*/
+	snd_ptr -> msg_header.no   = 0;								/*#  #*/
+	snd_ptr -> msg_header.link = (BYTE*)ud_ptr;					/*# 2次リンクセット #*/
+
+	com_sndmsg( DOEP_ECB, ( BYTE * )snd_ptr );					/*#	メッセージ送出 #*/
+	/*# IP-CS追加 start 2004.04 #*/
+	if(com_data.reset != 0){
+		com_syserr(DWL_ID,0);									/*# LUﾘｾｯﾄ要求受信処理 #*/
+	}
+	com_data.tftp_ing = 0;										/*#	TFTP動作中フラグクリア #*/
+	/*# IP-CS追加 end 2004.04 #*/
 }
 
 /* This is free software, licensed under the GNU General Public License v2. */

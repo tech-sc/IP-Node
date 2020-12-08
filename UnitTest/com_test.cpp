@@ -32,6 +32,8 @@ extern "C" {
 #include "stub.h"
 }
 
+#define TEST_MEM_ADR	0x00000F00			/* 内蔵SRAMを用いて簡易デバッグする用途の物理アドレス */
+
 /********************************************************************************/
 /* テストケースの説明															*/
 /*		ComMemLv01 は、引数テストやリソースを扱わないロジックテスト				*/
@@ -44,9 +46,6 @@ extern "C" {
 /******************************************************************************/
 /* テストクラス																  */
 /******************************************************************************/
-#define PFN_MASK_SIZE 8
-#define ADDR_MASK		0x7fffffffffffffUL
-
 class ComMemLv01 : public ::testing::Test {
 protected:
 	ComMemLv01(){
@@ -56,80 +55,174 @@ protected:
 
 	// TestCase名ごとの初期化処理。テストケース実行前に実行される。
 	virtual void SetUp(){
+		com_memInit();
 	}
 	// TestCase名ごとの後処理。テストケース実行後に実行される。
 	virtual void TearDown(){
 	}
+};
 
-	unsigned long virt2phy(const void *virtaddr)
-	{
-	    unsigned long page, physaddr, virt_pfn;
-	    off_t offset;
-	    int page_size = sysconf(_SC_PAGESIZE);
-	    int fd, retval;
-
-	    fd = open("/proc/self/pagemap", O_RDONLY);
-	    if (fd < 0) {
-	        printf("error: open");
-	        return 0;
-	    }
-
-	    virt_pfn = (unsigned long)virtaddr / page_size;
-	    offset = sizeof(uint64_t) * virt_pfn;
-	    if (lseek(fd, offset, SEEK_SET) == (off_t) -1) {
-	        printf("error: lseek\n");
-	        close(fd);
-	        return 0;
-	    }
-
-	    retval = read(fd, &page, PFN_MASK_SIZE);
-	    close(fd);
-	    if (retval < 0) {
-	        printf("error: read\n");
-	        return 0;
-	    } else if (retval != PFN_MASK_SIZE) {
-	        printf("error: read2\n");
-	        return 0;
-	    }
-
-	    if ((page & ADDR_MASK) == 0){
-	        printf("pfn == 0\n");
-	        printf("page = %016lX\n", page);
-	        printf("mask = %016lX\n", ADDR_MASK);
-	        return 0;
-	    }
-
-	    physaddr = ((page & ADDR_MASK) * page_size)
-	        + ((unsigned long)virtaddr % page_size);
-
-	    return physaddr;
+class ComMemLv02 : public ::testing::Test {
+protected:
+	ComMemLv02(){
+	}
+	~ComMemLv02(){
 	}
 
+	// TestCase名ごとの初期化処理。テストケース実行前に実行される。
+	virtual void SetUp(){
+		com_memInit();
+	}
+	// TestCase名ごとの後処理。テストケース実行後に実行される。
+	virtual void TearDown(){
+	}
 };
 
 /******************************************************************************/
 /* テストケース																  */
 /******************************************************************************/
-TEST_F(ComMemLv01, com_memInit)
-{
-	EXPECT_EQ(OK, com_memInit());
-}
+//TEST_F(ComMemLv01, com_memInit)
+//{
+// SetUp()に移動した
+//	EXPECT_EQ(OK, com_memInit());
+//}
 
 TEST_F(ComMemLv01, com_memRead)
 {
-	// PC-VMだと物理アドレスがわからない
-	DWORD	data=0;
-	void	*virt_ptr=NULL;
-	uint64_t	phy_ptr=0;
+	uint32_t	data=0;
 
-	virt_ptr = malloc(256);
-	memcpy(virt_ptr, "1234567890", 10);
-
-	phy_ptr = virt2phy(virt_ptr);
-
-	EXPECT_EQ(OK, com_memRead(phy_ptr, DWORD_WIDTH, 1, &data));
-	printf("data=%lX\n", data);
-
-	free(virt_ptr);
+	//パラメータエラー確認
+	EXPECT_EQ(NG, com_memRead(TEST_MEM_ADR, 0, 1, &data));
+	EXPECT_EQ(NG, com_memRead(TEST_MEM_ADR, DWORD_WIDTH, 0, &data));
+	EXPECT_EQ(NG, com_memRead(TEST_MEM_ADR, DWORD_WIDTH, 1, NULL));
 }
 
+TEST_F(ComMemLv01, com_memWrite)
+{
+	uint32_t	data=0;
+
+	//パラメータエラー確認
+	EXPECT_EQ(NG, com_memWrite(TEST_MEM_ADR, 0, 1, &data));
+	EXPECT_EQ(NG, com_memWrite(TEST_MEM_ADR, DWORD_WIDTH, 0, &data));
+	EXPECT_EQ(NG, com_memWrite(TEST_MEM_ADR, DWORD_WIDTH, 1, NULL));
+}
+
+TEST_F(ComMemLv02, com_memWrite_comMemRead)
+{
+	uint32_t	data=0x12345678;
+	uint32_t	rd_data=0;
+
+	EXPECT_EQ(OK, com_memWrite(TEST_MEM_ADR, DWORD_WIDTH, 1, &data));
+	//リードバック確認
+	EXPECT_EQ(OK, com_memRead(TEST_MEM_ADR, DWORD_WIDTH, 1, &rd_data));
+	EXPECT_EQ(data, rd_data);
+}
+
+TEST_F(ComMemLv01, com_memUpdate)
+{
+	uint32_t	prev_data=0;
+	uint32_t	data=0x98765432;
+
+	//パラメータエラー確認
+	EXPECT_EQ(NG, com_memUpdate(TEST_MEM_ADR, 0, 0xFFFFFFFF, data, &prev_data));
+}
+
+TEST_F(ComMemLv02, com_memUpdate)
+{
+	uint32_t	wt_data=0x12345678;
+	uint32_t	data=0x98765432;
+	uint32_t	prev_data=0;
+	uint32_t	rd_data=0;
+
+	//正常確認
+	EXPECT_EQ(OK, com_memWrite(TEST_MEM_ADR, DWORD_WIDTH, 1, &wt_data));
+	EXPECT_EQ(OK, com_memUpdate(TEST_MEM_ADR, DWORD_WIDTH, 0xFFFFFFFF, data, &prev_data));
+	EXPECT_EQ(wt_data, prev_data);
+	EXPECT_EQ(OK, com_memUpdate(TEST_MEM_ADR+4, DWORD_WIDTH, 0xFFFFFFFF, data, NULL));
+	//リードバック確認
+	EXPECT_EQ(OK, com_memRead(TEST_MEM_ADR, DWORD_WIDTH, 1, &rd_data));
+	EXPECT_EQ(data, rd_data);
+}
+
+TEST_F(ComMemLv02, com_FpgaRegRead)
+{
+	uint32_t	rd_data[4] = {};
+
+	EXPECT_EQ(OK, com_FpgaRegRead(FPGA_HWVER3, 4, &rd_data[0]));
+	printf("FPGA_HWVER[3~0]=%02X,%02X,%02X,%02X\n", rd_data[0], rd_data[1], rd_data[2], rd_data[3]);
+	rd_data[0] = 0xFF;
+	EXPECT_EQ(OK, com_FpgaRegRead(FPGA_PKGVER, 1, &rd_data[0]));
+	printf("FPGA_PKGVER=%02X\n", rd_data[0]);
+}
+
+TEST_F(ComMemLv02, com_FpgaRegWrite)
+{
+	// LED全点灯
+	EXPECT_EQ(OK, com_FpgaRegWrite(FPGA_LED, LED_BLUE | LED_GREEN | LED_RED));
+	sleep(3);
+}
+
+TEST_F(ComMemLv02, com_FpgaLED)
+{
+	// 青点滅
+	EXPECT_EQ(OK, com_FpgaLED(ON_BLINK_MASK | LED_CTRL_MASK | COLOR_MASK, LED_BLINK | LED_LU | LED_BLUE ));
+	sleep(2);
+	// 青+赤点灯
+	EXPECT_EQ(OK, com_FpgaLED(ON_BLINK_MASK | LED_CTRL_MASK | COLOR_MASK, LED_ON | LED_LU | (LED_BLUE | LED_RED)));
+	sleep(2);
+	EXPECT_EQ(OK, com_FpgaLED(ON_BLINK_MASK | LED_CTRL_MASK | COLOR_MASK, 0));
+}
+
+TEST_F(ComMemLv02, com_GpioRegRead)
+{
+	uint32_t	rd_data[0] = {};
+
+	EXPECT_EQ(OK, com_GpioRegRead(GPIO_IN0_REG, FPGA_DONE | MODE_SW_ON, &rd_data[0]));
+	EXPECT_EQ(OK, com_GpioRegRead(GPIO_IN0_REG, MODE_SW_ON, &rd_data[1]));
+	EXPECT_EQ(rd_data[0] & MODE_SW_ON, rd_data[1]);
+}
+
+TEST_F(ComMemLv02, com_GpioRegUpdate)
+{
+	// 検査結果LED点灯
+	EXPECT_EQ(OK, com_GpioRegUpdate(GPIO_OUT0_REG, GPIO_LED_MASK, ~GPIO_LED_OFF));
+	sleep(3);
+	EXPECT_EQ(OK, com_GpioRegUpdate(GPIO_OUT0_REG, GPIO_LED_MASK, GPIO_LED_OFF));
+}
+
+TEST_F(ComMemLv02, com_IPLVerGet)
+{
+	char	ipl_ver[5] = {};
+
+	EXPECT_EQ(5, com_IPLVerGet(ipl_ver, sizeof(ipl_ver)));
+	EXPECT_EQ(0, strcmp("1.00", ipl_ver));
+}
+
+TEST_F(ComMemLv01, com_SpiflashRead)
+{
+	uint16_t	data[512] = {};
+
+	//パラメータエラー確認
+	EXPECT_EQ(NG, com_SpiflashRead(0, 0, &data[0]));
+	EXPECT_EQ(NG, com_SpiflashRead(0, 1, NULL));
+}
+
+TEST_F(ComMemLv02, com_SpiflashRead)
+{
+	uint16_t	data[512] = {};
+
+	EXPECT_EQ(OK, com_SpiflashRead(0, 512, data));
+	printf("SPI-FLASh dump[0~15]:%04X,%04X,%04X,%04X\n", data[0],data[1],data[2],data[3]);
+}
+
+TEST_F(ComMemLv01, seq_search)
+{
+	//パラメータエラー確認
+	EXPECT_EQ(NULL, seq_search(NULL, 10, "ave", 3));
+	EXPECT_EQ(NULL, seq_search("I have a PC.", 0, "ave", 3));
+	EXPECT_EQ(NULL, seq_search("I have a PC.", 12, NULL, 3));
+	EXPECT_EQ(NULL, seq_search("I have a PC.", 12, "ave", 0));
+	EXPECT_EQ(NULL, seq_search("I have a PC.", 3, "ave", 3));
+
+	EXPECT_EQ(!NULL, seq_search("I have a PC.", 12, "ave", 3));
+}

@@ -67,6 +67,12 @@ static	char				errno_str[16];
 static	char				taskid_str[16];
 
 /*** static 関数宣言 ***/
+#ifndef DEBUG
+_ATTR_SYM void lulog_init(void);
+_ATTR_SYM BYTE lulog_Loggin(INNER_MSG *msg_p);
+_ATTR_SYM BYTE lulog_LogWrite(void);
+_ATTR_SYM BYTE lulog_LogWiteFile(FILE *fp);
+#endif // !DEBUG
 
 /******************************************************************************/
 /* 関数名	  errno文字列変換												  */
@@ -231,8 +237,8 @@ _ATTR_SYM BYTE lulog_LogWrite(void)
 	BYTE		result = NG;
 	int			loop = 0;
 	FILE		*fp = NULL;
-	struct timeval	timeval = {};
-	struct stat		fl_stat = {};
+	struct timeval		timeval;
+	struct stat		fl_stat;
 
 	gettimeofday(&timeval, NULL);
 	while(loop < 5)
@@ -323,7 +329,7 @@ void lulog_AplLog(WORD task_id, WORD line, WORD len, BYTE *data_p)
 {
 	INNER_MSG	*msg_p = (INNER_MSG*)com_poolget(POOL0);
 	APLLOG_MSG	*sub_p = (APLLOG_MSG*)com_poolget(POOL1);
-	struct timeval	timeval = {};
+	struct timeval	timeval;
 
 	if ((msg_p != NULL)&&(sub_p != NULL)&&(len <= APLLOGDATA_LEN)&&(data_p != NULL))
 	{

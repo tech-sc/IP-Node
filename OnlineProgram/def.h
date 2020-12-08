@@ -12,7 +12,7 @@
 /*#     更    新 : 20/11/27 - 小澤  美津晴                                  #*/
 /*#                                                                         #*/
 /*###########################################################################*/
-
+#include <arpa/inet.h> /* IPCS_V4 <PD><ADD> */
 /*---------------------------------------------------------------------------*/
 /*       作成ファイル種別用                                                  */
 /*---------------------------------------------------------------------------*/
@@ -83,7 +83,7 @@
 #define		DELAY_TIME_FULL		0xFFFFFFFF      /* V03.03 遅延時間最大値               */
 
 #define     NG                  0xFF
-//#define     NULL                0x00
+//#define     NULL                0x00 /* IPCS_V4 <PD><DEL> */
 //#define       NULLP           (void*)(0)
 #define     ON                  0x01
 #define     OFF                 0x00
@@ -106,7 +106,15 @@
 typedef     unsigned char       BYTE;   /*# BYTE  = 8bit #*/
 typedef     unsigned short      WORD;   /*# WORD  = 16bit #*/
 typedef     unsigned long       DWORD;  /*# DWORD = 32bit #*/
+/* IPCS_V4 <PD><ADD-STA> */
+typedef     unsigned char 	uint_8;
+typedef     unsigned short	uint_16;
+typedef     unsigned long       uint_32;
+typedef     char       int_8;
+typedef     short      int_16;
+typedef     long       int_32;
 
+/* IPCS_V4 <PD><ADD-END> */
 /* 圧縮LU */
 #ifndef LONG
 #define LONG       long            /* 32ビット符号有り整数
@@ -326,6 +334,8 @@ typedef     unsigned long       DWORD;  /*# DWORD = 32bit #*/
 #define     E_DOUKI2    7                                   /*# 同期制御２ #*/      // 2000.05.11 V1.2追加
 #define     E_PACKET2   8                                   /*# パケット同期２ #*/  // 2000.10.19 V2.1追加
 
+#define SOCKET_NG 0xffffffff /* IPCS_V4 <PD><ADD> */
+
 /*# ＳＩＯ通信内部データフォーマット #*/
 enum{
     SIOCTL_IN_VER,                  /*# ＳＩＯ通知バージョン（RESERVE） #*/     //LU32B
@@ -402,7 +412,6 @@ typedef enum {
 		LAN2DSP_ID,				/*# lan2dsp #*/
 		CYCCTL_ID,				/*# sys_ctl #*/
 		SPROCTL_ID,				/*# spro_ctl #*/
-		LPBCTL_ID,				/*# lpb_ctl #*/
 		FPGAR_ID,				/*# fpga_read #*/
 		WRT_ID,					/*# writer #*/
 		FPGAW_ID,				/*# fpga_write #*/
@@ -474,7 +483,7 @@ typedef enum {
 
 //圧縮LU対応。DSP系MSG。2003.09.08
 #define     I_DSPCMDSND             0x18    
-#define     I_HPI_ECHO_REPLY        0x19    /* HPIエコー応答受信 */
+#define     I_DEVICE_STATUS        0x19    /* DSPデバイス状態受信 */
 #define     I_DSP_REALTIME_COMMAND  0x1a
 #define     I_DSP_MODECHG           0x1b    /* DSP⇔FAX切替通知 */
 #define     I_DSPSTART              0x1c    /* DSP開始通知 */
@@ -493,6 +502,7 @@ typedef enum {
 #define     I_CLKDOBS       0x41        /*# CLKD障害通知要求 #*/
 #define     I_FANOBS        0x42        /*# FAN障害通知要求 #*/
 #define     I_SYNCMP        0x43        /*# CLKD同期合わせ完了通知要求 #*/  // 2000.05.13 追加
+#define     I_DSPCMP        0x44        /*# DSP起動完了通知 #*//* IPCS_V4 <PD><ADD> */
 
 //#define       I_DPRAMRD       0x50        /*# DPRAMデータ読み出し要求 #*/
 #define     I_PGDLCMP       0x51        /*# プログラムダウンロード完了 #*///2004.04 IP-CS 追加
@@ -504,6 +514,8 @@ typedef enum {
 #define     I_VOICESND      0x80        /*# 音声送信要求 #*/
 #define     I_SDESRCV       0x81        /*# SDES受信 #*/
 #define     I_BYERCV        0x82        /*# BYE受信 #*/
+#define     I_HORYCOMPLETE  0x83        /*# 保留音送出完了 #*//* IPCS_V4 <PD><ADD> */
+#define     I_DTMFABORT     0x84        /*# DTMF送出アボート #*//* IPCS_V4 <PD><ADD> */
 
 #define     I_BOOTPREQRCV   0x90        /*# BOOTPreq受信 #*/    //2000.07 V2.1追加
 
@@ -516,7 +528,7 @@ typedef enum {
 #define     I_FAXEND        0xc1        /*# FAX手順終了 #*/
 #define     I_T38STATUS     0xc2        /*# T38状態通知 #*/
 #define     I_FAXKILL       0xc3        /*# FAX強制停止指示 #*/
-#define     I_FAXTOVOICE        0xc4        /*# FAXtoVOICE終了 #*/
+#define     I_FAXTOVOICE        0xc4    /*# FAXtoVOICE終了 #*/
 #define     I_FAXPASS       0xc5        /*# FAXパス切断指示 #*/ //2003.11.10追加
 
 /* T30タスクにて受信するメッセージの定義    */
@@ -547,6 +559,14 @@ typedef enum {
 #define     I_LOGSTART      0xf0        /*# ログオープン #*/    // 2001.08 V2.3追加
 #define     I_LOGCMD        0xf1        /*# ログコマンド #*/    // 2001.08 V2.3追加
 #define     I_LOGTRACE      0xf2        /*# ログトレース #*/    // 2003.09 追加
+
+// UF7200追加メッセージ
+#define I_SERVER_REQ    0xf0
+#define I_SERVER_RESP   0xf1
+#define I_CLIENT_REQ    0xf2
+#define I_CLIENT_RESP   0xf3
+#define I_WRITE_REQ     0xf4
+#define I_WRITE_RESP    0xf5
 
 
     /*# メッセージ種別：ＬＵオーダ #*/
@@ -589,6 +609,7 @@ typedef enum {
 #define     O_TST_MEM_RD    0xfb        /*# 工場試験用 メモリリード #*/
 #define     O_TST_MEM_WT    0xfc        /*# 工場試験用 メモリライト #*/
 #define     O_TST_DSP_CK    0xfd        /*# 工場試験用 ＤＳＰメモリチェック #*/ // 2001.05.22 追加
+#define     O_TST_SPI_RD    0xfe        /*# 工場試験用 SPIバージョンリード #*/ /* IPCS_V4 ADD */
 #define     O_TEST_ORD_TEND 0xff        /*# 工場試験用識別終了 #*/          //2000.07 V2.1追加
 
 #define     O_FLASHTOOL     0x2F        /*# フラッシュツール要求 #*/        //2000.12.04 V2.1FLASH_TOOL
@@ -669,6 +690,7 @@ typedef enum {
 #define     E_TST_MEM_RD    0xfb        /*# 工場試験用 メモリリード #*/
 #define     E_TST_MEM_WT    0xfc        /*# 工場試験用 メモリライト #*/
 #define     E_TST_DSP_CK    0xfd        /*# 工場試験用 ＤＳＰメモリチェック #*/ // 2001.05.22 追加
+#define     E_TST_SPI_RD    0xfe        /*# 工場試験用 SPIバージョンリード #*/ /* IPCS_V4 ADD */
 // 工場試験用
 
 #define     E_PKGEVENT      0x80        /*# 既存PKGイベント #*/
@@ -849,8 +871,8 @@ typedef enum {
 #define     POOL0_SIZE      		56          /*# 一般メッセージ用 [12(os)+44(内部msg)] #*/ //2003.10.23
 #define     POOL1_SIZE      		280         /*# 二次メッセージ用 [12(os)+12(LUﾍｯﾀﾞ)+256(ｵｰﾀﾞ/ｲﾍﾞﾝﾄ情報)] #*/
 #define     POOL2_SIZE      		80          /*# DSP制御データ用 [12(os)+4(SystemSTS)+64] #*/
-#define     POOL3_SIZE      		1540        /*# 音声受信メッセージ用 [12(os)+1528(Max LAN Rcv Size)] #*/
-#define     POOL4_SIZE      		984         /*# 音声送信メッセージ用 [12(os)+12(rtp)+960(音声120ms)) #*/
+#define     POOL3_SIZE      		1540        /*# 音声受信メッセージ用 [1528(Max LAN Rcv Size)] #*/
+#define     POOL4_SIZE      		512         /*# 音声送信メッセージ用 [12(rtp)+320(音声G711-40ms)) #*//* IPCS_V4 <PD><CHG> */
 #define     POOL5_SIZE      		140         /*# UDP送信用 [12(os)+128(RTCP、CLKD、CRINT)]#*/
 #define     POOL6_SIZE      		20          /*# FUSION用 [12(os)+4(SystemSTS)+4(Dmy)] #*/
 #define     POOL7_SIZE      		28          /*# TAG用 [12(os)+16(TAG)] #*/
@@ -867,7 +889,7 @@ typedef enum {
 #define     POOL0_CNT       		512         /*# 一般メッセージ用 #*/
 #define     POOL1_CNT       		256         /*# 二次メッセージ用 #*/
 #define     POOL2_CNT       		32          /*# DSP制御データ用 #*/
-#define     POOL3_CNT       		1           /*# 音声受信用 #*/
+#define     POOL3_CNT       		8           /*# 音声受信用 #*//* IPCS_V4 <PD><CHG> */
 #define     POOL4_CNT       		512         /*# 音声送信用 #*/
 #define     POOL5_CNT       		32          /*# UDP送信用 #*/
 #define     POOL6_CNT       		256         /*# FUSION用 #*/
@@ -954,8 +976,10 @@ typedef enum {
 /*#########################################*/
 /*#            マクロ定義                 #*/
 /*#########################################*/
-#define     com_chgword(C)          (WORD)((((C)>>8)&0xFF)|(((C)<<8)&0xFF00))
-#define     com_chgdword(C)         ((DWORD)(((((DWORD)C)>>24)&0xFF)|((((DWORD)C)>>8)&0xFF00)|((((DWORD)C)<<8)&0xFF0000)|((((DWORD)C)<<24)&0xFF000000)))
+//#define     com_chgword(C)          (WORD)((((C)>>8)&0xFF)|(((C)<<8)&0xFF00))
+#define	com_chgword(C)	htons(C) /* IPCS_V4 <PD><CHG> */
+//#define     com_chgdword(C)         ((DWORD)(((((DWORD)C)>>24)&0xFF)|((((DWORD)C)>>8)&0xFF00)|((((DWORD)C)<<8)&0xFF0000)|((((DWORD)C)<<24)&0xFF000000)))
+#define	com_chgdword(C)	htonl(C) /* IPCS_V4 <PD><CHG> */
 #define com_10dwordcopy(a,b)        *a++ = *b++;\
                                     *a++ = *b++;\
                                     *a++ = *b++;\
@@ -1061,4 +1085,47 @@ typedef enum {
 #define LOGDST_CNS    1 /* Output to console */
 #define LOGDST_SYSLOG 2 /* Output to syslog */
 
+/* LU動作モード */
+#define LUMODE_NORMAL 1 /* 通常モード */
+#define LUMODE_MAINTE 0 /* 保守モード */
+
+
+/* TAG FIELDS in the vendor information area (v_fields) */
+
+/* FIXED  LENGTH DATA: one tag byte, followed by optional data as described 
+ * below 
+*/
+#define PAD_TAG         (BYTE)0   /* padding fields */
+#define END_TAG         (BYTE)255 /* end of usable data */
+#define SUBNET_TAG      (BYTE)1   /* followed by 4 bytes subnet mask */
+/*time offset of the local subnet in seconds from Coordinated Universal Time 
+ * (UTC) (signed 32 bit integer)
+*/
+#define TIMEOFFSET_TAG  (BYTE)2   /* followed by 4 bytes of time offset */
+#define BOOTFILESIZE_TAG (BYTE)13 /* Two byte value in network order specifiyng
+                  the number of 512 bytes blocks in the default
+                  boot file.
+                */
+
+/* VARIABLE LENGTH DATA: one tag byte, one length byte, and N bytes of 
+ * data 
+*/
+#define GATEWAY_TAG     (BYTE)3   /*IP addresses of N/4 gateways for
+                       this subnet. Preferred one is first*/ 
+#define TIMESERVER_TAG  (BYTE)4   /*IP addresses of N/4 time servers (RFC-868) */
+
+#define NAMESERVER_TAG  (BYTE)5   /*IP addresses of N/4 name servers (IEN_116) */
+#define DOMAINNAMESERVER_TAG (BYTE)6  /*IP addresses of N/4 domain name servers
+                                (RFC1034) */
+#define LOGSERVER_TAG   (BYTE)7   /* IP addresses of N/4 MIT-LCS UDP log server */
+#define QUOTESERVER_TAG (BYTE)8   /* IP addresses of N/4 Quote of the Day servers
+                                (RFC865) */
+#define LPRSERVER_TAG   (BYTE)9   /* IP addresses of N/4 Berkeley 4BSD printer 
+                    servers (LPD) */
+#define IMPRESSSERVER_TAG (BYTE)10 /*IP addresses of N/4 Impress network image 
+                    servers [IMAGEN] */ 
+#define RLPSERVER_TAG   (BYTE)11  /* IP addresses of N/4 Resource Location 
+                   Protocol servers (RFC-887) */
+
+#define HOSTNAME_TAG    (BYTE)12  /* Name of the client. Site specific issue */
 

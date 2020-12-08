@@ -42,15 +42,14 @@ typedef struct lulog_t {
 extern	lulog_t				lulog;
 #define LOG_AREA_NUM		128
 extern	APLLOG_MSG			lulog_LogArea[LOG_AREA_NUM];
-#endif // DEBUG
-
-
-extern void lulog_thread(void *arg);
 _ATTR_SYM void lulog_init(void);
 _ATTR_SYM BYTE lulog_Loggin(INNER_MSG *msg_p);
 _ATTR_SYM BYTE lulog_LogWrite(void);
 _ATTR_SYM BYTE lulog_LogWiteFile(FILE *fp);
-void lulog_AplLog(WORD task_id, WORD line, WORD len, BYTE *data_p);
+#endif // DEBUG
+
+extern void lulog_thread(void *arg);
+extern void lulog_AplLog(WORD task_id, WORD line, WORD len, BYTE *data_p);
 #define com_AplLog		lulog_AplLog
 #endif /* _LULOG_TSK_H_ */
 

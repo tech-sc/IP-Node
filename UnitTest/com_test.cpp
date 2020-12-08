@@ -146,7 +146,7 @@ TEST_F(ComMemLv02, com_memUpdate)
 
 TEST_F(ComMemLv02, com_FpgaRegRead)
 {
-	uint32_t	rd_data[4] = {};
+	uint8_t		rd_data[4] = {};
 
 	EXPECT_EQ(OK, com_FpgaRegRead(FPGA_HWVER3, 4, &rd_data[0]));
 	printf("FPGA_HWVER[3~0]=%02X,%02X,%02X,%02X\n", rd_data[0], rd_data[1], rd_data[2], rd_data[3]);
@@ -165,17 +165,17 @@ TEST_F(ComMemLv02, com_FpgaRegWrite)
 TEST_F(ComMemLv02, com_FpgaLED)
 {
 	// 青点滅
-	EXPECT_EQ(OK, com_FpgaLED(ON_BLINK_MASK | LED_CTRL_MASK | COLOR_MASK, LED_BLINK | LED_LU | LED_BLUE ));
+	EXPECT_EQ(OK, com_FpgaLED(ON_BLINK_MASK | LED_CTRL_MASK | COLOR_MASK, LED_BLINK | LED_LU | LED_BLUE, NULL));
 	sleep(2);
 	// 青+赤点灯
-	EXPECT_EQ(OK, com_FpgaLED(ON_BLINK_MASK | LED_CTRL_MASK | COLOR_MASK, LED_ON | LED_LU | (LED_BLUE | LED_RED)));
+	EXPECT_EQ(OK, com_FpgaLED(ON_BLINK_MASK | LED_CTRL_MASK | COLOR_MASK, LED_ON | LED_LU | (LED_BLUE | LED_RED), NULL));
 	sleep(2);
-	EXPECT_EQ(OK, com_FpgaLED(ON_BLINK_MASK | LED_CTRL_MASK | COLOR_MASK, 0));
+	EXPECT_EQ(OK, com_FpgaLED(ON_BLINK_MASK | LED_CTRL_MASK | COLOR_MASK, 0, NULL));
 }
 
 TEST_F(ComMemLv02, com_GpioRegRead)
 {
-	uint32_t	rd_data[0] = {};
+	uint32_t	rd_data[2] = {};
 
 	EXPECT_EQ(OK, com_GpioRegRead(GPIO_IN0_REG, FPGA_DONE | MODE_SW_ON, &rd_data[0]));
 	EXPECT_EQ(OK, com_GpioRegRead(GPIO_IN0_REG, MODE_SW_ON, &rd_data[1]));
@@ -217,12 +217,14 @@ TEST_F(ComMemLv02, com_SpiflashRead)
 
 TEST_F(ComMemLv01, seq_search)
 {
+	uint8_t		buff[20] ={"I have a PC."};
+
 	//パラメータエラー確認
 	EXPECT_EQ(NULL, seq_search(NULL, 10, "ave", 3));
-	EXPECT_EQ(NULL, seq_search("I have a PC.", 0, "ave", 3));
-	EXPECT_EQ(NULL, seq_search("I have a PC.", 12, NULL, 3));
-	EXPECT_EQ(NULL, seq_search("I have a PC.", 12, "ave", 0));
-	EXPECT_EQ(NULL, seq_search("I have a PC.", 3, "ave", 3));
+	EXPECT_EQ(NULL, seq_search(buff, 0, "ave", 3));
+	EXPECT_EQ(NULL, seq_search(buff, 12, NULL, 3));
+	EXPECT_EQ(NULL, seq_search(buff, 12, "ave", 0));
+	EXPECT_EQ(NULL, seq_search(buff, 3, "ave", 3));
 
-	EXPECT_EQ(!NULL, seq_search("I have a PC.", 12, "ave", 3));
+	EXPECT_EQ(&buff[3], seq_search(buff, 12, "ave", 3));
 }

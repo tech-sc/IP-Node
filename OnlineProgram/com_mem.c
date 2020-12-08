@@ -23,6 +23,7 @@
 #include "temp_tmr_def.h"
 #else
 #include "str.h"
+#include "prot.h"
 #include "tmr_def.h"
 #endif
 #include "com_mem.h"
@@ -43,7 +44,7 @@
 	#define LOG_PUTDISC		LOGDST_SYSLOG		/* 運用時ログ出力先 */
 #endif /* end DEBUG */
 
-#define MAP_SIZE		4096UL
+#define MAP_SIZE		4096U
 #define MAP_MASK		(MAP_SIZE - 1)
 
 #define	IPL_MTD			"/dev/mtd3"
@@ -140,9 +141,13 @@ BYTE com_memRead( off_t phy_addr, uint16_t width, uint16_t len, void *buff_p )
 	ACC_PTR_t	virt_addr = {};
 	ACC_PTR_t	data_addr = {.byte_p = buff_p};
 
+	if ((len == 0)||(buff_p == NULL))
+	{
+		return NG;
+	}
 	if ((width == BYTE_WIDTH) || (width == WORD_WIDTH) || (width == DWORD_WIDTH))
 	{
-		if ((width * len) <= MAP_SIZE)
+		if ((uint32_t)(width * len) <= MAP_SIZE)
 		{
 			pthread_mutex_lock(&mem_mutex);
 			fd = open("/dev/mem", O_RDONLY | O_SYNC);
@@ -209,9 +214,13 @@ BYTE com_memWrite( off_t phy_addr, uint16_t width, uint16_t len, void *buff_p )
 	ACC_PTR_t	virt_addr = {};
 	ACC_PTR_t	data_addr = {.byte_p = buff_p};
 
+	if ((len == 0)||(buff_p == NULL))
+	{
+		return NG;
+	}
 	if ((width == BYTE_WIDTH) || (width == WORD_WIDTH) || (width == DWORD_WIDTH))
 	{
-		if ((width * len) <= MAP_SIZE)
+		if ((uint32_t)(width * len) <= MAP_SIZE)
 		{
 			pthread_mutex_lock(&mem_mutex);
 			fd = open("/dev/mem", O_RDWR | O_SYNC);
@@ -300,15 +309,21 @@ BYTE com_memUpdate( off_t phy_addr, uint16_t width, uint32_t mask, uint32_t val,
 				switch (width)
 				{
 				  case BYTE_WIDTH:
-					*prev_addr.byte_p = *virt_addr.byte_p;
+					if (prev_p != NULL){
+						*prev_addr.byte_p = *virt_addr.byte_p;
+					}
 					*virt_addr.byte_p = (*virt_addr.byte_p & (uint8_t)mask) | (uint8_t)val;
 					break;
 				  case WORD_WIDTH:
-					*prev_addr.word_p = *virt_addr.word_p;
+					if (prev_p != NULL){
+						*prev_addr.word_p = *virt_addr.word_p;
+					}
 					*virt_addr.word_p = (*virt_addr.word_p & (uint16_t)mask) | (uint16_t)val;
 					break;
 				  case DWORD_WIDTH:
-					*prev_addr.dword_p = *virt_addr.dword_p;
+					if (prev_p != NULL){
+						*prev_addr.dword_p = *virt_addr.dword_p;
+					}
 					*virt_addr.dword_p = (*virt_addr.dword_p & mask) | val;
 					break;
 				  default:	//ありえない
@@ -344,7 +359,7 @@ BYTE com_FpgaRegRead( off_t phy_addr, uint16_t len, uint8_t *buff_p )
 /* 関数名	  FPGAレジスタのライト API										  */
 /* 機能概要	  FPGAレジスタにレジスタ値をライトする							  */
 /* パラメータ phy_addr : (in)	レジスタアドレス							  */
-/*            len : (in)		書き込むデータ								  */
+/*            val : (in)		書き込むデータ								  */
 /* リターン	  OK/NG															  */
 /* 注意事項	  FPGAレジスタオフセットアドレス0x0000～0x0024をライトすると	  */
 /*            FPGA-SIOドライバに支障が発生する可能性がある					  */
@@ -385,7 +400,9 @@ BYTE com_GpioRegRead( off_t phy_addr, uint32_t mask, uint32_t *buff_p )
 	BYTE	result = NG;
 
 	result = com_memRead( phy_addr, DWORD_WIDTH, 1, buff_p );
-	*buff_p &= mask;
+	if (result == OK) {
+		*buff_p &= mask;
+	}
 	return result;
 }
 
@@ -411,7 +428,7 @@ BYTE com_GpioRegUpdate( off_t phy_addr, uint32_t mask, uint32_t bit )
 /* 機能概要	  バージョン情報を文字列(例：1.00)＋null終端付きで返す			  */
 /* パラメータ ver : (out)	取得したバージョン情報を格納する領域			  */
 /*			  ver_sz : (in) バージョン情報を格納する領域のサイズ			  */
-/* リターン	  取得したバージョン情報の文字数（null終端含むまない）			  */
+/* リターン	  取得したバージョン情報の文字数（null終端含まない文字数）		  */
 /* 注意事項	  －															  */
 /* その他	  －															  */
 /******************************************************************************/
@@ -423,7 +440,7 @@ BYTE com_IPLVerGet( char *ver, BYTE ver_sz )
 	char	*str	= NULL;
 	char	buff[BUFF_SZ];
 
-	if (ver_sz < IPL_VER_LEN)
+	if ((ver_sz < IPL_VER_LEN)||(ver == NULL))
 	{
 		return NG;
 	}
@@ -487,6 +504,9 @@ BYTE com_SpiflashRead(DWORD addr, WORD size, WORD *data_p)
 	DWORD	seg_addr = addr / SPI_BUFF_SZ;
 	char	buff[SPI_BUFF_SZ];
 
+	if ((size == 0)||(data_p == NULL)) {
+		return NG;
+	}
 	/* SPI-ROMゲート開放 */
 	if (com_GpioRegUpdate(GPIO_OUT0_REG, SPI_GATE_MASK, ~SPI_GATE_CLOSE) != OK)
 	{
@@ -578,6 +598,9 @@ BYTE *seq_search(BYTE *buff, size_t siz, const char *target, size_t len)
 	size_t		same = 0;
 	const BYTE		*p   = NULL;
 
+	if ((siz < len)||(buff == NULL)||(target == NULL)||(len == 0)){
+		return NULL;
+	}
 	while (i < siz)
 	{
 		p = (const BYTE*)target;

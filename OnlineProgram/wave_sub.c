@@ -20,6 +20,7 @@
 #include "temp_tmr_def.h"
 #else
 #include "str.h"
+#include "prot.h"
 #include "tmr_def.h"
 #endif
 #include "str_comdt.h"
@@ -127,7 +128,7 @@ BYTE wave_file_write( const char *fl_name )
 	size_t		retv				= 0;
 	size_t		wt_sz				= 0;
 	BYTE		result				= NG;
-	WAVE_HDR_t	wave_header		= {};
+	WAVE_HDR_t	wave_header;
 	char		savefl[128]			= {};
 	char		buff[512];
 
@@ -140,10 +141,7 @@ BYTE wave_file_write( const char *fl_name )
 	retv = fread(&wave_header, 1, sizeof(wave_header), fp);
 	if (retv <= 0)
 	{
-		if (retv < 0)
-		{
-			dbg_print(COM_ID, LOG_ERR, "wave_file_write fread() Error:%s", mkstr_errno(errno));
-		}
+		dbg_print(COM_ID, LOG_ERR, "wave_file_write fread() Error:%s", mkstr_errno(errno));
 		return NG;
 	}
 
@@ -177,7 +175,7 @@ BYTE wave_file_write( const char *fl_name )
 	{
 		result = OK;
 		wt_sz = fread(buff, 1, 512, fp);
-		if (wt_sz < 0)
+		if (wt_sz <= 0)
 		{
 			dbg_print(COM_ID, LOG_ERR, "wave_file_write fread(fp) Error:%s", mkstr_errno(errno));
 			result = NG;

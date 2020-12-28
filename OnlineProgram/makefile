@@ -13,7 +13,8 @@ PROGLIB := lib$(PROGNAME).a
 export STAGING_DIR=
 
 ## Directory defines
-SRCDIR := .
+PROJ_SRCDIR := ~/sdk.ac49x.uf7200/barrier_breaker/package/audc/audc-apps/voip/src/audc-voip/apps/voip/source/common
+PROJ_INCDIR := ~/sdk.ac49x.uf7200/barrier_breaker/package/audc/audc-apps/voip/src/audc-voip/apps/voip/include/common
 OBJDIR := build
 TARGET := $(OBJDIR)/$(PROGNAME)
 
@@ -21,11 +22,12 @@ TOOLCHAIN := /usr
 OPENSSL := /usr/local/src/openssl-1.0.2f
 
 INCDIR := -I $(TOOLCHAIN)/include -I $(OPENSSL)/include \
--I /usr/local/src/googletest/googletest/include
+-I /usr/local/src/googletest/googletest/include -I $(PROJ_INCDIR)
 LIBDIR := -L $(TOOLCHAIN)/lib -L $(OPENSSL) \
 -L /usr/local/src/googletest/build/googletest
 
-SRCS := $(wildcard $(SRCDIR)/*.cpp) $(wildcard $(SRCDIR)/*.c) $(wildcard $(SRCDIR)/*.s)
+SRCS := com_mem.c lulog_tsk.c supp_tsk.c
+SRCS += tftp_tsk.c wave_sub.c
 OBJS := $(SRCS:%=$(OBJDIR)/%.o)
 DEPS := $(OBJS:.o=.d)
 LIBS := -lpthread -lcrypto
@@ -48,13 +50,8 @@ $(TARGET): $(OBJS)
 	$(AR) $(ARFLAGS) $(PROGLIB) $^
 #	$(CXX) -o $@ $^ $(LDFLAGS) $(LIBS)
 
-# ssembly
-$(OBJDIR)/%.s.o:%.s
-	@if [ ! -e `dirname $@` ]; then mkdir -p `dirname $@`; fi
-	$(AS) $(ASFLAGS) -o $@ -c $<
-
 # c source
-$(OBJDIR)/%.c.o:%.c
+$(OBJDIR)/%.c.o:$(PROJ_SRCDIR)/%.c
 	@if [ ! -e `dirname $@` ]; then mkdir -p `dirname $@`; fi
 	$(CC) $(CFLAGS) -o $@ -c $<
 

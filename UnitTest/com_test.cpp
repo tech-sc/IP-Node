@@ -20,13 +20,8 @@
 
 extern "C" {
 #include "def.h"
-#ifdef TEMP_HEADER
-#include "temp_header.h"
-#include "temp_tmr_def.h"
-#else
 #include "str.h"
 #include "tmr_def.h"
-#endif
 #include "com_mem.h"
 #include "tftp_tsk.h"
 #include "stub.h"

@@ -16,6 +16,7 @@ export STAGING_DIR=
 export LD_LIBRARY_PATH=/usr/local/src/openssl-1.0.2f
 
 ## Directory defines
+PROJ_INCDIR := ~/sdk.ac49x.uf7200/barrier_breaker/package/audc/audc-apps/voip/src/audc-voip/apps/voip/include/common
 SRCDIR := .
 OBJDIR := build
 TARGET := $(OBJDIR)/$(PROGNAME)
@@ -24,10 +25,10 @@ DBGOPT := -DDEBUG -DTEMP_HEADER
 TOOLCHAIN := /usr
 OPENSSL := /usr/local/src/openssl-1.0.2f
 
-INCDIR := -I $(TOOLCHAIN)/include -I $(OPENSSL)/include -I $(APPDIR) \
+INCDIR := -I $(TOOLCHAIN)/include -I $(OPENSSL)/include -I $(PROJ_INCDIR) \
 -I /usr/local/src/googletest/googletest/include
 LIBDIR := -L $(TOOLCHAIN)/lib -L $(OPENSSL) -L $(APPDIR) \
--L /usr/local/src/googletest/build/googletest
+-L /usr/local/src/googletest/build/googletest -lrt
 
 SRCS := $(wildcard $(SRCDIR)/*.cpp) $(wildcard $(SRCDIR)/*.c) $(wildcard $(SRCDIR)/*.s)
 OBJS := $(SRCS:%=$(OBJDIR)/%.o)
